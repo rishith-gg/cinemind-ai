@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run:*)", "Bash(uv sync:*)", "Bash(uv add:*)", "Bash(pnpm:*)", "Bash(just:*)",
+      "Bash(git status:*)", "Bash(git diff:*)", "Bash(git log:*)", "Bash(git add:*)", "Bash(git commit:*)",
+      "Bash(ffprobe:*)", "Bash(ffmpeg:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)", "Bash(git reset --hard:*)", "Bash(git clean:*)", "Bash(rm -rf:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "uv run ruff format --quiet backend eval scripts" }
+        ]
+      }
+    ]
+  }
+}

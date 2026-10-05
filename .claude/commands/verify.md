@@ -1,0 +1,1 @@
+Run the full verification: lint, type-check, backend tests, frontend tests, and the Playwright smoke test. Start the app, hit /api/system/health, and report PASS/FAIL per step with exact error output for failures. Fix failures you caused; report ones you can't fix.

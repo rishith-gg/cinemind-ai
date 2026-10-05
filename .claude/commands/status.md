@@ -1,0 +1,1 @@
+Summarise current state from docs/PROGRESS.md and `git log --oneline -15`: finished phases, current phase, open issues, DEVELOPMENT PLACEHOLDERs still in the code (grep for them), and the recommended next step.
