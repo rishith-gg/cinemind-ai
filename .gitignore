@@ -11,3 +11,5 @@ node_modules/
 frontend/dist/
 .DS_Store
 *.log
+frontend/test-results/
+frontend/playwright-report/

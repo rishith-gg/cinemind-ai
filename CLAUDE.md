@@ -50,6 +50,7 @@ Run from the repo root. `just` is not used; `scripts/tasks.py` is the cross-plat
 - Run (single command, API + built UI): `T build-ui` once, then `uv run cinemind serve` -> http://127.0.0.1:8000
 - Dev: `T dev-api` (backend, auto-reload) and `T dev-ui` (Vite on :5173, proxies /api to :8000)
 - Regenerate the TS API client after any API change: `T gen-api` (writes `frontend/openapi.json` + `frontend/src/api/`, commit both)
+- E2E smoke test (Playwright, real app; first run: `cd frontend && pnpm exec playwright install chromium`): `T e2e`
 - Full check (ruff format/lint, pyright, pytest, tsc, eslint, vitest): `T check`
 - Format Python: `T format`
 - Backend tests only: `uv run pytest -q`; frontend tests only: `cd frontend && pnpm test`

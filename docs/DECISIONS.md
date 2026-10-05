@@ -21,4 +21,9 @@
 | D-017 | 2026-10-05 | A stage interrupted by a crash restarts from its beginning; only whole finished stages are cached. | Per-item checkpoints belong inside long stages (transcribe, faces) and are added there if needed. |
 | D-018 | 2026-10-05 | Test-only chains live in `backend/tests/dummy_chain.py` and load through `extra_stage_modules` setting. | The Phase 1 acceptance chain must not ship as fake "AI" in the package. |
 | D-019 | 2026-10-05 | Alembic migrations are excluded from pyright (generated code). | Strict mode flags Alembic's generated column calls; the models themselves stay strict-checked. |
+| D-020 | 2026-10-05 | Frontend: React Router 8.4.0 (`react-router` package), zustand 5.0.15, @playwright/test 1.63.0 (versions checked on npm). | CLAUDE.md allows React Router; zustand holds the current project and toasts. |
+| D-021 | 2026-10-05 | No shadcn/ui yet; plain Tailwind components and a small zustand toast store instead of a toast library. | Phase 2 needs a handful of primitives; shadcn can be added per component when a screen needs one (dialogs, tables). Avoids unused dependencies. |
+| D-022 | 2026-10-05 | E2E tests use `@playwright/test` (not the Playwright MCP) against the real built app on port 8765 with a throwaway `data/e2e` database. Run: `T e2e`. | Repeatable by the user without an MCP. Chromium is a one-time ~180 MB setup download. |
+| D-023 | 2026-10-05 | TanStack Query retries only network failures, never backend answers (errors that carry a `code`). | Retrying a 404/422 just delays the error message. |
+| D-024 | 2026-10-05 | Navigation shows every SPEC section; screens whose feature is unbuilt render "Not available yet: built in Phase N". | Honest placeholders, no fake data (rule 3). |
 

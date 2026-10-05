@@ -20,3 +20,6 @@ On startup it re-queues any job left `running` (assumes exactly one worker); fin
 cache, so a killed job resumes at the stage that was interrupted (that stage restarts from its beginning).
 Cancel is cooperative: stages call `ctx.check_cancelled()` and the runner checks between stages.
 Retry keeps succeeded stages.
+
+## Static frontend
+`cinemind serve` serves `frontend/dist`. Unknown extensionless non-`/api` paths return `index.html` (client-side routing deep links and reloads); missing files with an extension and unknown `/api` paths are real 404s.

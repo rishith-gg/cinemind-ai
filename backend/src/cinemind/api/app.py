@@ -9,6 +9,9 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from starlette.exceptions import HTTPException
+from starlette.responses import Response
+from starlette.types import Scope
 
 from cinemind import __version__
 from cinemind.api import jobs, projects
@@ -22,6 +25,20 @@ from cinemind.jobs.registry import load_extra_modules
 log = logging.getLogger(__name__)
 
 FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
+
+
+class SPAStaticFiles(StaticFiles):
+    """Serves the built frontend; unknown non-API paths get index.html so deep links and
+    reloads work with client-side routing. Unknown /api paths stay real 404s."""
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        try:
+            return await super().get_response(path, scope)
+        except HTTPException as exc:
+            is_api = path == "api" or path.startswith("api/")
+            if exc.status_code != 404 or is_api or "." in path.rsplit("/", 1)[-1]:
+                raise  # real 404s for API routes and for missing files such as /assets/x.js
+            return await super().get_response("index.html", scope)
 
 
 class HealthResponse(BaseModel):
@@ -70,5 +87,5 @@ def create_app(
 
     # Built frontend (single-command run). Mounted last so /api routes win.
     if frontend_dist is not None and frontend_dist.is_dir():
-        app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
+        app.mount("/", SPAStaticFiles(directory=frontend_dist, html=True), name="frontend")
     return app

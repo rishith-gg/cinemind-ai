@@ -34,6 +34,12 @@ def check() -> None:
     print("\nAll checks passed.")
 
 
+def e2e() -> None:
+    shutil.rmtree(ROOT / "data" / "e2e", ignore_errors=True)  # start from an empty database
+    run("pnpm", "build", cwd=FRONTEND)
+    run("pnpm", "e2e", cwd=FRONTEND)
+
+
 TASKS = {
     "check": check,
     "gen-api": gen_api,
@@ -42,6 +48,7 @@ TASKS = {
     "serve": lambda: run("uv", "run", "cinemind", "serve"),
     "dev-api": lambda: run("uv", "run", "cinemind", "serve", "--reload"),
     "dev-ui": lambda: run("pnpm", "dev", cwd=FRONTEND),
+    "e2e": e2e,
     "build-ui": lambda: run("pnpm", "build", cwd=FRONTEND),
 }
 
