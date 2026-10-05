@@ -1,0 +1,261 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CineMind AI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/system/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Health",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Check": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "missing",
+              "warn"
+            ],
+            "title": "Status"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "fix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fix"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "status",
+          "required"
+        ],
+        "title": "Check"
+      },
+      "DoctorReport": {
+        "properties": {
+          "app_version": {
+            "type": "string",
+            "title": "App Version"
+          },
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/Check"
+            },
+            "type": "array",
+            "title": "Checks"
+          },
+          "hardware": {
+            "$ref": "#/components/schemas/HardwareInfo"
+          },
+          "recommended": {
+            "$ref": "#/components/schemas/TierRecommendation"
+          },
+          "selected_tier": {
+            "type": "string",
+            "title": "Selected Tier"
+          }
+        },
+        "type": "object",
+        "required": [
+          "app_version",
+          "ok",
+          "checks",
+          "hardware",
+          "recommended",
+          "selected_tier"
+        ],
+        "title": "DoctorReport"
+      },
+      "GpuInfo": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "cuda",
+              "mps",
+              "none"
+            ],
+            "title": "Kind"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "vram_gb": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vram Gb"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "GpuInfo"
+      },
+      "HardwareInfo": {
+        "properties": {
+          "os": {
+            "type": "string",
+            "title": "Os"
+          },
+          "arch": {
+            "type": "string",
+            "title": "Arch"
+          },
+          "cpu_name": {
+            "type": "string",
+            "title": "Cpu Name"
+          },
+          "cpu_cores": {
+            "type": "integer",
+            "title": "Cpu Cores"
+          },
+          "ram_gb": {
+            "type": "number",
+            "title": "Ram Gb"
+          },
+          "gpu": {
+            "$ref": "#/components/schemas/GpuInfo"
+          },
+          "free_disk_gb": {
+            "type": "number",
+            "title": "Free Disk Gb"
+          }
+        },
+        "type": "object",
+        "required": [
+          "os",
+          "arch",
+          "cpu_name",
+          "cpu_cores",
+          "ram_gb",
+          "gpu",
+          "free_disk_gb"
+        ],
+        "title": "HardwareInfo"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "report": {
+            "$ref": "#/components/schemas/DoctorReport"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "report"
+        ],
+        "title": "HealthResponse"
+      },
+      "TierRecommendation": {
+        "properties": {
+          "tier": {
+            "type": "string",
+            "enum": [
+              "lite",
+              "balanced",
+              "quality"
+            ],
+            "title": "Tier"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tier",
+          "reason"
+        ],
+        "title": "TierRecommendation"
+      }
+    }
+  }
+}
