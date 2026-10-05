@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from cinemind.api.deps import FactoryDep, SessionDep, SettingsDep
 from cinemind.api.schemas import ErrorResponse, JobOut
-from cinemind.db.models import JobEvent
+from cinemind.db.models import Job, JobEvent
 from cinemind.jobs import queue
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
@@ -72,6 +72,21 @@ def stream_events(
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+@router.get("", response_model=list[JobOut], operation_id="listJobs")
+def list_jobs(
+    session: SessionDep,
+    project_id: str | None = None,
+    status: str | None = None,
+    limit: int = Query(100, ge=1, le=500),
+) -> list[JobOut]:
+    stmt = select(Job).order_by(Job.created_at.desc()).limit(limit)
+    if project_id:
+        stmt = stmt.where(Job.project_id == project_id)
+    if status:
+        stmt = stmt.where(Job.status == status)
+    return [JobOut.model_validate(j) for j in session.scalars(stmt)]
 
 
 @router.get("/{job_id}", response_model=JobOut, responses=_ERR, operation_id="getJob")

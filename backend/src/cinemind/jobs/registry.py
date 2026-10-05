@@ -5,6 +5,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
+from sqlalchemy.orm import Session
+
 from cinemind.core.config import Settings
 from cinemind.core.errors import NotFoundError
 
@@ -39,6 +41,13 @@ class Stage:
     params: dict[str, Any] = field(default_factory=lambda: {})
     # Job params this stage depends on (None = all). Keeps unrelated params from busting the cache.
     param_keys: tuple[str, ...] | None = None
+    # Stages that write files under the project directory cache per project, so the same footage
+    # imported into two projects still gets its own artifacts.
+    scope_project: bool = False
+    # Cached results are only reused if this says the output files still exist.
+    verify: Callable[[StageContext, dict[str, Any]], bool] | None = None
+    # Store the result in the database; runs after a fresh run AND after a cache hit.
+    persist: Callable[[Session, StageContext, dict[str, Any]], None] | None = None
 
 
 _CHAINS: dict[str, list[Stage]] = {}
@@ -49,6 +58,7 @@ def register_chain(name: str, stages: list[Stage]) -> None:
 
 
 def get_chain(name: str) -> list[Stage]:
+    importlib.import_module("cinemind.pipeline.ingest")  # registers the built-in chains
     if name not in _CHAINS:
         raise NotFoundError(f"Unknown processing chain '{name}'.")
     return _CHAINS[name]

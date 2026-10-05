@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     media_roots: list[Path] = []
     model_tier: ModelTier = "auto"
     max_job_attempts: int = 3
+    max_upload_mb: int = 2048
+    proxy_max_height: int = 720
     worker_poll_seconds: float = 0.5
     # Importable modules that register extra stage chains (used by tests and plugins).
     extra_stage_modules: list[str] = []

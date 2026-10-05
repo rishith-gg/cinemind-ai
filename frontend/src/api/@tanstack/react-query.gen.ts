@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { cancelJob, createProject, deleteProject, getHealth, getJob, getProject, listProjects, type Options, retryJob, streamJobEvents, updateProject } from '../sdk.gen';
-import type { CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetProjectData, GetProjectError, GetProjectResponse, ListProjectsData, ListProjectsResponse, RetryJobData, RetryJobError, RetryJobResponse, StreamJobEventsData, StreamJobEventsError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse } from '../types.gen';
+import { browseFolder, cancelJob, createProject, deleteMedia, deleteProject, getHealth, getJob, getMedia, getPoster, getProject, getStrip, getWaveform, importMedia, listJobs, listMedia, listProjects, type Options, processMedia, processProject, relinkMedia, retryJob, streamJobEvents, streamProxy, updateProject, uploadMedia } from '../sdk.gen';
+import type { BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetMediaData, GetMediaError, GetMediaResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetStripData, GetStripError, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaError, ListMediaResponse, ListProjectsData, ListProjectsResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RetryJobData, RetryJobError, RetryJobResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -144,6 +144,24 @@ export const streamJobEventsOptions = (options?: Options<StreamJobEventsData>) =
     queryKey: streamJobEventsQueryKey(options)
 });
 
+export const listJobsQueryKey = (options?: Options<ListJobsData>) => createQueryKey('listJobs', options);
+
+/**
+ * List Jobs
+ */
+export const listJobsOptions = (options?: Options<ListJobsData>) => queryOptions<ListJobsResponse, ListJobsError, ListJobsResponse, ReturnType<typeof listJobsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listJobs({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listJobsQueryKey(options)
+});
+
 export const getJobQueryKey = (options: Options<GetJobData>) => createQueryKey('getJob', options);
 
 /**
@@ -195,6 +213,246 @@ export const retryJobMutation = (options?: Partial<Options<RetryJobData>>): UseM
     };
     return mutationOptions;
 };
+
+export const listMediaQueryKey = (options: Options<ListMediaData>) => createQueryKey('listMedia', options);
+
+/**
+ * List Media
+ */
+export const listMediaOptions = (options: Options<ListMediaData>) => queryOptions<ListMediaResponse, ListMediaError, ListMediaResponse, ReturnType<typeof listMediaQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listMedia({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMediaQueryKey(options)
+});
+
+/**
+ * Import Media
+ *
+ * Register files or folders (reference in place, or copy) and queue processing.
+ */
+export const importMediaMutation = (options?: Partial<Options<ImportMediaData>>): UseMutationOptions<ImportMediaResponse, ImportMediaError, Options<ImportMediaData>> => {
+    const mutationOptions: UseMutationOptions<ImportMediaResponse, ImportMediaError, Options<ImportMediaData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await importMedia({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Upload Media
+ *
+ * Upload one file as the raw request body (streamed to disk, size-limited).
+ */
+export const uploadMediaMutation = (options?: Partial<Options<UploadMediaData>>): UseMutationOptions<UploadMediaResponse, UploadMediaError, Options<UploadMediaData>> => {
+    const mutationOptions: UseMutationOptions<UploadMediaResponse, UploadMediaError, Options<UploadMediaData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await uploadMedia({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete Media
+ *
+ * Remove a media item and its derived data. Referenced source files are never touched.
+ */
+export const deleteMediaMutation = (options?: Partial<Options<DeleteMediaData>>): UseMutationOptions<DeleteMediaResponse, DeleteMediaError, Options<DeleteMediaData>> => {
+    const mutationOptions: UseMutationOptions<DeleteMediaResponse, DeleteMediaError, Options<DeleteMediaData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteMedia({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getMediaQueryKey = (options: Options<GetMediaData>) => createQueryKey('getMedia', options);
+
+/**
+ * Get Media
+ */
+export const getMediaOptions = (options: Options<GetMediaData>) => queryOptions<GetMediaResponse, GetMediaError, GetMediaResponse, ReturnType<typeof getMediaQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMedia({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMediaQueryKey(options)
+});
+
+/**
+ * Process Media
+ *
+ * (Re)run the ingest chain; finished, still-valid stages are skipped via the cache.
+ */
+export const processMediaMutation = (options?: Partial<Options<ProcessMediaData>>): UseMutationOptions<ProcessMediaResponse, ProcessMediaError, Options<ProcessMediaData>> => {
+    const mutationOptions: UseMutationOptions<ProcessMediaResponse, ProcessMediaError, Options<ProcessMediaData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await processMedia({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Process Project
+ */
+export const processProjectMutation = (options?: Partial<Options<ProcessProjectData>>): UseMutationOptions<ProcessProjectResponse, ProcessProjectError, Options<ProcessProjectData>> => {
+    const mutationOptions: UseMutationOptions<ProcessProjectResponse, ProcessProjectError, Options<ProcessProjectData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await processProject({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Relink Media
+ *
+ * Point a moved/missing reference at its new location. The content must be identical.
+ */
+export const relinkMediaMutation = (options?: Partial<Options<RelinkMediaData>>): UseMutationOptions<RelinkMediaResponse, RelinkMediaError, Options<RelinkMediaData>> => {
+    const mutationOptions: UseMutationOptions<RelinkMediaResponse, RelinkMediaError, Options<RelinkMediaData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await relinkMedia({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const streamProxyQueryKey = (options: Options<StreamProxyData>) => createQueryKey('streamProxy', options);
+
+/**
+ * Stream Proxy
+ */
+export const streamProxyOptions = (options: Options<StreamProxyData>) => queryOptions<unknown, StreamProxyError, unknown, ReturnType<typeof streamProxyQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await streamProxy({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: streamProxyQueryKey(options)
+});
+
+export const getPosterQueryKey = (options: Options<GetPosterData>) => createQueryKey('getPoster', options);
+
+/**
+ * Get Poster
+ */
+export const getPosterOptions = (options: Options<GetPosterData>) => queryOptions<unknown, GetPosterError, unknown, ReturnType<typeof getPosterQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getPoster({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getPosterQueryKey(options)
+});
+
+export const getStripQueryKey = (options: Options<GetStripData>) => createQueryKey('getStrip', options);
+
+/**
+ * Get Strip
+ */
+export const getStripOptions = (options: Options<GetStripData>) => queryOptions<unknown, GetStripError, unknown, ReturnType<typeof getStripQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getStrip({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getStripQueryKey(options)
+});
+
+export const getWaveformQueryKey = (options: Options<GetWaveformData>) => createQueryKey('getWaveform', options);
+
+/**
+ * Get Waveform
+ */
+export const getWaveformOptions = (options: Options<GetWaveformData>) => queryOptions<unknown, GetWaveformError, unknown, ReturnType<typeof getWaveformQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getWaveform({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getWaveformQueryKey(options)
+});
+
+export const browseFolderQueryKey = (options?: Options<BrowseFolderData>) => createQueryKey('browseFolder', options);
+
+/**
+ * Browse
+ *
+ * List a folder inside the approved media roots. Without `path`, lists the roots.
+ */
+export const browseFolderOptions = (options?: Options<BrowseFolderData>) => queryOptions<BrowseFolderResponse, BrowseFolderError, BrowseFolderResponse, ReturnType<typeof browseFolderQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await browseFolder({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: browseFolderQueryKey(options)
+});
 
 export const getHealthQueryKey = (options?: Options<GetHealthData>) => createQueryKey('getHealth', options);
 

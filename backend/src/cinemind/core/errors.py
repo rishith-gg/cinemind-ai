@@ -34,3 +34,33 @@ class JobStateError(DomainError):
 
 class JobCancelled(Exception):
     """Raised inside a stage when the user cancelled the job."""
+
+
+class UnreadableMediaError(DomainError):
+    code = "unreadable_media"
+    status_code = 422
+
+
+class UnsupportedMediaError(DomainError):
+    code = "unsupported_media"
+    status_code = 422
+
+
+class SourceMissingError(DomainError):
+    code = "source_missing"
+    status_code = 404
+
+
+class ToolMissingError(DomainError):
+    code = "ffmpeg_missing"
+    status_code = 500
+
+
+class LowDiskSpaceError(DomainError):
+    code = "low_disk_space"
+    status_code = 507
+
+
+class PayloadTooLargeError(DomainError):
+    code = "too_large"
+    status_code = 413

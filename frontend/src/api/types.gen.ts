@@ -73,6 +73,54 @@ export type ErrorResponse = {
 };
 
 /**
+ * FsEntry
+ */
+export type FsEntry = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Path
+     */
+    path: string;
+    /**
+     * Is Dir
+     */
+    is_dir: boolean;
+    /**
+     * Size Bytes
+     */
+    size_bytes: number | null;
+    /**
+     * Is Media Candidate
+     */
+    is_media_candidate: boolean;
+};
+
+/**
+ * FsListing
+ */
+export type FsListing = {
+    /**
+     * Path
+     */
+    path: string | null;
+    /**
+     * Parent
+     */
+    parent: string | null;
+    /**
+     * Roots
+     */
+    roots: Array<string>;
+    /**
+     * Entries
+     */
+    entries: Array<FsEntry>;
+};
+
+/**
  * GpuInfo
  */
 export type GpuInfo = {
@@ -144,6 +192,79 @@ export type HealthResponse = {
      */
     version: string;
     report: DoctorReport;
+};
+
+/**
+ * ImportItem
+ */
+export type ImportItem = {
+    /**
+     * Path
+     */
+    path: string;
+    media?: MediaOut | null;
+    /**
+     * Duplicate
+     */
+    duplicate?: boolean;
+    /**
+     * Error Code
+     */
+    error_code?: string | null;
+    /**
+     * Error Message
+     */
+    error_message?: string | null;
+};
+
+/**
+ * ImportRequest
+ */
+export type ImportRequest = {
+    /**
+     * Paths
+     */
+    paths: Array<string>;
+    /**
+     * Mode
+     */
+    mode?: 'reference' | 'copy';
+};
+
+/**
+ * ImportResponse
+ */
+export type ImportResponse = {
+    /**
+     * Items
+     */
+    items: Array<ImportItem>;
+};
+
+/**
+ * JobBrief
+ */
+export type JobBrief = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Progress
+     */
+    progress: number;
+    /**
+     * Error Code
+     */
+    error_code: string | null;
+    /**
+     * Error Message
+     */
+    error_message: string | null;
 };
 
 /**
@@ -263,6 +384,135 @@ export type JobStageOut = {
 };
 
 /**
+ * MediaOut
+ */
+export type MediaOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Project Id
+     */
+    project_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Path
+     */
+    path: string;
+    /**
+     * Import Mode
+     */
+    import_mode: string;
+    /**
+     * Size Bytes
+     */
+    size_bytes: number;
+    /**
+     * Content Hash
+     */
+    content_hash: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Source Missing
+     */
+    source_missing: boolean;
+    /**
+     * Probed
+     */
+    probed: boolean;
+    /**
+     * Container
+     */
+    container: string | null;
+    /**
+     * Duration S
+     */
+    duration_s: number | null;
+    /**
+     * Width
+     */
+    width: number | null;
+    /**
+     * Height
+     */
+    height: number | null;
+    /**
+     * Fps Num
+     */
+    fps_num: number | null;
+    /**
+     * Fps Den
+     */
+    fps_den: number | null;
+    /**
+     * Is Vfr
+     */
+    is_vfr: boolean;
+    /**
+     * Video Codec
+     */
+    video_codec: string | null;
+    /**
+     * Audio Codec
+     */
+    audio_codec: string | null;
+    /**
+     * Bit Rate
+     */
+    bit_rate: number | null;
+    /**
+     * Audio Channels
+     */
+    audio_channels: number | null;
+    /**
+     * Audio Sample Rate
+     */
+    audio_sample_rate: number | null;
+    /**
+     * Start Timecode
+     */
+    start_timecode: string | null;
+    /**
+     * Color
+     */
+    color: {
+        [key: string]: unknown;
+    };
+    /**
+     * Has Proxy
+     */
+    has_proxy: boolean;
+    /**
+     * Has Poster
+     */
+    has_poster: boolean;
+    /**
+     * Has Strip
+     */
+    has_strip: boolean;
+    /**
+     * Has Waveform
+     */
+    has_waveform: boolean;
+    /**
+     * Proxy Encoder
+     */
+    proxy_encoder: string | null;
+    /**
+     * Strip Frames
+     */
+    strip_frames: number;
+    job: JobBrief | null;
+};
+
+/**
  * ProjectCreate
  */
 export type ProjectCreate = {
@@ -314,6 +564,16 @@ export type ProjectUpdate = {
      * Description
      */
     description?: string | null;
+};
+
+/**
+ * RelinkRequest
+ */
+export type RelinkRequest = {
+    /**
+     * Path
+     */
+    path: string;
 };
 
 /**
@@ -543,6 +803,46 @@ export type StreamJobEventsResponses = {
     200: unknown;
 };
 
+export type ListJobsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Project Id
+         */
+        project_id?: string | null;
+        /**
+         * Status
+         */
+        status?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/jobs';
+};
+
+export type ListJobsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListJobsError = ListJobsErrors[keyof ListJobsErrors];
+
+export type ListJobsResponses = {
+    /**
+     * Response Listjobs
+     *
+     * Successful Response
+     */
+    200: Array<JobOut>;
+};
+
+export type ListJobsResponse = ListJobsResponses[keyof ListJobsResponses];
+
 export type GetJobData = {
     body?: never;
     path: {
@@ -656,6 +956,593 @@ export type RetryJobResponses = {
 };
 
 export type RetryJobResponse = RetryJobResponses[keyof RetryJobResponses];
+
+export type ListMediaData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/media';
+};
+
+export type ListMediaErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListMediaError = ListMediaErrors[keyof ListMediaErrors];
+
+export type ListMediaResponses = {
+    /**
+     * Response Listmedia
+     *
+     * Successful Response
+     */
+    200: Array<MediaOut>;
+};
+
+export type ListMediaResponse = ListMediaResponses[keyof ListMediaResponses];
+
+export type ImportMediaData = {
+    body: ImportRequest;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/media';
+};
+
+export type ImportMediaErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ImportMediaError = ImportMediaErrors[keyof ImportMediaErrors];
+
+export type ImportMediaResponses = {
+    /**
+     * Successful Response
+     */
+    201: ImportResponse;
+};
+
+export type ImportMediaResponse = ImportMediaResponses[keyof ImportMediaResponses];
+
+export type UploadMediaData = {
+    body: Blob | File;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query: {
+        /**
+         * Filename
+         */
+        filename: string;
+    };
+    url: '/api/projects/{project_id}/media/upload';
+};
+
+export type UploadMediaErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type UploadMediaError = UploadMediaErrors[keyof UploadMediaErrors];
+
+export type UploadMediaResponses = {
+    /**
+     * Successful Response
+     */
+    201: ImportItem;
+};
+
+export type UploadMediaResponse = UploadMediaResponses[keyof UploadMediaResponses];
+
+export type DeleteMediaData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}';
+};
+
+export type DeleteMediaErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type DeleteMediaError = DeleteMediaErrors[keyof DeleteMediaErrors];
+
+export type DeleteMediaResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteMediaResponse = DeleteMediaResponses[keyof DeleteMediaResponses];
+
+export type GetMediaData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}';
+};
+
+export type GetMediaErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetMediaError = GetMediaErrors[keyof GetMediaErrors];
+
+export type GetMediaResponses = {
+    /**
+     * Successful Response
+     */
+    200: MediaOut;
+};
+
+export type GetMediaResponse = GetMediaResponses[keyof GetMediaResponses];
+
+export type ProcessMediaData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/process';
+};
+
+export type ProcessMediaErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ProcessMediaError = ProcessMediaErrors[keyof ProcessMediaErrors];
+
+export type ProcessMediaResponses = {
+    /**
+     * Successful Response
+     */
+    202: JobOut;
+};
+
+export type ProcessMediaResponse = ProcessMediaResponses[keyof ProcessMediaResponses];
+
+export type ProcessProjectData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/process';
+};
+
+export type ProcessProjectErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ProcessProjectError = ProcessProjectErrors[keyof ProcessProjectErrors];
+
+export type ProcessProjectResponses = {
+    /**
+     * Response Processproject
+     *
+     * Successful Response
+     */
+    202: Array<JobOut>;
+};
+
+export type ProcessProjectResponse = ProcessProjectResponses[keyof ProcessProjectResponses];
+
+export type RelinkMediaData = {
+    body: RelinkRequest;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/relink';
+};
+
+export type RelinkMediaErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type RelinkMediaError = RelinkMediaErrors[keyof RelinkMediaErrors];
+
+export type RelinkMediaResponses = {
+    /**
+     * Successful Response
+     */
+    200: MediaOut;
+};
+
+export type RelinkMediaResponse = RelinkMediaResponses[keyof RelinkMediaResponses];
+
+export type StreamProxyData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/stream';
+};
+
+export type StreamProxyErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type StreamProxyError = StreamProxyErrors[keyof StreamProxyErrors];
+
+export type StreamProxyResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type GetPosterData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/poster';
+};
+
+export type GetPosterErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetPosterError = GetPosterErrors[keyof GetPosterErrors];
+
+export type GetPosterResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type GetStripData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/strip';
+};
+
+export type GetStripErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetStripError = GetStripErrors[keyof GetStripErrors];
+
+export type GetStripResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type GetWaveformData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/waveform';
+};
+
+export type GetWaveformErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetWaveformError = GetWaveformErrors[keyof GetWaveformErrors];
+
+export type GetWaveformResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type BrowseFolderData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Path
+         */
+        path?: string | null;
+    };
+    url: '/api/fs/browse';
+};
+
+export type BrowseFolderErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type BrowseFolderError = BrowseFolderErrors[keyof BrowseFolderErrors];
+
+export type BrowseFolderResponses = {
+    /**
+     * Successful Response
+     */
+    200: FsListing;
+};
+
+export type BrowseFolderResponse = BrowseFolderResponses[keyof BrowseFolderResponses];
 
 export type GetHealthData = {
     body?: never;

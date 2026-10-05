@@ -22,6 +22,20 @@ export function useJobEvents(onEvent?: (e: JobEvent) => void): { connected: bool
 
   useEffect(() => {
     if (typeof EventSource === "undefined") return; // e.g. jsdom
+    // Library/clip views show job state; refresh them at most once a second while jobs report.
+    let pending: ReturnType<typeof setTimeout> | undefined;
+    const scheduleMediaRefresh = () => {
+      if (pending) return;
+      pending = setTimeout(() => {
+        pending = undefined;
+        void qc.invalidateQueries({
+          predicate: (q) => {
+            const id = (q.queryKey[0] as { _id?: string } | undefined)?._id;
+            return id === "listMedia" || id === "getMedia";
+          },
+        });
+      }, 1000);
+    };
     const source = new EventSource("/api/jobs/events");
     source.onopen = () => setConnected(true);
     source.onerror = () => setConnected(false);
@@ -34,11 +48,15 @@ export function useJobEvents(onEvent?: (e: JobEvent) => void): { connected: bool
         return;
       }
       void qc.invalidateQueries({ queryKey: getJobQueryKey({ path: { job_id: e.job_id } }) });
+      scheduleMediaRefresh();
       handler.current?.(e);
     };
     const types = ["queued", "started", "stage", "progress", "cancel_requested", "succeeded", "failed", "cancelled"];
     types.forEach((t) => source.addEventListener(t, handle));
-    return () => source.close();
+    return () => {
+      source.close();
+      clearTimeout(pending);
+    };
   }, [qc]);
 
   return { connected };

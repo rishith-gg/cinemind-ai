@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Link, useParams } from "react-router";
 
 import { getProjectOptions } from "../../api/@tanstack/react-query.gen";
-import { EmptyState, ErrorState, Loading } from "../../components/states";
+import { ErrorState, Loading } from "../../components/states";
 import { useCurrentProject } from "../../lib/currentProject";
 import { errorMessage } from "../../lib/errors";
 
@@ -34,7 +34,9 @@ export function ProjectPage() {
     <section className="space-y-4">
       <h1 className="text-xl font-semibold">{data.name}</h1>
       {data.description && <p className="text-neutral-400">{data.description}</p>}
-      <EmptyState title="No footage yet">Importing footage arrives in Phase 3.</EmptyState>
+      <Link className="inline-block rounded bg-blue-600 px-4 py-2 text-sm font-medium" to="/library">
+        Open library
+      </Link>
     </section>
   );
 }

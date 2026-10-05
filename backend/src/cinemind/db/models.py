@@ -1,4 +1,4 @@
-"""ORM models for Phase 1. Later phases add tables through Alembic migrations."""
+"""ORM models. Later phases add tables through Alembic migrations."""
 
 from datetime import datetime
 from typing import Any
@@ -23,7 +23,7 @@ class Project(Base):
 
 
 class MediaAsset(Base):
-    """One source file. Phase 1 only has identity; Phase 3 adds ffprobe metadata."""
+    """One source file: identity, ffprobe metadata (filled by the validate stage) and artifacts."""
 
     __tablename__ = "media_assets"
 
@@ -32,9 +32,38 @@ class MediaAsset(Base):
     path: Mapped[str] = mapped_column(Text)
     filename: Mapped[str] = mapped_column(String(255))
     content_hash: Mapped[str] = mapped_column(String(64))
+    import_mode: Mapped[str] = mapped_column(String(16), default="reference")
+    size_bytes: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
 
-    __table_args__ = (Index("ix_media_project", "project_id"),)
+    # ffprobe metadata (None until the validate stage succeeded)
+    probed: Mapped[bool] = mapped_column(default=False)
+    container: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    duration_s: Mapped[float | None] = mapped_column(nullable=True)
+    width: Mapped[int | None] = mapped_column(nullable=True)
+    height: Mapped[int | None] = mapped_column(nullable=True)
+    fps_num: Mapped[int | None] = mapped_column(nullable=True)
+    fps_den: Mapped[int | None] = mapped_column(nullable=True)
+    is_vfr: Mapped[bool] = mapped_column(default=False)
+    video_codec: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    audio_codec: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    bit_rate: Mapped[int | None] = mapped_column(nullable=True)
+    audio_channels: Mapped[int | None] = mapped_column(nullable=True)
+    audio_sample_rate: Mapped[int | None] = mapped_column(nullable=True)
+    start_timecode: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    color: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+
+    # Derived artifacts, relative to the project directory (None until generated)
+    proxy_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    poster_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    strip_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    waveform_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    artifacts: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+
+    __table_args__ = (
+        Index("ix_media_project", "project_id"),
+        UniqueConstraint("project_id", "content_hash", name="uq_media_project_hash"),
+    )
 
 
 class Job(Base):

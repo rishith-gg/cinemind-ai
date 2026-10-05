@@ -50,7 +50,8 @@ def run_job(factory: sessionmaker[Session], settings: Settings, job_id: str) -> 
                 else {k: params[k] for k in stage.param_keys if k in params}
             )
             params_hash = _hash({"job": used, "stage": stage.params})
-            key = cache_key(media_hash, stage, params_hash, upstream_key)
+            scope = _hash([media_hash, project_id]) if stage.scope_project else media_hash
+            key = cache_key(scope, stage, params_hash, upstream_key)
             upstream_key = key
             prov = {
                 "cache_key": key,
@@ -58,13 +59,6 @@ def run_job(factory: sessionmaker[Session], settings: Settings, job_id: str) -> 
                 "model_name": stage.model_name,
                 "model_version": stage.model_version,
             }
-            cached = _load_cached(factory, key)
-            if cached is not None:
-                _set_stage(factory, job_id, ordinal, len(stages), "cached", prov)
-                previous[stage.name] = cached
-                continue
-
-            _set_stage(factory, job_id, ordinal, len(stages), "running", prov)
             ctx = StageContext(
                 job_id=job_id,
                 project_id=project_id,
@@ -75,8 +69,17 @@ def run_job(factory: sessionmaker[Session], settings: Settings, job_id: str) -> 
                 _progress=_progress_writer(factory, job_id, ordinal, len(stages)),
                 _check_cancel=lambda: _check_cancel(factory, job_id),
             )
+            cached = _load_cached(factory, key)
+            if cached is not None and (stage.verify is None or stage.verify(ctx, cached)):
+                _persist(factory, stage, ctx, cached)
+                _set_stage(factory, job_id, ordinal, len(stages), "cached", prov)
+                previous[stage.name] = cached
+                continue
+
+            _set_stage(factory, job_id, ordinal, len(stages), "running", prov)
             result = stage.run(ctx)
-            _store_result(factory, key, media_hash, stage, params_hash, result)
+            _store_result(factory, key, scope, stage, params_hash, result)
+            _persist(factory, stage, ctx, result)
             _set_stage(factory, job_id, ordinal, len(stages), "succeeded", prov)
             previous[stage.name] = result
         _finish_job(factory, job_id, "succeeded")
@@ -91,6 +94,16 @@ def run_job(factory: sessionmaker[Session], settings: Settings, job_id: str) -> 
         msg = "A processing step crashed. Partial results are kept; you can retry the job."
         _fail_stage(factory, job_id, "failed", "internal_error", msg)
         _finish_job(factory, job_id, "failed", "internal_error", msg)
+
+
+def _persist(
+    factory: sessionmaker[Session], stage: Stage, ctx: StageContext, result: dict[str, Any]
+) -> None:
+    if stage.persist is None:
+        return
+    with factory() as session:
+        stage.persist(session, ctx, result)
+        session.commit()
 
 
 def _check_cancel(factory: sessionmaker[Session], job_id: str) -> None:

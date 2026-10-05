@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetProjectData, GetProjectErrors, GetProjectResponses, ListProjectsData, ListProjectsResponses, RetryJobData, RetryJobErrors, RetryJobResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses } from './types.gen';
+import type { BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetMediaData, GetMediaErrors, GetMediaResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaErrors, ListMediaResponses, ListProjectsData, ListProjectsResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RetryJobData, RetryJobErrors, RetryJobResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -63,6 +63,11 @@ export const updateProject = <ThrowOnError extends boolean = false>(options: Opt
 export const streamJobEvents = <ThrowOnError extends boolean = false>(options?: Options<StreamJobEventsData, ThrowOnError>): RequestResult<StreamJobEventsResponses, StreamJobEventsErrors, ThrowOnError> => (options?.client ?? client).get<StreamJobEventsResponses, StreamJobEventsErrors, ThrowOnError>({ url: '/api/jobs/events', ...options });
 
 /**
+ * List Jobs
+ */
+export const listJobs = <ThrowOnError extends boolean = false>(options?: Options<ListJobsData, ThrowOnError>): RequestResult<ListJobsResponses, ListJobsErrors, ThrowOnError> => (options?.client ?? client).get<ListJobsResponses, ListJobsErrors, ThrowOnError>({ url: '/api/jobs', ...options });
+
+/**
  * Get Job
  */
 export const getJob = <ThrowOnError extends boolean = false>(options: Options<GetJobData, ThrowOnError>): RequestResult<GetJobResponses, GetJobErrors, ThrowOnError> => (options.client ?? client).get<GetJobResponses, GetJobErrors, ThrowOnError>({ url: '/api/jobs/{job_id}', ...options });
@@ -76,6 +81,105 @@ export const cancelJob = <ThrowOnError extends boolean = false>(options: Options
  * Retry Job
  */
 export const retryJob = <ThrowOnError extends boolean = false>(options: Options<RetryJobData, ThrowOnError>): RequestResult<RetryJobResponses, RetryJobErrors, ThrowOnError> => (options.client ?? client).post<RetryJobResponses, RetryJobErrors, ThrowOnError>({ url: '/api/jobs/{job_id}/retry', ...options });
+
+/**
+ * List Media
+ */
+export const listMedia = <ThrowOnError extends boolean = false>(options: Options<ListMediaData, ThrowOnError>): RequestResult<ListMediaResponses, ListMediaErrors, ThrowOnError> => (options.client ?? client).get<ListMediaResponses, ListMediaErrors, ThrowOnError>({ url: '/api/projects/{project_id}/media', ...options });
+
+/**
+ * Import Media
+ *
+ * Register files or folders (reference in place, or copy) and queue processing.
+ */
+export const importMedia = <ThrowOnError extends boolean = false>(options: Options<ImportMediaData, ThrowOnError>): RequestResult<ImportMediaResponses, ImportMediaErrors, ThrowOnError> => (options.client ?? client).post<ImportMediaResponses, ImportMediaErrors, ThrowOnError>({
+    url: '/api/projects/{project_id}/media',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Upload Media
+ *
+ * Upload one file as the raw request body (streamed to disk, size-limited).
+ */
+export const uploadMedia = <ThrowOnError extends boolean = false>(options: Options<UploadMediaData, ThrowOnError>): RequestResult<UploadMediaResponses, UploadMediaErrors, ThrowOnError> => (options.client ?? client).post<UploadMediaResponses, UploadMediaErrors, ThrowOnError>({
+    bodySerializer: null,
+    url: '/api/projects/{project_id}/media/upload',
+    ...options,
+    headers: {
+        'Content-Type': 'application/octet-stream',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Media
+ *
+ * Remove a media item and its derived data. Referenced source files are never touched.
+ */
+export const deleteMedia = <ThrowOnError extends boolean = false>(options: Options<DeleteMediaData, ThrowOnError>): RequestResult<DeleteMediaResponses, DeleteMediaErrors, ThrowOnError> => (options.client ?? client).delete<DeleteMediaResponses, DeleteMediaErrors, ThrowOnError>({ url: '/api/media/{media_id}', ...options });
+
+/**
+ * Get Media
+ */
+export const getMedia = <ThrowOnError extends boolean = false>(options: Options<GetMediaData, ThrowOnError>): RequestResult<GetMediaResponses, GetMediaErrors, ThrowOnError> => (options.client ?? client).get<GetMediaResponses, GetMediaErrors, ThrowOnError>({ url: '/api/media/{media_id}', ...options });
+
+/**
+ * Process Media
+ *
+ * (Re)run the ingest chain; finished, still-valid stages are skipped via the cache.
+ */
+export const processMedia = <ThrowOnError extends boolean = false>(options: Options<ProcessMediaData, ThrowOnError>): RequestResult<ProcessMediaResponses, ProcessMediaErrors, ThrowOnError> => (options.client ?? client).post<ProcessMediaResponses, ProcessMediaErrors, ThrowOnError>({ url: '/api/media/{media_id}/process', ...options });
+
+/**
+ * Process Project
+ */
+export const processProject = <ThrowOnError extends boolean = false>(options: Options<ProcessProjectData, ThrowOnError>): RequestResult<ProcessProjectResponses, ProcessProjectErrors, ThrowOnError> => (options.client ?? client).post<ProcessProjectResponses, ProcessProjectErrors, ThrowOnError>({ url: '/api/projects/{project_id}/process', ...options });
+
+/**
+ * Relink Media
+ *
+ * Point a moved/missing reference at its new location. The content must be identical.
+ */
+export const relinkMedia = <ThrowOnError extends boolean = false>(options: Options<RelinkMediaData, ThrowOnError>): RequestResult<RelinkMediaResponses, RelinkMediaErrors, ThrowOnError> => (options.client ?? client).post<RelinkMediaResponses, RelinkMediaErrors, ThrowOnError>({
+    url: '/api/media/{media_id}/relink',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Stream Proxy
+ */
+export const streamProxy = <ThrowOnError extends boolean = false>(options: Options<StreamProxyData, ThrowOnError>): RequestResult<StreamProxyResponses, StreamProxyErrors, ThrowOnError> => (options.client ?? client).get<StreamProxyResponses, StreamProxyErrors, ThrowOnError>({ url: '/api/media/{media_id}/stream', ...options });
+
+/**
+ * Get Poster
+ */
+export const getPoster = <ThrowOnError extends boolean = false>(options: Options<GetPosterData, ThrowOnError>): RequestResult<GetPosterResponses, GetPosterErrors, ThrowOnError> => (options.client ?? client).get<GetPosterResponses, GetPosterErrors, ThrowOnError>({ url: '/api/media/{media_id}/poster', ...options });
+
+/**
+ * Get Strip
+ */
+export const getStrip = <ThrowOnError extends boolean = false>(options: Options<GetStripData, ThrowOnError>): RequestResult<GetStripResponses, GetStripErrors, ThrowOnError> => (options.client ?? client).get<GetStripResponses, GetStripErrors, ThrowOnError>({ url: '/api/media/{media_id}/strip', ...options });
+
+/**
+ * Get Waveform
+ */
+export const getWaveform = <ThrowOnError extends boolean = false>(options: Options<GetWaveformData, ThrowOnError>): RequestResult<GetWaveformResponses, GetWaveformErrors, ThrowOnError> => (options.client ?? client).get<GetWaveformResponses, GetWaveformErrors, ThrowOnError>({ url: '/api/media/{media_id}/waveform', ...options });
+
+/**
+ * Browse
+ *
+ * List a folder inside the approved media roots. Without `path`, lists the roots.
+ */
+export const browseFolder = <ThrowOnError extends boolean = false>(options?: Options<BrowseFolderData, ThrowOnError>): RequestResult<BrowseFolderResponses, BrowseFolderErrors, ThrowOnError> => (options?.client ?? client).get<BrowseFolderResponses, BrowseFolderErrors, ThrowOnError>({ url: '/api/fs/browse', ...options });
 
 /**
  * Health

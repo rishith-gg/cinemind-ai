@@ -14,7 +14,7 @@ from starlette.responses import Response
 from starlette.types import Scope
 
 from cinemind import __version__
-from cinemind.api import jobs, projects
+from cinemind.api import fs, jobs, media, projects
 from cinemind.core.config import REPO_ROOT, Settings, get_settings
 from cinemind.core.doctor import DoctorReport, run_doctor
 from cinemind.core.errors import DomainError
@@ -72,6 +72,8 @@ def create_app(
 
     app.include_router(projects.router)
     app.include_router(jobs.router)
+    app.include_router(media.router)
+    app.include_router(fs.router)
 
     @app.get(
         "/api/system/health",

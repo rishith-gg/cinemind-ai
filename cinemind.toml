@@ -2,5 +2,5 @@
 host = "127.0.0.1"          # must stay local; the app refuses anything else
 port = 8000
 data_dir = "data"           # derived files only; source footage is never touched
-media_roots = []            # folders the app may read footage from (set in Phase 3)
+media_roots = []            # folders the app may read footage from, e.g. ["/Users/me/Footage"]
 model_tier = "auto"         # auto | lite | balanced | quality

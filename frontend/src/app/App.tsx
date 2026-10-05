@@ -3,12 +3,13 @@ import { Navigate, Route, Routes } from "react-router";
 import { Layout } from "../components/Layout";
 import { ComingSoon } from "../features/ComingSoon";
 import { DashboardPage } from "../features/DashboardPage";
+import { ClipPage } from "../features/library/ClipPage";
+import { LibraryPage } from "../features/library/LibraryPage";
 import { ProjectPage } from "../features/projects/ProjectPage";
 import { ProjectsPage } from "../features/projects/ProjectsPage";
 import { SettingsPage } from "../features/system/SettingsPage";
 
 const LATER = [
-  { path: "library", title: "Library", phase: 3 },
   { path: "shots", title: "Shots / Scenes", phase: 4 },
   { path: "actors", title: "Actors", phase: 7 },
   { path: "transcripts", title: "Transcripts", phase: 6 },
@@ -24,6 +25,8 @@ export function App() {
         <Route index element={<DashboardPage />} />
         <Route path="projects" element={<ProjectsPage />} />
         <Route path="projects/:projectId" element={<ProjectPage />} />
+        <Route path="library" element={<LibraryPage />} />
+        <Route path="library/:mediaId" element={<ClipPage />} />
         <Route path="settings" element={<SettingsPage />} />
         {LATER.map((l) => (
           <Route key={l.path} path={l.path} element={<ComingSoon title={l.title} phase={l.phase} />} />
