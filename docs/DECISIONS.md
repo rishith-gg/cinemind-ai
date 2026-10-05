@@ -15,3 +15,10 @@
 | D-011 | 2026-10-05 | `GET /api/system/health` runs the doctor on every call (no cache). | Cheap enough (~100s of ms); caching can come with the first-run wizard. |
 | D-012 | 2026-10-05 | pnpm enabled through `corepack enable pnpm` (user approved). pnpm 12.9.1. | Ships with Node, no Homebrew package needed. |
 | D-013 | 2026-10-05 | `uv` link-mode set to `copy`. | Project is on an external SSD; hardlinks from the uv cache across filesystems failed with a warning. |
+| D-014 | 2026-10-05 | SQLAlchemy **2.1.3** (not the 2.0 in the pack) and Alembic 1.20.0, pinned `>=2.1.3,<2.2`. | Verified on PyPI (D-004). 2.0-style `Mapped[]`/`select()` code ran unchanged. |
+| D-015 | 2026-10-05 | Added `stage_results` (cache) and `job_events` (SSE log) tables beyond the SPEC table list. | Rule 5 needs a cache keyed by `(media hash, stage, params hash, model)`; resumable SSE needs durable, ordered events. Both live in SQLite, so no Redis. |
+| D-016 | 2026-10-05 | Worker assumes a single instance: on startup every `running` job is re-queued (no heartbeats/leases). `serve` spawns the worker and passes `--parent-pid` so it exits if `serve` dies. | One worker process is the architecture (rule 4). Leases would be over-engineering. |
+| D-017 | 2026-10-05 | A stage interrupted by a crash restarts from its beginning; only whole finished stages are cached. | Per-item checkpoints belong inside long stages (transcribe, faces) and are added there if needed. |
+| D-018 | 2026-10-05 | Test-only chains live in `backend/tests/dummy_chain.py` and load through `extra_stage_modules` setting. | The Phase 1 acceptance chain must not ship as fake "AI" in the package. |
+| D-019 | 2026-10-05 | Alembic migrations are excluded from pyright (generated code). | Strict mode flags Alembic's generated column calls; the models themselves stay strict-checked. |
+

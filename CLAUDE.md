@@ -45,6 +45,7 @@ Single-command run: `uv run cinemind serve` (serves API + built frontend). Dev: 
 ## Commands (keep this section accurate; update in Phase 0 and whenever they change)
 Run from the repo root. `just` is not used; `scripts/tasks.py` is the cross-platform equivalent (`T` = `uv run python scripts/tasks.py`).
 - Setup: `uv sync` then `cd frontend && pnpm install`
+- Worker alone (normally started by `serve`; `serve --no-worker` to skip): `uv run cinemind worker`
 - Environment check: `uv run cinemind doctor` (add `--json` for machine output)
 - Run (single command, API + built UI): `T build-ui` once, then `uv run cinemind serve` -> http://127.0.0.1:8000
 - Dev: `T dev-api` (backend, auto-reload) and `T dev-ui` (Vite on :5173, proxies /api to :8000)

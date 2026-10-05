@@ -1,6 +1,9 @@
-"""Command line entry point: `cinemind doctor | serve | export-openapi`."""
+"""Command line entry point: `cinemind doctor | serve | worker | export-openapi`."""
 
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 from typing import Annotated
 
@@ -12,6 +15,7 @@ from rich.table import Table
 from cinemind.api.app import create_app
 from cinemind.core.config import REPO_ROOT, get_settings
 from cinemind.core.doctor import run_doctor
+from cinemind.db.migrate import upgrade_head
 
 app = typer.Typer(help="CineMind AI: local-first pre-editing assistant.", no_args_is_help=True)
 
@@ -54,15 +58,45 @@ def doctor(as_json: Annotated[bool, typer.Option("--json", help="Print JSON.")] 
 
 
 @app.command()
-def serve(reload: Annotated[bool, typer.Option(help="Auto-reload (development).")] = False) -> None:
-    """Start the API (and the built frontend, if present) on 127.0.0.1."""
+def worker() -> None:
+    """Run the job worker in the foreground (normally `serve` starts it for you)."""
+    from cinemind.jobs.worker import main
+
+    main()
+
+
+@app.command()
+def serve(
+    reload: Annotated[bool, typer.Option(help="Auto-reload (development).")] = False,
+    with_worker: Annotated[
+        bool, typer.Option("--worker/--no-worker", help="Also start the job worker process.")
+    ] = True,
+) -> None:
+    """Start the API (and the built frontend, if present) on 127.0.0.1, plus the worker."""
     s = get_settings()
-    if reload:
-        uvicorn.run(
-            "cinemind.api.app:create_app", factory=True, host=s.host, port=s.port, reload=True
+    if with_worker:
+        upgrade_head(s.db_path)  # migrate once, before API and worker start together
+    proc = (
+        subprocess.Popen(  # noqa: S603
+            [sys.executable, "-m", "cinemind.jobs.worker", "--parent-pid", str(os.getpid())]
         )
-    else:
-        uvicorn.run(create_app(), host=s.host, port=s.port)
+        if with_worker
+        else None
+    )
+    try:
+        if reload:
+            uvicorn.run(
+                "cinemind.api.app:create_app", factory=True, host=s.host, port=s.port, reload=True
+            )
+        else:
+            uvicorn.run(create_app(), host=s.host, port=s.port)
+    finally:
+        if proc is not None:
+            proc.terminate()
+            try:
+                proc.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                proc.kill()
 
 
 @app.command("export-openapi")

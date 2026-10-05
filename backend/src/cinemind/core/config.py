@@ -32,6 +32,22 @@ class Settings(BaseSettings):
     data_dir: Path = Path("data")
     media_roots: list[Path] = []
     model_tier: ModelTier = "auto"
+    max_job_attempts: int = 3
+    worker_poll_seconds: float = 0.5
+    # Importable modules that register extra stage chains (used by tests and plugins).
+    extra_stage_modules: list[str] = []
+
+    @property
+    def data_path(self) -> Path:
+        """Absolute data directory (relative values resolve against the repo root)."""
+        return self.data_dir if self.data_dir.is_absolute() else REPO_ROOT / self.data_dir
+
+    @property
+    def db_path(self) -> Path:
+        return self.data_path / "cinemind.db"
+
+    def project_dir(self, project_id: str) -> Path:
+        return self.data_path / "projects" / project_id
 
     @field_validator("host")
     @classmethod

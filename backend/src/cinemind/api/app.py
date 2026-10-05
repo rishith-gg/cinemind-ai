@@ -1,14 +1,25 @@
 """FastAPI application factory. Bound to 127.0.0.1 only (see core/config.py)."""
 
+import logging
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from cinemind import __version__
-from cinemind.core.config import REPO_ROOT, get_settings
+from cinemind.api import jobs, projects
+from cinemind.core.config import REPO_ROOT, Settings, get_settings
 from cinemind.core.doctor import DoctorReport, run_doctor
+from cinemind.core.errors import DomainError
+from cinemind.db.base import make_engine, make_session_factory
+from cinemind.db.migrate import upgrade_head
+from cinemind.jobs.registry import load_extra_modules
+
+log = logging.getLogger(__name__)
 
 FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
 
@@ -19,8 +30,31 @@ class HealthResponse(BaseModel):
     report: DoctorReport
 
 
-def create_app(frontend_dist: Path | None = FRONTEND_DIST) -> FastAPI:
-    app = FastAPI(title="CineMind AI", version=__version__)
+def create_app(
+    frontend_dist: Path | None = FRONTEND_DIST, settings: Settings | None = None
+) -> FastAPI:
+    settings = settings or get_settings()
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+        load_extra_modules(settings)
+        upgrade_head(settings.db_path)
+        engine = make_engine(settings.db_path)
+        app.state.session_factory = make_session_factory(engine)
+        yield
+        engine.dispose()
+
+    app = FastAPI(title="CineMind AI", version=__version__, lifespan=lifespan)
+    app.state.settings = settings
+
+    @app.exception_handler(DomainError)
+    async def domain_error(_: Request, exc: DomainError) -> JSONResponse:
+        return JSONResponse(
+            status_code=exc.status_code, content={"code": exc.code, "message": exc.message}
+        )
+
+    app.include_router(projects.router)
+    app.include_router(jobs.router)
 
     @app.get(
         "/api/system/health",
@@ -29,7 +63,7 @@ def create_app(frontend_dist: Path | None = FRONTEND_DIST) -> FastAPI:
         operation_id="getHealth",
     )
     def health() -> HealthResponse:
-        report = run_doctor(get_settings())
+        report = run_doctor(settings)
         return HealthResponse(
             status="ok" if report.ok else "degraded", version=__version__, report=report
         )
