@@ -33,12 +33,17 @@ class SPAStaticFiles(StaticFiles):
 
     async def get_response(self, path: str, scope: Scope) -> Response:
         try:
-            return await super().get_response(path, scope)
+            response = await super().get_response(path, scope)
         except HTTPException as exc:
             is_api = path == "api" or path.startswith("api/")
             if exc.status_code != 404 or is_api or "." in path.rsplit("/", 1)[-1]:
                 raise  # real 404s for API routes and for missing files such as /assets/x.js
-            return await super().get_response("index.html", scope)
+            response = await super().get_response("index.html", scope)
+        if response.headers.get("content-type", "").startswith("text/html"):
+            # The page names the current (hashed) script. Without this a browser keeps showing
+            # an old build after an update; the hashed assets themselves stay cacheable.
+            response.headers["Cache-Control"] = "no-cache"
+        return response
 
 
 class HealthResponse(BaseModel):

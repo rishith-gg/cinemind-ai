@@ -52,6 +52,6 @@ For each timeline, and for each of the three files (start with the FCP7 XML):
 |---|---|---|---|---|---|
 | 2026-10-09 | 21.1 free | A | FCP7 XML (first export) | Imported, no error. All clips online. | Stereo clips had their audio twice (A1 and A2): our file had one audio item per channel and Resolve reads each as the whole stereo audio. Fixed the same day (one audio item per cut); **re-check pending**. User also reported "in some the order of clips after splitting is reversed"; the file lists the pieces in source order (in points ascending), so which clip and what is reversed is **still to be pinned down**. Frame check not done. |
 | 2026-10-09 | 21.1 free | B | FCP7 XML (first export) | Imported, no error. All clips online. | Same audio duplication. Mixed-rate clips imported; their in/out accuracy not checked yet. |
-| | | A | FCP7 XML (after audio fix) | not run yet | |
+| 2026-10-09 | 21.1 free | A, B | FCP7 XML (after audio fix) | User: "everything is correct in DaVinci Resolve". | Audio no longer doubled; the earlier "reversed order" remark was not repeated. Which checklist items were looked at individually (frame check, mixed-rate in/out) was not stated. |
 | | | A | EDL | not reported | |
 | | | A | OTIO | not reported | |

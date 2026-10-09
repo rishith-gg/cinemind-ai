@@ -14,7 +14,7 @@ _Last updated: 2026-10-09_
 - [x] Phase 1: Backend core + DB + job system
 - [x] Phase 2: Frontend shell
 - [x] Phase 3: Ingest, metadata, proxies, thumbnails
-- [ ] Phase 4: Shots, keyframes + first timeline export (Resolve test). **Resolve import run once (2026-10-09): imports cleanly, clips online; audio duplication found and fixed; open: re-check of the audio fix, and the reported "reversed order after splitting"**
+- [x] Phase 4: Shots, keyframes + first timeline export (Resolve test). Confirmed by the user in DaVinci Resolve 21.1 free on 2026-10-09 (FCP7 XML)
 - [ ] Phase 5: Quality + audio QC
 - [ ] Phase 6: Transcription
 - [ ] Phase 7: Faces and actors
@@ -27,8 +27,8 @@ _Last updated: 2026-10-09_
 - [ ] Phase 14: Polish, packaging, demo
 
 ## Current state
-Phase 4 is implemented and verified by tests, but NOT closed: the roadmap requires the user to import an exported
-timeline into DaVinci Resolve and report the result, and to fix what that finds before Phase 5.
+Phase 4 is complete. The export path for the rest of the project is **FCP7 XML into DaVinci Resolve**; EDL and OTIO
+are written and round-trip tested but their import into Resolve has not been reported.
 
 What exists now: `shots` and `keyframes` stages in the ingest chain (PySceneDetect on the proxy; sharpest-frame
 keyframes), shot strip on the clip page, Shots page, `timelines`/`timeline_items`, the chronological "all shots"
@@ -38,8 +38,9 @@ Resolve test, first round (user, Resolve 21.1 free, FCP7 XML, timelines A and B)
 online. Found: stereo audio appeared twice (fixed, D-044). Reported and not yet understood: "in some the order of
 clips after splitting is reversed" (the exported file has the pieces in source order).
 
-Next step: the user re-imports the re-exported `Resolve test A_71a3b4f9.xml`, confirms the audio is single, and says
-which clip looks reversed. Then tick Phase 4 and start Phase 5.
+Second round, after the audio fix: the user reports everything is correct in Resolve.
+
+Next step: Phase 5 (technical quality + audio QC).
 
 ### Phase 4 run on the user's real footage (2026-10-09, M1 8 GB, `data/phase4-verify`, not an evaluation)
 Numbers from `eval/phase4_run_summary.py data/phase4-verify` (output kept in
@@ -61,7 +62,8 @@ None.
 ## Open issues / notes
 - E2E: `T e2e` (Playwright, real built app, throwaway `data/e2e`). Needs a one-time `pnpm exec playwright install chromium`; here only full Chrome for Testing downloaded (headless shell stalled), so `playwright.config.ts` uses `channel: "chromium"`.
 - shadcn/ui is deferred until a screen needs a dialog/table (D-021); delete confirmation uses `window.confirm` for now. Wavesurfer, Recharts and dnd-kit arrive with their screens.
-- **Waiting on the user: second Resolve check** (above). Claimed so far, from one manual run: FCP7 XML imports into Resolve 21.1 free with clips online. Frame accuracy, EDL and OTIO import are not confirmed.
+- Resolve: confirmed by hand for FCP7 XML only (Resolve 21.1 free, the user's 17 phone clips). Not individually confirmed: frame-exact in/out on mixed-rate and variable-rate clips, EDL import, OTIO import.
+- The built UI was served without `Cache-Control`, so a browser could keep showing the previous build after an update (the user saw the Phase 3 placeholder on the Shots page). The page is now sent with `no-cache`.
 - Footage with real cuts is still needed: the user's folder is all single-take phone clips, so shot detection has only
   been checked against synthetic cuts (exact) and for false positives on real footage (3 in 352 s). An edited video with
   hand-marked cuts is needed before thresholds are tuned (Phase 13). Also still missing: a clip with embedded timecode

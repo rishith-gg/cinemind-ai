@@ -34,6 +34,11 @@ def test_spa_fallback_serves_index_for_deep_links_but_not_api(
     with TestClient(create_app(frontend_dist=tmp_path, settings=settings)) as client:
         assert "app" in client.get("/projects/abc").text
         assert client.get("/settings").status_code == 200
+        # the page must be revalidated, or a browser keeps showing the previous build
+        (tmp_path / "app.js").write_text("x")
+        assert client.get("/").headers["cache-control"] == "no-cache"
+        assert client.get("/settings").headers["cache-control"] == "no-cache"
+        assert "cache-control" not in client.get("/app.js").headers
         assert client.get("/assets/missing.js").status_code == 404
         assert client.get("/%2e%2e/%2e%2e/etc/passwd").status_code in (200, 404)
         assert "root:" not in client.get("/%2e%2e/%2e%2e/etc/passwd").text
