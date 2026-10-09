@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetMediaData, GetMediaErrors, GetMediaResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaErrors, ListMediaResponses, ListProjectsData, ListProjectsResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RetryJobData, RetryJobErrors, RetryJobResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
+import type { BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RetryJobData, RetryJobErrors, RetryJobResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -180,6 +180,61 @@ export const getWaveform = <ThrowOnError extends boolean = false>(options: Optio
  * List a folder inside the approved media roots. Without `path`, lists the roots.
  */
 export const browseFolder = <ThrowOnError extends boolean = false>(options?: Options<BrowseFolderData, ThrowOnError>): RequestResult<BrowseFolderResponses, BrowseFolderErrors, ThrowOnError> => (options?.client ?? client).get<BrowseFolderResponses, BrowseFolderErrors, ThrowOnError>({ url: '/api/fs/browse', ...options });
+
+/**
+ * List Media Shots
+ */
+export const listMediaShots = <ThrowOnError extends boolean = false>(options: Options<ListMediaShotsData, ThrowOnError>): RequestResult<ListMediaShotsResponses, ListMediaShotsErrors, ThrowOnError> => (options.client ?? client).get<ListMediaShotsResponses, ListMediaShotsErrors, ThrowOnError>({ url: '/api/media/{media_id}/shots', ...options });
+
+/**
+ * List Project Shots
+ *
+ * Every shot in the project, clip by clip in file-name order.
+ */
+export const listProjectShots = <ThrowOnError extends boolean = false>(options: Options<ListProjectShotsData, ThrowOnError>): RequestResult<ListProjectShotsResponses, ListProjectShotsErrors, ThrowOnError> => (options.client ?? client).get<ListProjectShotsResponses, ListProjectShotsErrors, ThrowOnError>({ url: '/api/projects/{project_id}/shots', ...options });
+
+/**
+ * Get Keyframe
+ */
+export const getKeyframe = <ThrowOnError extends boolean = false>(options: Options<GetKeyframeData, ThrowOnError>): RequestResult<GetKeyframeResponses, GetKeyframeErrors, ThrowOnError> => (options.client ?? client).get<GetKeyframeResponses, GetKeyframeErrors, ThrowOnError>({ url: '/api/keyframes/{keyframe_id}/image', ...options });
+
+/**
+ * List Timelines
+ */
+export const listTimelines = <ThrowOnError extends boolean = false>(options: Options<ListTimelinesData, ThrowOnError>): RequestResult<ListTimelinesResponses, ListTimelinesErrors, ThrowOnError> => (options.client ?? client).get<ListTimelinesResponses, ListTimelinesErrors, ThrowOnError>({ url: '/api/projects/{project_id}/timelines', ...options });
+
+/**
+ * Create Timeline
+ *
+ * Build the chronological "all shots" timeline: every detected shot, nothing selected.
+ */
+export const createTimeline = <ThrowOnError extends boolean = false>(options: Options<CreateTimelineData, ThrowOnError>): RequestResult<CreateTimelineResponses, CreateTimelineErrors, ThrowOnError> => (options.client ?? client).post<CreateTimelineResponses, CreateTimelineErrors, ThrowOnError>({
+    url: '/api/projects/{project_id}/timelines',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Timeline
+ *
+ * Remove the timeline. Files already exported stay in the exports folder.
+ */
+export const deleteTimeline = <ThrowOnError extends boolean = false>(options: Options<DeleteTimelineData, ThrowOnError>): RequestResult<DeleteTimelineResponses, DeleteTimelineErrors, ThrowOnError> => (options.client ?? client).delete<DeleteTimelineResponses, DeleteTimelineErrors, ThrowOnError>({ url: '/api/timelines/{timeline_id}', ...options });
+
+/**
+ * Get Timeline
+ */
+export const getTimeline = <ThrowOnError extends boolean = false>(options: Options<GetTimelineData, ThrowOnError>): RequestResult<GetTimelineResponses, GetTimelineErrors, ThrowOnError> => (options.client ?? client).get<GetTimelineResponses, GetTimelineErrors, ThrowOnError>({ url: '/api/timelines/{timeline_id}', ...options });
+
+/**
+ * Export Timeline
+ *
+ * Write the timeline to the project's exports folder and download it.
+ */
+export const exportTimeline = <ThrowOnError extends boolean = false>(options: Options<ExportTimelineData, ThrowOnError>): RequestResult<ExportTimelineResponses, ExportTimelineErrors, ThrowOnError> => (options.client ?? client).get<ExportTimelineResponses, ExportTimelineErrors, ThrowOnError>({ url: '/api/timelines/{timeline_id}/export/{fmt}', ...options });
 
 /**
  * Health

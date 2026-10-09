@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { browseFolder, cancelJob, createProject, deleteMedia, deleteProject, getHealth, getJob, getMedia, getPoster, getProject, getStrip, getWaveform, importMedia, listJobs, listMedia, listProjects, type Options, processMedia, processProject, relinkMedia, retryJob, streamJobEvents, streamProxy, updateProject, uploadMedia } from '../sdk.gen';
-import type { BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetMediaData, GetMediaError, GetMediaResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetStripData, GetStripError, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaError, ListMediaResponse, ListProjectsData, ListProjectsResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RetryJobData, RetryJobError, RetryJobResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
+import { browseFolder, cancelJob, createProject, createTimeline, deleteMedia, deleteProject, deleteTimeline, exportTimeline, getHealth, getJob, getKeyframe, getMedia, getPoster, getProject, getStrip, getTimeline, getWaveform, importMedia, listJobs, listMedia, listMediaShots, listProjects, listProjectShots, listTimelines, type Options, processMedia, processProject, relinkMedia, retryJob, streamJobEvents, streamProxy, updateProject, uploadMedia } from '../sdk.gen';
+import type { BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RetryJobData, RetryJobError, RetryJobResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -452,6 +452,156 @@ export const browseFolderOptions = (options?: Options<BrowseFolderData>) => quer
         return data;
     },
     queryKey: browseFolderQueryKey(options)
+});
+
+export const listMediaShotsQueryKey = (options: Options<ListMediaShotsData>) => createQueryKey('listMediaShots', options);
+
+/**
+ * List Media Shots
+ */
+export const listMediaShotsOptions = (options: Options<ListMediaShotsData>) => queryOptions<ListMediaShotsResponse, ListMediaShotsError, ListMediaShotsResponse, ReturnType<typeof listMediaShotsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listMediaShots({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMediaShotsQueryKey(options)
+});
+
+export const listProjectShotsQueryKey = (options: Options<ListProjectShotsData>) => createQueryKey('listProjectShots', options);
+
+/**
+ * List Project Shots
+ *
+ * Every shot in the project, clip by clip in file-name order.
+ */
+export const listProjectShotsOptions = (options: Options<ListProjectShotsData>) => queryOptions<ListProjectShotsResponse, ListProjectShotsError, ListProjectShotsResponse, ReturnType<typeof listProjectShotsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listProjectShots({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listProjectShotsQueryKey(options)
+});
+
+export const getKeyframeQueryKey = (options: Options<GetKeyframeData>) => createQueryKey('getKeyframe', options);
+
+/**
+ * Get Keyframe
+ */
+export const getKeyframeOptions = (options: Options<GetKeyframeData>) => queryOptions<unknown, GetKeyframeError, unknown, ReturnType<typeof getKeyframeQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getKeyframe({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getKeyframeQueryKey(options)
+});
+
+export const listTimelinesQueryKey = (options: Options<ListTimelinesData>) => createQueryKey('listTimelines', options);
+
+/**
+ * List Timelines
+ */
+export const listTimelinesOptions = (options: Options<ListTimelinesData>) => queryOptions<ListTimelinesResponse, ListTimelinesError, ListTimelinesResponse, ReturnType<typeof listTimelinesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listTimelines({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listTimelinesQueryKey(options)
+});
+
+/**
+ * Create Timeline
+ *
+ * Build the chronological "all shots" timeline: every detected shot, nothing selected.
+ */
+export const createTimelineMutation = (options?: Partial<Options<CreateTimelineData>>): UseMutationOptions<CreateTimelineResponse, CreateTimelineError, Options<CreateTimelineData>> => {
+    const mutationOptions: UseMutationOptions<CreateTimelineResponse, CreateTimelineError, Options<CreateTimelineData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createTimeline({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete Timeline
+ *
+ * Remove the timeline. Files already exported stay in the exports folder.
+ */
+export const deleteTimelineMutation = (options?: Partial<Options<DeleteTimelineData>>): UseMutationOptions<DeleteTimelineResponse, DeleteTimelineError, Options<DeleteTimelineData>> => {
+    const mutationOptions: UseMutationOptions<DeleteTimelineResponse, DeleteTimelineError, Options<DeleteTimelineData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteTimeline({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getTimelineQueryKey = (options: Options<GetTimelineData>) => createQueryKey('getTimeline', options);
+
+/**
+ * Get Timeline
+ */
+export const getTimelineOptions = (options: Options<GetTimelineData>) => queryOptions<GetTimelineResponse, GetTimelineError, GetTimelineResponse, ReturnType<typeof getTimelineQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getTimeline({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getTimelineQueryKey(options)
+});
+
+export const exportTimelineQueryKey = (options: Options<ExportTimelineData>) => createQueryKey('exportTimeline', options);
+
+/**
+ * Export Timeline
+ *
+ * Write the timeline to the project's exports folder and download it.
+ */
+export const exportTimelineOptions = (options: Options<ExportTimelineData>) => queryOptions<unknown, ExportTimelineError, unknown, ReturnType<typeof exportTimelineQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await exportTimeline({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: exportTimelineQueryKey(options)
 });
 
 export const getHealthQueryKey = (options?: Options<GetHealthData>) => createQueryKey('getHealth', options);

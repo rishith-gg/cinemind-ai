@@ -3,7 +3,7 @@
 OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors are always
 `{"code": "<machine code>", "message": "<plain language>"}`; codes: `invalid_input` (422), `not_found` (404),
 `path_not_allowed` (403), `job_state` (409), `unreadable_media` / `unsupported_media` (422), `source_missing` (404),
-`too_large` (413), `low_disk_space` (507), `ffmpeg_missing` (500).
+`too_large` (413), `low_disk_space` (507), `ffmpeg_missing` (500), `export_failed` (500).
 
 ## Implemented (Phase 1)
 - `GET /api/system/health`
@@ -27,14 +27,29 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
 - Files (derived data only, served with HTTP Range): `GET /api/media/{id}/stream` (proxy), `/poster`, `/strip`
   (horizontal thumbnail strip, `strip_frames` evenly spaced tiles), `/waveform` (`{duration, peaks[1000]}`, 0..1).
 
-## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform
+## Implemented (Phase 4): shots, keyframes, timelines, export
+- `GET /api/media/{id}/shots`, `GET /api/projects/{id}/shots` (adds `filename`): shots with `start_s`/`end_s`,
+  frames on the proxy rate, `detection` (library, detector, threshold) and their keyframes (`time_s`, `sharpness`).
+- `GET /api/keyframes/{id}/image` (JPEG).
+- `POST /api/projects/{id}/timelines` body `{name, kind: "all_shots", fps?: [num, den], mixed_rates: include|exclude}`:
+  every detected shot, clips in file-name order. `fps` omitted = the rate most clips have. 422 when there are no shots.
+- `GET /api/projects/{id}/timelines`, `GET/DELETE /api/timelines/{id}`. A timeline reports `item_count`,
+  `duration_frames`, `warnings` (mixed frame rates, missing originals) and, in detail, each cut's record position.
+- `GET /api/timelines/{id}/export/{fcp7xml|edl|otio}`: writes the file to `data/projects/<id>/exports/` and downloads
+  it. Files reference the ORIGINAL media (`file://` URL), never the proxy. An EDL is refused (422) above 60 fps or
+  above 999 cuts.
+
+## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes
 - validate: ffprobe (by content, not extension): rational fps, VFR flag (avg vs nominal rate differ > 0.5 %),
   codecs, display size (rotation applied), timecode, colour tags. Corrupt or non-media files fail with a plain message.
-- proxy: H.264 (+AAC), <= `proxy_max_height` (720), constant frame rate (nominal rate, halved above 60), `+faststart`.
+- proxy: H.264 (+AAC), <= `proxy_max_height` (720), constant frame rate (the source's average rate, halved above 60), `+faststart`.
   Encoder order: NVENC, VideoToolbox, QSV if FFmpeg lists them, with automatic fallback to libx264 (CPU) if one fails
   at run time. Audio-only sources get an AAC `.m4a` proxy. Disk space is checked first.
 - thumbnails (poster + strip) and waveform peaks are made from the proxy. Everything is written to a `.partial` file and
   renamed, so a crash never leaves a half-written artifact.
+- shots: PySceneDetect on the proxy (`shot_detector` adaptive|content, `shot_threshold`, `shot_min_len_s`). A clip
+  without cuts is one shot; audio-only files have none. Existing library, default thresholds, not tuned yet.
+- keyframes: per shot, the sharpest frame near 1 to 3 anchor points (`keyframes_per_shot`), see DECISIONS D-038.
 - Stage cache for these stages is per project and re-validated against the files on disk (`Stage.scope_project`,
   `Stage.verify`); `Stage.persist` copies results onto the media row, also on a cache hit.
 

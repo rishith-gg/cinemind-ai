@@ -9,6 +9,17 @@ export function formatDuration(seconds: number | null | undefined): string {
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${sec}` : `${m}:${sec}`;
 }
 
+/** Position inside a clip with hundredths, e.g. "0:03.52". */
+export function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  return `${m}:${(seconds - m * 60).toFixed(2).padStart(5, "0")}`;
+}
+
+/** A rational frame rate as editors write it: 30000/1001 -> "29.97", 25/1 -> "25". */
+export function rateLabel(num: number, den: number): string {
+  return den === 1 ? `${num}` : (num / den).toFixed(3).replace(/0+$/, "");
+}
+
 export function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
   if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`;

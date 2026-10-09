@@ -61,6 +61,11 @@ class LowDiskSpaceError(DomainError):
     status_code = 507
 
 
+class ExportWriteError(DomainError):
+    code = "export_failed"
+    status_code = 500
+
+
 class PayloadTooLargeError(DomainError):
     code = "too_large"
     status_code = 413

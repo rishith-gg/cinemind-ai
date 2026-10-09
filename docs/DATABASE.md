@@ -17,3 +17,13 @@ Add tables only through a new migration (`alembic revision --autogenerate`, then
 
 Jobs without a media asset use `project:<id>` as the "media hash" in the cache key.
 Datetimes are stored as naive UTC and returned timezone-aware (`UTCDateTime`).
+
+## Phase 4 tables (migrations 0003, 0004)
+| Table | Purpose |
+|---|---|
+| `shots` | one detected shot of a media asset: `index`, `start_frame`/`end_frame` (end exclusive) and `start_s`/`end_s` on the proxy's constant frame rate (`fps_num/fps_den`), and `detection` (library, version, detector, threshold, minimum length). Id = hash of (media id, start frame, end frame). Cascades from `media_assets`. |
+| `keyframes` | 1 to 3 per shot: `slot`, `frame`, `time_s`, `path` (JPEG, relative to the project dir, under `keyframes/<media id>/`), `sharpness` (why it was picked). Cascades from `shots`. |
+| `timelines` | `name`, `kind` (`all_shots`), rational `fps_num/fps_den`, `width`/`height`, `params` (how it was built: order, rate choice, clips left out). |
+| `timeline_items` | ordered cuts: `position`, `media_id`, optional `shot_id` (set to NULL if the shot disappears), `source_in_s`/`source_out_s`. Frames are computed at export time on the timeline rate. Cascades from `timelines` and `media_assets`. |
+
+`media_assets` gained `nominal_fps_num/nominal_fps_den` (the stream's base rate; `fps_*` is the measured average).

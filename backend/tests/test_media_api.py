@@ -2,14 +2,10 @@ import hashlib
 from collections.abc import Iterator
 from pathlib import Path
 
-import pytest
 from fastapi.testclient import TestClient
 
-from cinemind.api.app import create_app
 from cinemind.core.config import Settings
-from cinemind.db.base import make_engine, make_session_factory
-from cinemind.jobs import queue
-from cinemind.jobs.runner import run_job
+from helpers import drain, import_one
 
 ALL_CLIPS = [
     "a_h264.mp4",
@@ -21,42 +17,9 @@ ALL_CLIPS = [
 ]
 
 
-@pytest.fixture
-def api_settings(settings: Settings, footage: Path) -> Settings:
-    settings.media_roots = [footage]
-    settings.max_upload_mb = 1
-    return settings
-
-
-@pytest.fixture
-def client(api_settings: Settings) -> Iterator[TestClient]:
-    with TestClient(create_app(frontend_dist=None, settings=api_settings)) as c:
-        yield c
-
-
-@pytest.fixture
-def pid(client: TestClient) -> str:
-    return client.post("/api/projects", json={"name": "p"}).json()["id"]
-
-
-def drain(settings: Settings) -> None:
-    """Run every queued job inline (what the worker process does)."""
-    factory = make_session_factory(make_engine(settings.db_path))
-    while (job_id := queue.claim_next(factory)) is not None:
-        run_job(factory, settings, job_id)
-
-
 def tree_digest(root: Path) -> dict[str, str]:
     files = sorted(p for p in root.rglob("*") if p.is_file())
     return {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
-
-
-def import_one(
-    client: TestClient, pid: str, path: Path, mode: str = "reference"
-) -> dict[str, object]:
-    res = client.post(f"/api/projects/{pid}/media", json={"paths": [str(path)], "mode": mode})
-    assert res.status_code == 201
-    return res.json()["items"][0]
 
 
 def test_browse_lists_roots_and_folders(client: TestClient, footage: Path) -> None:

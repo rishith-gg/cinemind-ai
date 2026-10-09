@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
 
 import type { MediaOut } from "../../api";
+import { ShotStrip } from "../shots/ShotStrip";
 import { handlePlayerKey, type PlayerState } from "./playerKeys";
 import { Waveform } from "./Waveform";
 
@@ -10,7 +12,7 @@ function isTyping(target: EventTarget | null): boolean {
 }
 
 /** Proxy player with editor shortcuts (Space/K/L/J, arrows = frame step, I/O marks), a
- * thumbnail strip (click to seek) and the waveform. Always plays the browser-safe proxy. */
+ * thumbnail strip (click to seek), the shot strip and the waveform. Always plays the browser-safe proxy. */
 export function Player({ media }: { media: MediaOut }) {
   const [video, setVideo] = useState<HTMLVideoElement | null>(null);
   const [time, setTime] = useState(0);
@@ -19,6 +21,9 @@ export function Player({ media }: { media: MediaOut }) {
   const state = useRef<PlayerState>({ speedIndex: 0 });
   const fps = media.fps_num && media.fps_den ? media.fps_num / media.fps_den : 25;
   const duration = media.duration_s ?? 0;
+  // `?t=12.5` opens the clip at that second (links from the Shots page).
+  const [params] = useSearchParams();
+  const startAt = Number(params.get("t")) || 0;
 
   useEffect(() => {
     if (!video) return;
@@ -54,6 +59,9 @@ export function Player({ media }: { media: MediaOut }) {
         poster={media.has_poster ? `/api/media/${media.id}/poster` : undefined}
         controls
         preload="metadata"
+        onLoadedMetadata={(e) => {
+          if (startAt > 0) e.currentTarget.currentTime = startAt;
+        }}
         onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
       />
       <p className="font-mono text-xs text-neutral-400" aria-live="off">
@@ -74,6 +82,7 @@ export function Player({ media }: { media: MediaOut }) {
           <img src={`/api/media/${media.id}/strip`} alt="" className="h-full w-full object-fill" />
         </button>
       )}
+      {duration > 0 && !!media.width && <ShotStrip mediaId={media.id} duration={duration} time={time} onSeek={(t) => seekToFraction(t / duration)} />}
       {media.has_waveform && <Waveform mediaId={media.id} video={video} />}
       <p className="text-xs text-neutral-500">
         Keys: Space/K play·pause · L play (again = faster) · J back 1 s · ←/→ one frame (Shift: 1 s) · I/O mark

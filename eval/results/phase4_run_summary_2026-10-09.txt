@@ -1,0 +1,16 @@
+data directory: data/phase4-verify
+clips: 17
+footage seconds: 352.7
+variable-frame-rate clips: 1
+failed jobs: 0
+shots: 20
+clips with more than one shot: 2
+detected cuts: 3
+keyframes: 55
+stage wall time, summed over fresh (uncached) runs:
+  validate: 3.1 s over 17 runs
+  proxy: 200.4 s over 17 runs
+  thumbnails: 9.3 s over 17 runs
+  waveform: 1.6 s over 17 runs
+  shots: 16.1 s over 17 runs
+  keyframes: 7.3 s over 17 runs

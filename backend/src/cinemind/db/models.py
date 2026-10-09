@@ -45,6 +45,9 @@ class MediaAsset(Base):
     fps_num: Mapped[int | None] = mapped_column(nullable=True)
     fps_den: Mapped[int | None] = mapped_column(nullable=True)
     is_vfr: Mapped[bool] = mapped_column(default=False)
+    # The stream's base rate; `fps_*` above is the measured average (they differ for VFR).
+    nominal_fps_num: Mapped[int | None] = mapped_column(nullable=True)
+    nominal_fps_den: Mapped[int | None] = mapped_column(nullable=True)
     video_codec: Mapped[str | None] = mapped_column(String(50), nullable=True)
     audio_codec: Mapped[str | None] = mapped_column(String(50), nullable=True)
     bit_rate: Mapped[int | None] = mapped_column(nullable=True)
@@ -144,3 +147,86 @@ class JobEvent(Base):
     type: Mapped[str] = mapped_column(String(32))
     data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+
+
+class Shot(Base):
+    """A continuous run of frames between two detected cuts, on the analysis proxy's frame grid.
+    `end_*` is exclusive. The id is derived from (media, frames) so re-detection keeps it stable."""
+
+    __tablename__ = "shots"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    media_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id", ondelete="CASCADE"))
+    index: Mapped[int]
+    start_frame: Mapped[int]
+    end_frame: Mapped[int]
+    start_s: Mapped[float]
+    end_s: Mapped[float]
+    # Frame rate the frames above are counted in (the constant-rate proxy), as a rational.
+    fps_num: Mapped[int]
+    fps_den: Mapped[int]
+    # Rule 6: detector, threshold, minimum length and library version that produced this shot.
+    detection: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+
+    keyframes: Mapped[list["Keyframe"]] = relationship(
+        order_by="Keyframe.slot", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+    __table_args__ = (Index("ix_shots_media", "media_id", "index"),)
+
+
+class Keyframe(Base):
+    """A representative frame of a shot: the sharpest candidate near one anchor point."""
+
+    __tablename__ = "keyframes"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    shot_id: Mapped[str] = mapped_column(ForeignKey("shots.id", ondelete="CASCADE"))
+    media_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id", ondelete="CASCADE"))
+    slot: Mapped[int]
+    frame: Mapped[int]
+    time_s: Mapped[float]
+    path: Mapped[str] = mapped_column(Text)  # relative to the project directory
+    sharpness: Mapped[float]  # variance of the Laplacian; why this candidate was picked
+
+    __table_args__ = (Index("ix_keyframes_shot", "shot_id"),)
+
+
+class Timeline(Base):
+    __tablename__ = "timelines"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
+    name: Mapped[str] = mapped_column(String(200))
+    kind: Mapped[str] = mapped_column(String(32))
+    fps_num: Mapped[int]
+    fps_den: Mapped[int]
+    width: Mapped[int]
+    height: Mapped[int]
+    # How it was built (rule 6): options, ordering, what was left out and why.
+    params: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+
+    items: Mapped[list["TimelineItem"]] = relationship(
+        order_by="TimelineItem.position", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+    __table_args__ = (Index("ix_timelines_project", "project_id"),)
+
+
+class TimelineItem(Base):
+    """One cut on the timeline: a source range of an original file, stored in seconds."""
+
+    __tablename__ = "timeline_items"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    timeline_id: Mapped[str] = mapped_column(ForeignKey("timelines.id", ondelete="CASCADE"))
+    position: Mapped[int]
+    media_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id", ondelete="CASCADE"))
+    shot_id: Mapped[str | None] = mapped_column(
+        ForeignKey("shots.id", ondelete="SET NULL"), nullable=True
+    )
+    source_in_s: Mapped[float]
+    source_out_s: Mapped[float]
+
+    __table_args__ = (Index("ix_timeline_items_timeline", "timeline_id", "position"),)

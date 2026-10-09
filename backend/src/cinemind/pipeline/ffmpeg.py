@@ -49,7 +49,7 @@ def pick_encoders() -> list[str]:
 
 
 def proxy_fps(info: MediaInfo) -> Fraction:
-    """Constant frame rate for the proxy: the nominal rate, halved above 60 fps."""
+    """Constant frame rate for the proxy: the source's average rate, halved above 60 fps."""
     fps = info.fps or Fraction(30)
     return fps / 2 if fps > 60 else fps
 

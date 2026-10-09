@@ -25,7 +25,8 @@ class MediaInfo:
     has_audio: bool
     width: int | None = None  # display size (rotation applied)
     height: int | None = None
-    fps: Fraction | None = None  # nominal rate as a rational, never a float
+    fps: Fraction | None = None  # average rate as a rational, never a float
+    nominal_fps: Fraction | None = None  # the stream's base rate (r_frame_rate)
     is_vfr: bool = False
     video_codec: str | None = None
     audio_codec: str | None = None
@@ -146,6 +147,7 @@ def parse_probe(data: dict[str, Any], filename: str) -> MediaInfo:
         avg, nominal = _rational(video.get("avg_frame_rate")), _rational(video.get("r_frame_rate"))
         info.width, info.height = width, height
         info.fps = avg or nominal
+        info.nominal_fps = nominal
         # VFR: average rate differs from the container's base rate by more than 0.5 %.
         info.is_vfr = bool(avg and nominal and abs(avg - nominal) / nominal > Fraction(1, 200))
         info.video_codec = video.get("codec_name")

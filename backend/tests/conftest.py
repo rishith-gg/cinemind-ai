@@ -5,9 +5,11 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 
 import dummy_chain
+from cinemind.api.app import create_app
 from cinemind.core.config import Settings
 from cinemind.db.base import make_engine, make_session_factory
 from cinemind.db.migrate import upgrade_head
@@ -66,4 +68,53 @@ def footage(tmp_path_factory: pytest.TempPathFactory) -> Path:
     )
     (root / "f_corrupt.mp4").write_bytes(os.urandom(4096))
     (root / "notes.txt").write_text("not media")
+    return root
+
+
+@pytest.fixture
+def api_settings(settings: Settings, footage: Path) -> Settings:
+    settings.media_roots = [footage]
+    settings.max_upload_mb = 1
+    return settings
+
+
+@pytest.fixture
+def client(api_settings: Settings) -> Iterator[TestClient]:
+    with TestClient(create_app(frontend_dist=None, settings=api_settings)) as c:
+        yield c
+
+
+@pytest.fixture
+def pid(client: TestClient) -> str:
+    return client.post("/api/projects", json={"name": "p"}).json()["id"]
+
+
+# Cut positions (seconds) of `cuts.mp4`: four visually distinct segments at 25 fps.
+CUTS_S = (2.0, 3.52, 6.0)
+CUTS_DURATION_S = 8.0
+
+
+@pytest.fixture(scope="session")
+def cut_footage(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Clips with exactly known shot boundaries (ground truth for shot detection)."""
+    if shutil.which("ffmpeg") is None:
+        pytest.skip("ffmpeg not installed")
+    root = tmp_path_factory.mktemp("cuts")
+    size = "size=640x360:rate=25"
+    graph = "[2:v]trim=duration=2.48,setpts=PTS-STARTPTS[m];[0:v][1:v][m][3:v]concat=n=4:v=1[v]"
+    _ffmpeg(
+        *("-f", "lavfi", "-i", f"testsrc2={size}:duration=2"),
+        *("-f", "lavfi", "-i", f"smptebars={size}:duration=1.52"),
+        *("-f", "lavfi", "-i", f"mandelbrot={size}"),
+        *("-f", "lavfi", "-i", f"color=c=darkblue:{size}:duration=2"),
+        *("-f", "lavfi", "-i", "sine=frequency=330:duration=8"),
+        *("-filter_complex", graph, "-map", "[v]", "-map", "4:a", "-ac", "2"),
+        *("-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", str(root / "cuts.mp4")),
+    )
+    # One continuous shot at 29.97 fps with a drop-frame start timecode, no audio.
+    _ffmpeg(
+        *("-f", "lavfi", "-i", "testsrc2=size=640x360:rate=30000/1001:duration=3"),
+        *("-c:v", "libx264", "-pix_fmt", "yuv420p", "-timecode", "01:00:00;00"),
+        str(root / "one_shot_ntsc.mov"),
+    )
     return root

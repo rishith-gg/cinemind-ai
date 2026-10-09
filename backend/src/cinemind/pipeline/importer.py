@@ -223,6 +223,10 @@ def enqueue_ingest(session: Session, settings: Settings, asset: MediaAsset) -> J
             "source": asset.path,
             "import_mode": asset.import_mode,
             "proxy_max_height": settings.proxy_max_height,
+            "shot_detector": settings.shot_detector,
+            "shot_threshold": settings.shot_threshold,
+            "shot_min_len_s": settings.shot_min_len_s,
+            "keyframes_per_shot": settings.keyframes_per_shot,
         },
     )
 
@@ -233,5 +237,6 @@ def delete_asset_files(settings: Settings, asset: MediaAsset) -> None:
     for rel in (asset.proxy_path, asset.poster_path, asset.strip_path, asset.waveform_path):
         if rel:
             (root / rel).unlink(missing_ok=True)
+    shutil.rmtree(root / "keyframes" / asset.id, ignore_errors=True)
     if asset.import_mode != "reference":
         shutil.rmtree(media_dir(settings, asset.project_id, asset.id), ignore_errors=True)

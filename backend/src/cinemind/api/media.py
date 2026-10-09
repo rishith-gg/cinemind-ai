@@ -37,7 +37,7 @@ from cinemind.pipeline.hashing import content_hash
 
 log = logging.getLogger(__name__)
 router = APIRouter(tags=["media"])
-_ERR: dict[int | str, dict[str, Any]] = {
+ERRORS: dict[int | str, dict[str, Any]] = {
     403: {"model": ErrorResponse},
     404: {"model": ErrorResponse},
     409: {"model": ErrorResponse},
@@ -47,14 +47,14 @@ _ERR: dict[int | str, dict[str, Any]] = {
 _MAX_LISTING = 1000
 
 
-def _project(session: Session, project_id: str) -> Project:
+def get_project(session: Session, project_id: str) -> Project:
     project = session.get(Project, validate_project_id(project_id))
     if project is None:
         raise NotFoundError("That project does not exist.")
     return project
 
 
-def _asset(session: Session, media_id: str) -> MediaAsset:
+def get_asset(session: Session, media_id: str) -> MediaAsset:
     asset = session.get(MediaAsset, media_id)
     if asset is None:
         raise NotFoundError("That media item does not exist.")
@@ -132,14 +132,14 @@ def _item(session: Session, result: importer.ImportResult) -> ImportItem:
     "/api/projects/{project_id}/media",
     response_model=ImportResponse,
     status_code=201,
-    responses=_ERR,
+    responses=ERRORS,
     operation_id="importMedia",
 )
 def import_media(
     project_id: str, body: ImportRequest, session: SessionDep, settings: SettingsDep
 ) -> ImportResponse:
     """Register files or folders (reference in place, or copy) and queue processing."""
-    _project(session, project_id)
+    get_project(session, project_id)
     files = importer.expand_paths(body.paths, settings.media_roots)
     items: list[ImportItem] = []
     for source in files:
@@ -166,7 +166,7 @@ def import_media(
     "/api/projects/{project_id}/media/upload",
     response_model=ImportItem,
     status_code=201,
-    responses=_ERR,
+    responses=ERRORS,
     operation_id="uploadMedia",
     openapi_extra={
         "requestBody": {
@@ -188,7 +188,7 @@ async def upload_media(
     declared = request.headers.get("content-length")
 
     def prepare() -> importer.UploadTarget:
-        _project(session, project_id)
+        get_project(session, project_id)
         return importer.prepare_upload(
             settings,
             project_id,
@@ -228,11 +228,11 @@ async def upload_media(
 @router.get(
     "/api/projects/{project_id}/media",
     response_model=list[MediaOut],
-    responses=_ERR,
+    responses=ERRORS,
     operation_id="listMedia",
 )
 def list_media(project_id: str, session: SessionDep) -> list[MediaOut]:
-    _project(session, project_id)
+    get_project(session, project_id)
     assets = list(
         session.scalars(
             select(MediaAsset)
@@ -245,16 +245,18 @@ def list_media(project_id: str, session: SessionDep) -> list[MediaOut]:
 
 
 @router.get(
-    "/api/media/{media_id}", response_model=MediaOut, responses=_ERR, operation_id="getMedia"
+    "/api/media/{media_id}", response_model=MediaOut, responses=ERRORS, operation_id="getMedia"
 )
 def get_media(media_id: str, session: SessionDep) -> MediaOut:
-    return _out(session, _asset(session, media_id))
+    return _out(session, get_asset(session, media_id))
 
 
-@router.delete("/api/media/{media_id}", status_code=204, responses=_ERR, operation_id="deleteMedia")
+@router.delete(
+    "/api/media/{media_id}", status_code=204, responses=ERRORS, operation_id="deleteMedia"
+)
 def delete_media(media_id: str, session: SessionDep, settings: SettingsDep) -> None:
     """Remove a media item and its derived data. Referenced source files are never touched."""
-    asset = _asset(session, media_id)
+    asset = get_asset(session, media_id)
     jobs = list(session.scalars(select(Job).where(Job.media_id == media_id)))
     if any(j.status in ("queued", "running") for j in jobs):
         raise JobStateError("This item is being processed. Cancel its job before removing it.")
@@ -268,23 +270,23 @@ def delete_media(media_id: str, session: SessionDep, settings: SettingsDep) -> N
     "/api/media/{media_id}/process",
     response_model=JobOut,
     status_code=202,
-    responses=_ERR,
+    responses=ERRORS,
     operation_id="processMedia",
 )
 def process_media(media_id: str, session: SessionDep, settings: SettingsDep) -> Job:
     """(Re)run the ingest chain; finished, still-valid stages are skipped via the cache."""
-    return importer.enqueue_ingest(session, settings, _asset(session, media_id))
+    return importer.enqueue_ingest(session, settings, get_asset(session, media_id))
 
 
 @router.post(
     "/api/projects/{project_id}/process",
     response_model=list[JobOut],
     status_code=202,
-    responses=_ERR,
+    responses=ERRORS,
     operation_id="processProject",
 )
 def process_project(project_id: str, session: SessionDep, settings: SettingsDep) -> list[Job]:
-    _project(session, project_id)
+    get_project(session, project_id)
     assets = session.scalars(select(MediaAsset).where(MediaAsset.project_id == project_id))
     return [importer.enqueue_ingest(session, settings, a) for a in list(assets)]
 
@@ -292,14 +294,14 @@ def process_project(project_id: str, session: SessionDep, settings: SettingsDep)
 @router.post(
     "/api/media/{media_id}/relink",
     response_model=MediaOut,
-    responses=_ERR,
+    responses=ERRORS,
     operation_id="relinkMedia",
 )
 def relink_media(
     media_id: str, body: RelinkRequest, session: SessionDep, settings: SettingsDep
 ) -> MediaOut:
     """Point a moved/missing reference at its new location. The content must be identical."""
-    asset = _asset(session, media_id)
+    asset = get_asset(session, media_id)
     if asset.import_mode != "reference":
         raise InvalidInputError("Only referenced files can be relinked.")
     if not Path(body.path).is_absolute():
@@ -326,7 +328,9 @@ _TYPES = {
 }
 
 
-def _derived(settings: Settings, asset: MediaAsset, rel: str | None, what: str) -> FileResponse:
+def serve_derived(
+    settings: Settings, asset: MediaAsset, rel: str | None, what: str
+) -> FileResponse:
     if rel is None:
         raise NotFoundError(f"The {what} for this item has not been generated yet.")
     root = settings.project_dir(asset.project_id).resolve()
@@ -342,25 +346,25 @@ def _derived(settings: Settings, asset: MediaAsset, rel: str | None, what: str) 
     )
 
 
-@router.get("/api/media/{media_id}/stream", responses=_ERR, operation_id="streamProxy")
+@router.get("/api/media/{media_id}/stream", responses=ERRORS, operation_id="streamProxy")
 def stream_proxy(media_id: str, session: SessionDep, settings: SettingsDep) -> FileResponse:
-    asset = _asset(session, media_id)
-    return _derived(settings, asset, asset.proxy_path, "playback proxy")
+    asset = get_asset(session, media_id)
+    return serve_derived(settings, asset, asset.proxy_path, "playback proxy")
 
 
-@router.get("/api/media/{media_id}/poster", responses=_ERR, operation_id="getPoster")
+@router.get("/api/media/{media_id}/poster", responses=ERRORS, operation_id="getPoster")
 def get_poster(media_id: str, session: SessionDep, settings: SettingsDep) -> FileResponse:
-    asset = _asset(session, media_id)
-    return _derived(settings, asset, asset.poster_path, "thumbnail")
+    asset = get_asset(session, media_id)
+    return serve_derived(settings, asset, asset.poster_path, "thumbnail")
 
 
-@router.get("/api/media/{media_id}/strip", responses=_ERR, operation_id="getStrip")
+@router.get("/api/media/{media_id}/strip", responses=ERRORS, operation_id="getStrip")
 def get_strip(media_id: str, session: SessionDep, settings: SettingsDep) -> FileResponse:
-    asset = _asset(session, media_id)
-    return _derived(settings, asset, asset.strip_path, "thumbnail strip")
+    asset = get_asset(session, media_id)
+    return serve_derived(settings, asset, asset.strip_path, "thumbnail strip")
 
 
-@router.get("/api/media/{media_id}/waveform", responses=_ERR, operation_id="getWaveform")
+@router.get("/api/media/{media_id}/waveform", responses=ERRORS, operation_id="getWaveform")
 def get_waveform(media_id: str, session: SessionDep, settings: SettingsDep) -> FileResponse:
-    asset = _asset(session, media_id)
-    return _derived(settings, asset, asset.waveform_path, "waveform")
+    asset = get_asset(session, media_id)
+    return serve_derived(settings, asset, asset.waveform_path, "waveform")

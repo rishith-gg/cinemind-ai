@@ -384,6 +384,32 @@ export type JobStageOut = {
 };
 
 /**
+ * KeyframeOut
+ */
+export type KeyframeOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Slot
+     */
+    slot: number;
+    /**
+     * Frame
+     */
+    frame: number;
+    /**
+     * Time S
+     */
+    time_s: number;
+    /**
+     * Sharpness
+     */
+    sharpness: number;
+};
+
+/**
  * MediaOut
  */
 export type MediaOut = {
@@ -553,6 +579,62 @@ export type ProjectOut = {
 };
 
 /**
+ * ProjectShotOut
+ */
+export type ProjectShotOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Start Frame
+     */
+    start_frame: number;
+    /**
+     * End Frame
+     */
+    end_frame: number;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Fps Num
+     */
+    fps_num: number;
+    /**
+     * Fps Den
+     */
+    fps_den: number;
+    /**
+     * Detection
+     */
+    detection: {
+        [key: string]: unknown;
+    };
+    /**
+     * Keyframes
+     */
+    keyframes: Array<KeyframeOut>;
+    /**
+     * Filename
+     */
+    filename: string;
+};
+
+/**
  * ProjectUpdate
  */
 export type ProjectUpdate = {
@@ -577,6 +659,58 @@ export type RelinkRequest = {
 };
 
 /**
+ * ShotOut
+ */
+export type ShotOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Start Frame
+     */
+    start_frame: number;
+    /**
+     * End Frame
+     */
+    end_frame: number;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Fps Num
+     */
+    fps_num: number;
+    /**
+     * Fps Den
+     */
+    fps_den: number;
+    /**
+     * Detection
+     */
+    detection: {
+        [key: string]: unknown;
+    };
+    /**
+     * Keyframes
+     */
+    keyframes: Array<KeyframeOut>;
+};
+
+/**
  * TierRecommendation
  */
 export type TierRecommendation = {
@@ -588,6 +722,229 @@ export type TierRecommendation = {
      * Reason
      */
     reason: string;
+};
+
+/**
+ * TimelineCreate
+ */
+export type TimelineCreate = {
+    /**
+     * Name
+     */
+    name?: string;
+    /**
+     * Kind
+     */
+    kind?: 'all_shots';
+    /**
+     * Fps
+     */
+    fps?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Mixed Rates
+     */
+    mixed_rates?: 'include' | 'exclude';
+};
+
+/**
+ * TimelineDetail
+ */
+export type TimelineDetail = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Project Id
+     */
+    project_id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Kind
+     */
+    kind: string;
+    /**
+     * Fps Num
+     */
+    fps_num: number;
+    /**
+     * Fps Den
+     */
+    fps_den: number;
+    /**
+     * Width
+     */
+    width: number;
+    /**
+     * Height
+     */
+    height: number;
+    /**
+     * Params
+     */
+    params: {
+        [key: string]: unknown;
+    };
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Item Count
+     */
+    item_count: number;
+    /**
+     * Duration Frames
+     */
+    duration_frames: number;
+    /**
+     * Duration S
+     */
+    duration_s: number;
+    /**
+     * Warnings
+     */
+    warnings: Array<string>;
+    /**
+     * Export Dir
+     */
+    export_dir: string;
+    /**
+     * Formats
+     */
+    formats: Array<string>;
+    /**
+     * Items
+     */
+    items: Array<TimelineItemOut>;
+};
+
+/**
+ * TimelineItemOut
+ */
+export type TimelineItemOut = {
+    /**
+     * Position
+     */
+    position: number;
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Shot Id
+     */
+    shot_id: string | null;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Source In S
+     */
+    source_in_s: number;
+    /**
+     * Source Out S
+     */
+    source_out_s: number;
+    /**
+     * Record Frame
+     */
+    record_frame: number;
+    /**
+     * Duration Frames
+     */
+    duration_frames: number;
+    /**
+     * Source Fps Num
+     */
+    source_fps_num: number;
+    /**
+     * Source Fps Den
+     */
+    source_fps_den: number;
+    /**
+     * Mixed Rate
+     */
+    mixed_rate: boolean;
+};
+
+/**
+ * TimelineOut
+ */
+export type TimelineOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Project Id
+     */
+    project_id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Kind
+     */
+    kind: string;
+    /**
+     * Fps Num
+     */
+    fps_num: number;
+    /**
+     * Fps Den
+     */
+    fps_den: number;
+    /**
+     * Width
+     */
+    width: number;
+    /**
+     * Height
+     */
+    height: number;
+    /**
+     * Params
+     */
+    params: {
+        [key: string]: unknown;
+    };
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Item Count
+     */
+    item_count: number;
+    /**
+     * Duration Frames
+     */
+    duration_frames: number;
+    /**
+     * Duration S
+     */
+    duration_s: number;
+    /**
+     * Warnings
+     */
+    warnings: Array<string>;
+    /**
+     * Export Dir
+     */
+    export_dir: string;
+    /**
+     * Formats
+     */
+    formats: Array<string>;
 };
 
 /**
@@ -1543,6 +1900,380 @@ export type BrowseFolderResponses = {
 };
 
 export type BrowseFolderResponse = BrowseFolderResponses[keyof BrowseFolderResponses];
+
+export type ListMediaShotsData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/shots';
+};
+
+export type ListMediaShotsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListMediaShotsError = ListMediaShotsErrors[keyof ListMediaShotsErrors];
+
+export type ListMediaShotsResponses = {
+    /**
+     * Response Listmediashots
+     *
+     * Successful Response
+     */
+    200: Array<ShotOut>;
+};
+
+export type ListMediaShotsResponse = ListMediaShotsResponses[keyof ListMediaShotsResponses];
+
+export type ListProjectShotsData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/shots';
+};
+
+export type ListProjectShotsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListProjectShotsError = ListProjectShotsErrors[keyof ListProjectShotsErrors];
+
+export type ListProjectShotsResponses = {
+    /**
+     * Response Listprojectshots
+     *
+     * Successful Response
+     */
+    200: Array<ProjectShotOut>;
+};
+
+export type ListProjectShotsResponse = ListProjectShotsResponses[keyof ListProjectShotsResponses];
+
+export type GetKeyframeData = {
+    body?: never;
+    path: {
+        /**
+         * Keyframe Id
+         */
+        keyframe_id: string;
+    };
+    query?: never;
+    url: '/api/keyframes/{keyframe_id}/image';
+};
+
+export type GetKeyframeErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetKeyframeError = GetKeyframeErrors[keyof GetKeyframeErrors];
+
+export type GetKeyframeResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ListTimelinesData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/timelines';
+};
+
+export type ListTimelinesErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListTimelinesError = ListTimelinesErrors[keyof ListTimelinesErrors];
+
+export type ListTimelinesResponses = {
+    /**
+     * Response Listtimelines
+     *
+     * Successful Response
+     */
+    200: Array<TimelineOut>;
+};
+
+export type ListTimelinesResponse = ListTimelinesResponses[keyof ListTimelinesResponses];
+
+export type CreateTimelineData = {
+    body: TimelineCreate;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/timelines';
+};
+
+export type CreateTimelineErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type CreateTimelineError = CreateTimelineErrors[keyof CreateTimelineErrors];
+
+export type CreateTimelineResponses = {
+    /**
+     * Successful Response
+     */
+    201: TimelineDetail;
+};
+
+export type CreateTimelineResponse = CreateTimelineResponses[keyof CreateTimelineResponses];
+
+export type DeleteTimelineData = {
+    body?: never;
+    path: {
+        /**
+         * Timeline Id
+         */
+        timeline_id: string;
+    };
+    query?: never;
+    url: '/api/timelines/{timeline_id}';
+};
+
+export type DeleteTimelineErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type DeleteTimelineError = DeleteTimelineErrors[keyof DeleteTimelineErrors];
+
+export type DeleteTimelineResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteTimelineResponse = DeleteTimelineResponses[keyof DeleteTimelineResponses];
+
+export type GetTimelineData = {
+    body?: never;
+    path: {
+        /**
+         * Timeline Id
+         */
+        timeline_id: string;
+    };
+    query?: never;
+    url: '/api/timelines/{timeline_id}';
+};
+
+export type GetTimelineErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetTimelineError = GetTimelineErrors[keyof GetTimelineErrors];
+
+export type GetTimelineResponses = {
+    /**
+     * Successful Response
+     */
+    200: TimelineDetail;
+};
+
+export type GetTimelineResponse = GetTimelineResponses[keyof GetTimelineResponses];
+
+export type ExportTimelineData = {
+    body?: never;
+    path: {
+        /**
+         * Timeline Id
+         */
+        timeline_id: string;
+        /**
+         * Fmt
+         */
+        fmt: string;
+    };
+    query?: never;
+    url: '/api/timelines/{timeline_id}/export/{fmt}';
+};
+
+export type ExportTimelineErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ExportTimelineError = ExportTimelineErrors[keyof ExportTimelineErrors];
+
+export type ExportTimelineResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type GetHealthData = {
     body?: never;

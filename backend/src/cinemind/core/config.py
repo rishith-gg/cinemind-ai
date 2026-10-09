@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="CINEMIND_",
         toml_file=REPO_ROOT / "cinemind.toml",
+        env_file=REPO_ROOT / ".env",  # machine-specific values (gitignored)
         extra="ignore",
     )
 
@@ -35,6 +36,11 @@ class Settings(BaseSettings):
     max_job_attempts: int = 3
     max_upload_mb: int = 2048
     proxy_max_height: int = 720
+    # Shot detection (PySceneDetect). threshold None = the detector's own default.
+    shot_detector: Literal["adaptive", "content"] = "adaptive"
+    shot_threshold: float | None = None
+    shot_min_len_s: float = 0.5
+    keyframes_per_shot: int = 3
     worker_poll_seconds: float = 0.5
     # Importable modules that register extra stage chains (used by tests and plugins).
     extra_stage_modules: list[str] = []
@@ -71,8 +77,8 @@ class Settings(BaseSettings):
         return (
             init_settings,
             env_settings,
-            TomlConfigSettingsSource(settings_cls),
             dotenv_settings,
+            TomlConfigSettingsSource(settings_cls),
             file_secret_settings,
         )
 
