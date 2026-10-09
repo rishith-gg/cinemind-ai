@@ -92,7 +92,8 @@ def test_fcp7xml_structure(seq: Sequence) -> None:
     assert sequence.findtext("timecode/string") == "01:00:00:00"
     video = sequence.findall("media/video/track")
     audio = sequence.findall("media/audio/track")
-    assert [len(t.findall("clipitem")) for t in video + audio] == [4, 3, 2]  # V1, A1, A2
+    # One audio item per cut, stereo or mono: one per channel doubles the sound in Resolve.
+    assert [len(t.findall("clipitem")) for t in video + audio] == [4, 3]  # V1, A1
 
     # Each file is described once and referenced afterwards.
     files = root.findall(".//file")
@@ -108,7 +109,9 @@ def test_fcp7xml_structure(seq: Sequence) -> None:
     tracks = {"video": video, "audio": audio}
     ids = {c.get("id") for c in root.iter("clipitem")}
     links = list(root.iter("link"))
-    assert len(links) == 3 * 3 + 3 * 3 + 2 * 2  # two stereo cuts, one mono cut, none for video-only
+    assert (
+        len(links) == 3 * 2 * 2
+    )  # three cuts with sound, picture + sound each; none for video-only
     for link in links:
         track = tracks[str(link.findtext("mediatype"))][int(str(link.findtext("trackindex"))) - 1]
         target = track.findall("clipitem")[int(str(link.findtext("clipindex"))) - 1]

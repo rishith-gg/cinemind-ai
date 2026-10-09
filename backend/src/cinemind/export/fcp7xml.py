@@ -2,8 +2,10 @@
 
 Our own writer rather than the OTIO `fcp_xml` adapter, whose output has empty audio clip items
 and unescaped file URLs (DECISIONS D-036). That adapter is used as an independent reader in the
-round-trip tests instead. One video track, one audio track per channel (up to stereo), cuts only,
-video and audio of a cut linked. In/out are media-relative frames on the sequence timebase.
+round-trip tests instead. One video track and one audio track, cuts only, video and audio of a cut
+linked. A cut gets ONE audio clip item whatever its channel count: DaVinci Resolve 21 reads each
+audio clip item as the file's whole (stereo) audio, so one item per channel doubled the sound
+(manual import test, 2026-10-09). In/out are media-relative frames on the sequence timebase.
 """
 
 from fractions import Fraction
@@ -75,22 +77,23 @@ def write_fcp7xml(seq: Sequence) -> str:
     audio = ET.SubElement(media, "audio")
     channels = max((c.source.channels for c in seq.cuts), default=0)
     _text(audio, "numOutputChannels", max(1, channels))
+    audio_tracks = 1 if channels else 0
     chars = ET.SubElement(ET.SubElement(audio, "format"), "samplecharacteristics")
     _text(chars, "depth", 16)
     _text(chars, "samplerate", 48000)
 
-    # Track 0 is video, tracks 1..n are audio channels. A cut sits on a track if its source has
-    # that channel; `members` remembers (track, index in track, clip id) to link them together.
+    # Track 0 is video, track 1 is audio. A cut sits on the audio track if its source has sound;
+    # `members` remembers (track, index in track, clip id) to link picture and sound together.
     tracks = [ET.SubElement(video, "track")] + [
-        ET.SubElement(audio, "track") for _ in range(channels)
+        ET.SubElement(audio, "track") for _ in range(audio_tracks)
     ]
     counts = [0] * len(tracks)
     file_ids: dict[str, str] = {}
     for number, cut in enumerate(seq.cuts, start=1):
         members: list[tuple[int, int, str]] = []
-        for track in range(1 + cut.source.channels):
+        for track in range(2 if cut.source.channels else 1):
             counts[track] += 1
-            kind = "v" if track == 0 else f"a{track}"
+            kind = "v" if track == 0 else "a"
             members.append((track, counts[track], f"clipitem-{number}-{kind}"))
         for track, _, clip_id in members:
             _clipitem(tracks[track], cut, track, clip_id, members, file_ids)

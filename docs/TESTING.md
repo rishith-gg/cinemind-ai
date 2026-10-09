@@ -18,7 +18,7 @@ Test footage is synthetic and generated on demand with ffmpeg (never committed).
 
 ## Manual: DaVinci Resolve import checklist (Phase 4)
 Claude cannot run Resolve. This is done by hand; write the outcome in the results table and in `docs/PROGRESS.md`.
-Tested version so far: none. Target: DaVinci Resolve 21.1 (free edition), macOS.
+Tested so far: DaVinci Resolve 21.1 (free edition), macOS, FCP7 XML, on 2026-10-09 (results below).
 
 Build the two test timelines on the Export page of the app:
 - **A**: frame rate "Auto", "Leave out clips at other frame rates" ticked. One frame rate only: the clean case.
@@ -38,8 +38,11 @@ For each timeline, and for each of the three files (start with the FCP7 XML):
    - [ ] The number of cuts equals "cuts" on the Export page, in the same order.
    - [ ] Every clip is online (no "Media Offline"), linked to the original file in the footage folder.
    - [ ] The timeline starts at 01:00:00:00 and its total length matches the Export page.
-   - [ ] Audio is present and in sync on each cut; clips without sound leave a gap.
-   - [ ] Pick three cuts and compare the first and last frame with the same times in the CineMind player.
+   - [ ] Audio is present once (not doubled on a second track) and in sync; clips without sound leave a gap.
+   - [ ] Frame check, for any three cuts: in Resolve, park the playhead on the first frame of the cut and look at
+         the picture. In CineMind open the same clip, click that shot in the shot strip (the player jumps to the
+         shot's first frame) and compare. The two pictures should be the same moment. Do the same for the last
+         frame of the cut. This checks that a cut starts and ends where CineMind says, not a few frames off.
    - [ ] Where one source clip was split into several shots, playback across the cut is seamless (no repeated or
          missing frame).
    - [ ] (B only) Note for each clip at another frame rate whether its in and out points are right, early or late.
@@ -47,7 +50,8 @@ For each timeline, and for each of the three files (start with the FCP7 XML):
 ### Results
 | Date | Resolve | Timeline | File | Result | Notes |
 |---|---|---|---|---|---|
-| | | A | FCP7 XML | not run yet | |
-| | | A | EDL | not run yet | |
-| | | A | OTIO | not run yet | |
-| | | B | FCP7 XML | not run yet | |
+| 2026-10-09 | 21.1 free | A | FCP7 XML (first export) | Imported, no error. All clips online. | Stereo clips had their audio twice (A1 and A2): our file had one audio item per channel and Resolve reads each as the whole stereo audio. Fixed the same day (one audio item per cut); **re-check pending**. User also reported "in some the order of clips after splitting is reversed"; the file lists the pieces in source order (in points ascending), so which clip and what is reversed is **still to be pinned down**. Frame check not done. |
+| 2026-10-09 | 21.1 free | B | FCP7 XML (first export) | Imported, no error. All clips online. | Same audio duplication. Mixed-rate clips imported; their in/out accuracy not checked yet. |
+| | | A | FCP7 XML (after audio fix) | not run yet | |
+| | | A | EDL | not reported | |
+| | | A | OTIO | not reported | |
