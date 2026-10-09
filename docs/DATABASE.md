@@ -27,3 +27,12 @@ Datetimes are stored as naive UTC and returned timezone-aware (`UTCDateTime`).
 | `timeline_items` | ordered cuts: `position`, `media_id`, optional `shot_id` (set to NULL if the shot disappears), `source_in_s`/`source_out_s`. Frames are computed at export time on the timeline rate. Cascades from `timelines` and `media_assets`. |
 
 `media_assets` gained `nominal_fps_num/nominal_fps_den` (the stream's base rate; `fps_*` is the measured average).
+
+## Phase 5 tables (migration 0005)
+| Table | Purpose |
+|---|---|
+| `quality_metrics` | one row per shot (`shot_id` is the key): frames measured, the seven picture metrics, the three sub-scores (`sharpness_score` is NULL when focus was not judged), the shot score, and `details` (the settings used, metrics version). Rewritten on every job run. |
+| `audio_metrics` | one row per clip with sound: integrated LUFS, loudness range, true peak, sample peak, clipped %, silence seconds and %, audio score, `details`. |
+| `qc_flags` | `kind`, `source` (picture or audio), optional `shot_id`, `start_s`/`end_s`, and `details` (metric, value, threshold, direction, or detector and settings). |
+
+`media_assets` gained `quality_score` (clip-level Technical Quality Score, null until measured).

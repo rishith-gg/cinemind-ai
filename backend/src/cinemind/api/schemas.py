@@ -115,6 +115,10 @@ class MediaOut(BaseModel):
     has_waveform: bool
     proxy_encoder: str | None
     strip_frames: int
+    # Technical Quality Score 0..1 (None until measured) and the kinds of QC flags on the clip.
+    quality_score: float | None
+    low_quality: bool
+    qc_flags: list[str]
     job: JobBrief | None
 
 
@@ -235,3 +239,61 @@ class TimelineOut(BaseModel):
 
 class TimelineDetail(TimelineOut):
     items: list[TimelineItemOut]
+
+
+class QcFlagOut(BaseModel):
+    kind: str
+    source: str
+    shot_id: str | None
+    start_s: float
+    end_s: float
+    # Why it was raised: metric, value, threshold, direction, or the detector and its settings.
+    details: dict[str, Any]
+
+
+class ShotQualityOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    shot_id: str
+    index: int
+    frames: int
+    sharpness: float
+    blur: float
+    luma_mean: float
+    luma_std: float
+    spread: float
+    clipped: float
+    crushed: float
+    # None = focus was not judged (the shot has no tonal range, e.g. black or a plain wall).
+    sharpness_score: float | None
+    exposure_score: float
+    contrast_score: float
+    score: float
+
+
+class AudioQualityOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    integrated_lufs: float | None
+    loudness_range: float | None
+    true_peak_db: float | None
+    sample_peak: float
+    clipped_pct: float
+    silence_s: float
+    silence_pct: float
+    score: float
+    details: dict[str, Any]
+
+
+class QualityOut(BaseModel):
+    media_id: str
+    measured: bool
+    score: float | None
+    low_quality: bool
+    shots: list[ShotQualityOut]
+    audio: AudioQualityOut | None
+    flags: list[QcFlagOut]
+    # The weights and thresholds these scores were computed with, and whether the settings
+    # have changed since (reprocess to re-score).
+    config: dict[str, float]
+    settings_changed: bool

@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+
+import type { MediaOut } from "../../api";
 import { Link } from "react-router";
 
 import { listMediaOptions, listMediaQueryKey, processProjectMutation } from "../../api/@tanstack/react-query.gen";
@@ -25,7 +27,22 @@ export function LibraryPage() {
   return <Library projectId={projectId} />;
 }
 
+const FILTERS = {
+  all: { label: "All clips", keep: () => true },
+  flagged: { label: "With QC flags", keep: (m: MediaOut) => m.qc_flags.length > 0 },
+  low: { label: "Low technical score", keep: (m: MediaOut) => m.low_quality },
+  clean: { label: "Scored, no QC flags", keep: (m: MediaOut) => m.quality_score != null && !m.low_quality && m.qc_flags.length === 0 },
+} as const;
+const SORTS = {
+  newest: { label: "Newest first", compare: () => 0 },
+  worst: { label: "Technical score: lowest first", compare: (a: MediaOut, b: MediaOut) => (a.quality_score ?? 2) - (b.quality_score ?? 2) },
+  best: { label: "Technical score: highest first", compare: (a: MediaOut, b: MediaOut) => (b.quality_score ?? -1) - (a.quality_score ?? -1) },
+  name: { label: "Name", compare: (a: MediaOut, b: MediaOut) => a.filename.localeCompare(b.filename, undefined, { numeric: true }) },
+} as const;
+
 function Library({ projectId }: { projectId: string }) {
+  const [filter, setFilter] = useState<keyof typeof FILTERS>("all");
+  const [sort, setSort] = useState<keyof typeof SORTS>("newest");
   const qc = useQueryClient();
   const [importing, setImporting] = useState(false);
   const { data, error, isPending, refetch } = useQuery(listMediaOptions({ path: { project_id: projectId } }));
@@ -37,6 +54,8 @@ function Library({ projectId }: { projectId: string }) {
       void refresh();
     },
   });
+
+  const shown = (data ?? []).filter(FILTERS[filter].keep).sort(SORTS[sort].compare);
 
   return (
     <section className="space-y-4">
@@ -66,8 +85,43 @@ function Library({ projectId }: { projectId: string }) {
           never moved or changed.
         </EmptyState>
       )}
+      {!!data?.length && (
+        <div className="flex flex-wrap items-center gap-4 text-sm">
+          <label>
+            <span className="mr-2 text-neutral-400">Show</span>
+            <select
+              className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as keyof typeof FILTERS)}
+            >
+              {Object.entries(FILTERS).map(([key, f]) => (
+                <option key={key} value={key}>
+                  {f.label} ({data.filter(f.keep).length})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span className="mr-2 text-neutral-400">Sort</span>
+            <select
+              className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1"
+              value={sort}
+              onChange={(e) => setSort(e.target.value as keyof typeof SORTS)}
+            >
+              {Object.entries(SORTS).map(([key, s]) => (
+                <option key={key} value={key}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
+      {!!data?.length && shown.length === 0 && <EmptyState title="No clips match this filter" />}
       <ul className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
-        {data?.map((m) => <MediaCard key={m.id} media={m} />)}
+        {shown.map((m) => (
+          <MediaCard key={m.id} media={m} />
+        ))}
       </ul>
     </section>
   );

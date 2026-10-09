@@ -1738,7 +1738,7 @@
           "shots"
         ],
         "summary": "List Project Shots",
-        "description": "Every shot in the project, clip by clip in file-name order.",
+        "description": "Every shot in the project, clip by clip in the same file-name order timelines use.",
         "operationId": "listProjectShots",
         "parameters": [
           {
@@ -1843,6 +1843,89 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
+    "/api/media/{media_id}/quality": {
+      "get": {
+        "tags": [
+          "quality"
+        ],
+        "summary": "Get Media Quality",
+        "description": "Everything needed to explain a clip's score: per-shot metrics and sub-scores, audio\nmeasurements, flags with the value and threshold behind each, and the settings in force.",
+        "operationId": "getMediaQuality",
+        "parameters": [
+          {
+            "name": "media_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Media Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityOut"
+                }
               }
             }
           },
@@ -2346,6 +2429,81 @@
   },
   "components": {
     "schemas": {
+      "AudioQualityOut": {
+        "properties": {
+          "integrated_lufs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Integrated Lufs"
+          },
+          "loudness_range": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Loudness Range"
+          },
+          "true_peak_db": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "True Peak Db"
+          },
+          "sample_peak": {
+            "type": "number",
+            "title": "Sample Peak"
+          },
+          "clipped_pct": {
+            "type": "number",
+            "title": "Clipped Pct"
+          },
+          "silence_s": {
+            "type": "number",
+            "title": "Silence S"
+          },
+          "silence_pct": {
+            "type": "number",
+            "title": "Silence Pct"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "details": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Details"
+          }
+        },
+        "type": "object",
+        "required": [
+          "integrated_lufs",
+          "loudness_range",
+          "true_peak_db",
+          "sample_peak",
+          "clipped_pct",
+          "silence_s",
+          "silence_pct",
+          "score",
+          "details"
+        ],
+        "title": "AudioQualityOut"
+      },
       "Check": {
         "properties": {
           "name": {
@@ -3295,6 +3453,28 @@
             "type": "integer",
             "title": "Strip Frames"
           },
+          "quality_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Score"
+          },
+          "low_quality": {
+            "type": "boolean",
+            "title": "Low Quality"
+          },
+          "qc_flags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Qc Flags"
+          },
           "job": {
             "anyOf": [
               {
@@ -3338,6 +3518,9 @@
           "has_waveform",
           "proxy_encoder",
           "strip_frames",
+          "quality_score",
+          "low_quality",
+          "qc_flags",
           "job"
         ],
         "title": "MediaOut"
@@ -3501,6 +3684,127 @@
         "type": "object",
         "title": "ProjectUpdate"
       },
+      "QcFlagOut": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "shot_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shot Id"
+          },
+          "start_s": {
+            "type": "number",
+            "title": "Start S"
+          },
+          "end_s": {
+            "type": "number",
+            "title": "End S"
+          },
+          "details": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Details"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "source",
+          "shot_id",
+          "start_s",
+          "end_s",
+          "details"
+        ],
+        "title": "QcFlagOut"
+      },
+      "QualityOut": {
+        "properties": {
+          "media_id": {
+            "type": "string",
+            "title": "Media Id"
+          },
+          "measured": {
+            "type": "boolean",
+            "title": "Measured"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "low_quality": {
+            "type": "boolean",
+            "title": "Low Quality"
+          },
+          "shots": {
+            "items": {
+              "$ref": "#/components/schemas/ShotQualityOut"
+            },
+            "type": "array",
+            "title": "Shots"
+          },
+          "audio": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AudioQualityOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "flags": {
+            "items": {
+              "$ref": "#/components/schemas/QcFlagOut"
+            },
+            "type": "array",
+            "title": "Flags"
+          },
+          "config": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Config"
+          },
+          "settings_changed": {
+            "type": "boolean",
+            "title": "Settings Changed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "media_id",
+          "measured",
+          "score",
+          "low_quality",
+          "shots",
+          "audio",
+          "flags",
+          "config",
+          "settings_changed"
+        ],
+        "title": "QualityOut"
+      },
       "RelinkRequest": {
         "properties": {
           "path": {
@@ -3580,6 +3884,91 @@
           "keyframes"
         ],
         "title": "ShotOut"
+      },
+      "ShotQualityOut": {
+        "properties": {
+          "shot_id": {
+            "type": "string",
+            "title": "Shot Id"
+          },
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "frames": {
+            "type": "integer",
+            "title": "Frames"
+          },
+          "sharpness": {
+            "type": "number",
+            "title": "Sharpness"
+          },
+          "blur": {
+            "type": "number",
+            "title": "Blur"
+          },
+          "luma_mean": {
+            "type": "number",
+            "title": "Luma Mean"
+          },
+          "luma_std": {
+            "type": "number",
+            "title": "Luma Std"
+          },
+          "spread": {
+            "type": "number",
+            "title": "Spread"
+          },
+          "clipped": {
+            "type": "number",
+            "title": "Clipped"
+          },
+          "crushed": {
+            "type": "number",
+            "title": "Crushed"
+          },
+          "sharpness_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sharpness Score"
+          },
+          "exposure_score": {
+            "type": "number",
+            "title": "Exposure Score"
+          },
+          "contrast_score": {
+            "type": "number",
+            "title": "Contrast Score"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shot_id",
+          "index",
+          "frames",
+          "sharpness",
+          "blur",
+          "luma_mean",
+          "luma_std",
+          "spread",
+          "clipped",
+          "crushed",
+          "sharpness_score",
+          "exposure_score",
+          "contrast_score",
+          "score"
+        ],
+        "title": "ShotQualityOut"
       },
       "TierRecommendation": {
         "properties": {

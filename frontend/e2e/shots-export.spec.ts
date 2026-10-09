@@ -43,7 +43,7 @@ test("shots are detected, shown on the clip, and export as a timeline for the ed
   await expect(page.getByText("No timelines yet")).toBeVisible();
   await page.getByRole("button", { name: "Build timeline" }).click();
   const timeline = page.getByRole("listitem", { name: "All shots" });
-  await expect(timeline).toContainText("5 cuts · 0:12 · 25 fps");
+  await expect(timeline).toContainText("6 cuts · 0:17 · 25 fps");
   const [download] = await Promise.all([
     page.waitForEvent("download"),
     timeline.getByRole("button", { name: "Download FCP7 XML (DaVinci Resolve)" }).click(),
@@ -52,7 +52,7 @@ test("shots are detected, shown on the clip, and export as a timeline for the ed
   const xml = readFileSync(await download.path(), "utf8");
   expect(xml).toContain("<!DOCTYPE xmeml>");
   expect(xml).toContain("e2e-footage/three_shots.mp4</pathurl>"); // the original, not the proxy
-  expect(xml.match(/<clipitem id="clipitem-\d+-v">/g)).toHaveLength(5);
+  expect(xml.match(/<clipitem id="clipitem-\d+-v">/g)).toHaveLength(6);
   expect(xml).toContain("<in>50</in>"); // second shot starts at frame 50 of its source
 
   const [edl] = await Promise.all([
@@ -60,7 +60,7 @@ test("shots are detected, shown on the clip, and export as a timeline for the ed
     timeline.getByRole("button", { name: "Download EDL" }).click(),
   ]);
   const events = readFileSync(await edl.path(), "utf8").split("\n").filter((l) => /^\d{3} /.test(l));
-  expect(events).toHaveLength(5);
+  expect(events).toHaveLength(6);
   expect(events.some((l) => l.includes("00:00:02:00 00:00:04:00"))).toBe(true);
 
   page.once("dialog", (d) => void d.accept());

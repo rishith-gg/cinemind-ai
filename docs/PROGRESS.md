@@ -15,7 +15,7 @@ _Last updated: 2026-10-09_
 - [x] Phase 2: Frontend shell
 - [x] Phase 3: Ingest, metadata, proxies, thumbnails
 - [x] Phase 4: Shots, keyframes + first timeline export (Resolve test). Confirmed by the user in DaVinci Resolve 21.1 free on 2026-10-09 (FCP7 XML)
-- [ ] Phase 5: Quality + audio QC
+- [x] Phase 5: Quality + audio QC (thresholds calibrated on synthetic degradations of real frames, see EVALUATION.md)
 - [ ] Phase 6: Transcription
 - [ ] Phase 7: Faces and actors
 - [ ] Phase 8: Embeddings, tags, scenes
@@ -27,20 +27,15 @@ _Last updated: 2026-10-09_
 - [ ] Phase 14: Polish, packaging, demo
 
 ## Current state
-Phase 4 is complete. The export path for the rest of the project is **FCP7 XML into DaVinci Resolve**; EDL and OTIO
-are written and round-trip tested but their import into Resolve has not been reported.
+Phase 5 is complete. Each clip now gets a Technical Quality Score and QC flags: picture metrics per shot (focus,
+exposure, contrast), black/frozen picture, loudness, silence and clipping, each flag with the value and threshold
+behind it. Library cards show the score and flags and can be filtered and sorted by them; the clip page has a quality
+panel and a QC lane on the time axis. Formulas: AI_PIPELINE.md. Calibration and its limits: EVALUATION.md.
 
-What exists now: `shots` and `keyframes` stages in the ingest chain (PySceneDetect on the proxy; sharpest-frame
-keyframes), shot strip on the clip page, Shots page, `timelines`/`timeline_items`, the chronological "all shots"
-timeline, and export to FCP7 XML, EDL and OTIO from the Export page (see API.md, DECISIONS D-034 to D-042).
+Next step: Phase 6 (transcription with faster-whisper). It needs a model download; ask before pulling anything over
+2 GB, and ask the user for a clip with clear dialogue.
 
-Resolve test, first round (user, Resolve 21.1 free, FCP7 XML, timelines A and B): import without errors, every clip
-online. Found: stereo audio appeared twice (fixed, D-044). Reported and not yet understood: "in some the order of
-clips after splitting is reversed" (the exported file has the pieces in source order).
-
-Second round, after the audio fix: the user reports everything is correct in Resolve.
-
-Next step: Phase 5 (technical quality + audio QC).
+Export path for the rest of the project (decided in Phase 4): FCP7 XML into DaVinci Resolve.
 
 ### Phase 4 run on the user's real footage (2026-10-09, M1 8 GB, `data/phase4-verify`, not an evaluation)
 Numbers from `eval/phase4_run_summary.py data/phase4-verify` (output kept in
@@ -62,6 +57,14 @@ None.
 ## Open issues / notes
 - E2E: `T e2e` (Playwright, real built app, throwaway `data/e2e`). Needs a one-time `pnpm exec playwright install chromium`; here only full Chrome for Testing downloaded (headless shell stalled), so `playwright.config.ts` uses `channel: "chromium"`.
 - shadcn/ui is deferred until a screen needs a dialog/table (D-021); delete confirmation uses `window.confirm` for now. Wavesurfer, Recharts and dnd-kit arrive with their screens.
+- Phase 5 limitations: the flag thresholds were calibrated on synthetically degraded frames from 17 phone clips, not
+  on human labels; held-out numbers are an upper bound (EVALUATION.md). Focus measures depend on content (fog, water,
+  plain walls read as soft); a few blurred frames inside a sharp shot are not flagged (median per shot); bright scenes
+  are flagged overexposed. Left open from review: the source audio is decoded twice (loudness pass, clipping pass);
+  the quality stages' cache keys chain through keyframes, so changing keyframe settings re-measures audio; each
+  metric row stores a full copy of the settings. Weights, the low-quality limit (0.5) and all audio thresholds are conventions. No
+  face-region sharpness, noise, shake or speech-present measure yet. No dashboard charts yet. Existing projects need
+  "Process all" once to get scores (earlier stages come from the cache).
 - Resolve: confirmed by hand for FCP7 XML only (Resolve 21.1 free, the user's 17 phone clips). Not individually confirmed: frame-exact in/out on mixed-rate and variable-rate clips, EDL import, OTIO import.
 - The built UI was served without `Cache-Control`, so a browser could keep showing the previous build after an update (the user saw the Phase 3 placeholder on the Shots page). The page is now sent with `no-cache`.
 - Footage with real cuts is still needed: the user's folder is all single-take phone clips, so shot detection has only

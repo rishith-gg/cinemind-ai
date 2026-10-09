@@ -39,7 +39,13 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
   it. Files reference the ORIGINAL media (`file://` URL), never the proxy. An EDL is refused (422) above 60 fps or
   above 999 cuts.
 
-## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes
+## Implemented (Phase 5): technical quality and QC
+- Media items carry `quality_score` (0..1, null until measured), `low_quality` and `qc_flags` (kinds present).
+- `GET /api/media/{id}/quality`: the clip score, per-shot metrics and sub-scores, audio measurements, every flag
+  with its time range and the value/threshold (or detector) behind it, and the `[quality]` settings in force.
+  Formulas: AI_PIPELINE.md. Where the thresholds come from: EVALUATION.md.
+
+## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc
 - validate: ffprobe (by content, not extension): rational fps, VFR flag (avg vs nominal rate differ > 0.5 %),
   codecs, display size (rotation applied), timecode, colour tags. Corrupt or non-media files fail with a plain message.
 - proxy: H.264 (+AAC), <= `proxy_max_height` (720), constant frame rate (the source's average rate, halved above 60), `+faststart`.
@@ -50,6 +56,9 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
 - shots: PySceneDetect on the proxy (`shot_detector` adaptive|content, `shot_threshold`, `shot_min_len_s`). A clip
   without cuts is one shot; audio-only files have none. Existing library, default thresholds, not tuned yet.
 - keyframes: per shot, the sharpest frame near 1 to 3 anchor points (`keyframes_per_shot`), see DECISIONS D-038.
+- quality: picture metrics per shot on the proxy, plus ffmpeg black/frozen-picture detection. audio_qc: loudness,
+  silence and clipped samples on the original file's audio. Both cache measurements only; scores and flags are
+  recomputed from the current `[quality]` settings on every run.
 - Stage cache for these stages is per project and re-validated against the files on disk (`Stage.scope_project`,
   `Stage.verify`); `Stage.persist` copies results onto the media row, also on a cache hit.
 

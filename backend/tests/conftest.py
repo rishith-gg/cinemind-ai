@@ -118,3 +118,44 @@ def cut_footage(tmp_path_factory: pytest.TempPathFactory) -> Path:
         str(root / "one_shot_ntsc.mov"),
     )
     return root
+
+
+@pytest.fixture(scope="session")
+def qc_footage(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Clips with one known technical property each (ground truth for the quality checks)."""
+    if shutil.which("ffmpeg") is None:
+        pytest.skip("ffmpeg not installed")
+    root = tmp_path_factory.mktemp("qc")
+    size = "size=640x360:rate=25"
+    picture = ("-f", "lavfi", "-i", f"testsrc2={size}:duration=3")
+    tone = ("-f", "lavfi", "-i", "sine=frequency=440:duration=3")
+    h264 = ("-c:v", "libx264", "-pix_fmt", "yuv420p")
+    _ffmpeg(*picture, *tone, *h264, "-c:a", "aac", str(root / "sharp.mp4"))
+    for name, vf in (
+        ("blurry.mp4", "gblur=sigma=8"),
+        ("over.mp4", "eq=brightness=0.5"),
+        ("under.mp4", "lutyuv=y=val/5"),
+    ):
+        _ffmpeg(*picture, "-vf", vf, *h264, str(root / name))
+    # 2 s moving picture, 1.5 s black, 1 s moving picture, then its last frame held for 3 s.
+    graph = (
+        "[2:v]trim=duration=1,setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration=3[tail];"
+        "[0:v][1:v][tail]concat=n=3:v=1[v]"
+    )
+    _ffmpeg(
+        *("-f", "lavfi", "-i", f"testsrc2={size}:duration=2"),
+        *("-f", "lavfi", "-i", f"color=c=black:{size}:duration=1.5"),
+        *("-f", "lavfi", "-i", f"testsrc2={size}:duration=2"),
+        *("-filter_complex", graph, "-map", "[v]", *h264, str(root / "black_freeze.mp4")),
+    )
+    # 2 s tone, 3 s digital silence, 2 s tone.
+    _ffmpeg(
+        *("-f", "lavfi", "-i", "sine=frequency=440:duration=2"),
+        *("-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono"),
+        *("-f", "lavfi", "-i", "sine=frequency=440:duration=2"),
+        *("-filter_complex", "[1:a]atrim=duration=3[s];[0:a][s][2:a]concat=n=3:v=0:a=1[a]"),
+        *("-map", "[a]", str(root / "gap.wav")),
+    )
+    _ffmpeg(*tone, "-af", "volume=30dB", str(root / "clipped.wav"))
+    _ffmpeg(*tone, "-af", "volume=-45dB", str(root / "quiet.wav"))
+    return root

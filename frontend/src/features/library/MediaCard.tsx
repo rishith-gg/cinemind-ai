@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 
 import type { MediaOut } from "../../api";
+import { QualityBadge } from "../quality/QualityBadge";
 import { formatBytes, formatDuration, mediaStatus, STATUS_LABEL, type Status } from "./format";
 
 const STATUS_STYLE: Record<Status, string> = {
@@ -21,7 +22,7 @@ export function MediaCard({ media }: { media: MediaOut }) {
   const failed = mediaStatus(media) === "failed";
   return (
     <li className="overflow-hidden rounded border border-neutral-800 bg-neutral-900">
-      <Link to={`/library/${media.id}`} className="block hover:bg-neutral-800/60" aria-label={`Open ${media.filename}`}>
+      <Link to={`/library/${media.id}`} className="block hover:bg-neutral-800/60" aria-label={`Open ${media.filename}`} aria-describedby={`quality-${media.id}`}>
         <div className="flex aspect-video items-center justify-center bg-black text-xs text-neutral-500">
           {media.has_poster ? (
             <img src={`/api/media/${media.id}/poster`} alt="" className="h-full w-full object-cover" loading="lazy" />
@@ -37,7 +38,10 @@ export function MediaCard({ media }: { media: MediaOut }) {
             {formatDuration(media.duration_s)} · {media.width ? `${media.width}×${media.height}` : "–"} ·{" "}
             {formatBytes(media.size_bytes)}
           </p>
-          <StatusBadge media={media} />
+          <div className="flex flex-wrap items-center gap-1">
+            <StatusBadge media={media} />
+            <QualityBadge media={media} id={`quality-${media.id}`} />
+          </div>
           {failed && media.job?.error_message && <p className="text-xs text-red-300">{media.job.error_message}</p>}
         </div>
       </Link>

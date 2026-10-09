@@ -62,6 +62,8 @@ class MediaAsset(Base):
     strip_path: Mapped[str | None] = mapped_column(Text, nullable=True)
     waveform_path: Mapped[str | None] = mapped_column(Text, nullable=True)
     artifacts: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    # Technical Quality Score of the whole clip, 0..1 (None until the quality stages ran).
+    quality_score: Mapped[float | None] = mapped_column(nullable=True)
 
     __table_args__ = (
         Index("ix_media_project", "project_id"),
@@ -230,3 +232,69 @@ class TimelineItem(Base):
     source_out_s: Mapped[float]
 
     __table_args__ = (Index("ix_timeline_items_timeline", "timeline_id", "position"),)
+
+
+class QualityMetric(Base):
+    """Technical picture metrics of one shot (median over sampled frames), the sub-scores
+    derived from them, and in `details` the weights and thresholds used (rule 6)."""
+
+    __tablename__ = "quality_metrics"
+
+    shot_id: Mapped[str] = mapped_column(
+        ForeignKey("shots.id", ondelete="CASCADE"), primary_key=True
+    )
+    media_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id", ondelete="CASCADE"))
+    frames: Mapped[int]
+    sharpness: Mapped[float]
+    blur: Mapped[float]
+    luma_mean: Mapped[float]
+    luma_std: Mapped[float]
+    spread: Mapped[float]
+    clipped: Mapped[float]
+    crushed: Mapped[float]
+    # None when focus could not be judged (no tonal range in the shot).
+    sharpness_score: Mapped[float | None] = mapped_column(nullable=True)
+    exposure_score: Mapped[float]
+    contrast_score: Mapped[float]
+    score: Mapped[float]
+    details: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+
+    __table_args__ = (Index("ix_quality_media", "media_id"),)
+
+
+class AudioMetric(Base):
+    """Audio measurements of one clip's first audio stream (from the original file)."""
+
+    __tablename__ = "audio_metrics"
+
+    media_id: Mapped[str] = mapped_column(
+        ForeignKey("media_assets.id", ondelete="CASCADE"), primary_key=True
+    )
+    integrated_lufs: Mapped[float | None] = mapped_column(nullable=True)
+    loudness_range: Mapped[float | None] = mapped_column(nullable=True)
+    true_peak_db: Mapped[float | None] = mapped_column(nullable=True)
+    sample_peak: Mapped[float]
+    clipped_pct: Mapped[float]
+    silence_s: Mapped[float]
+    silence_pct: Mapped[float]
+    score: Mapped[float]
+    details: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+
+
+class QcFlag(Base):
+    """A technical problem on a time range, with the measured value and the threshold crossed."""
+
+    __tablename__ = "qc_flags"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    media_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id", ondelete="CASCADE"))
+    shot_id: Mapped[str | None] = mapped_column(
+        ForeignKey("shots.id", ondelete="CASCADE"), nullable=True
+    )
+    kind: Mapped[str] = mapped_column(String(32))
+    source: Mapped[str] = mapped_column(String(16))  # which stage wrote it: picture | audio
+    start_s: Mapped[float]
+    end_s: Mapped[float]
+    details: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+
+    __table_args__ = (Index("ix_qc_flags_media", "media_id"),)

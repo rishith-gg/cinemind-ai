@@ -1,5 +1,6 @@
 """The `ingest` chain: validate -> proxy -> thumbnails -> waveform -> shots -> keyframes
-(SPEC sections 4 and 5; the last two live in `shot_stages.py`).
+-> quality -> audio_qc (SPEC sections 4 and 5; the later ones live in `shot_stages.py` and
+`quality_stages.py`).
 
 Stages return plain dicts (cached in `stage_results`); the `persist_*` functions copy them onto
 the media asset row. Artifact paths are stored relative to the project directory.
@@ -13,14 +14,15 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from cinemind.core.errors import LowDiskSpaceError, PathNotAllowedError, SourceMissingError
-from cinemind.core.paths import resolve_in_roots
+from cinemind.core.errors import LowDiskSpaceError, SourceMissingError
 from cinemind.jobs.registry import Stage, StageContext, register_chain
 from cinemind.pipeline import ffmpeg
 from cinemind.pipeline.ffmpeg import make_proxy, make_thumbnails, waveform_peaks
 from cinemind.pipeline.ffprobe import probe
+from cinemind.pipeline.quality_stages import QUALITY_STAGES
 from cinemind.pipeline.shot_stages import SHOT_STAGES
 from cinemind.pipeline.stage_utils import (
+    checked_source,
     exists,
     get_asset,
     media_id,
@@ -43,18 +45,6 @@ def _artifact(ctx: StageContext, kind: str, suffix: str) -> tuple[str, Path]:
 # --- validate ---------------------------------------------------------------------------------
 
 
-def _checked_source(ctx: StageContext) -> Path:
-    """The source must still be inside the approved roots (reference) or our own media dir
-    (copy/upload): a symlink swapped in later, or a removed root, must not be read."""
-    source = Path(str(ctx.params["source"]))
-    if ctx.params.get("import_mode", "reference") == "reference":
-        return resolve_in_roots(source, ctx.settings.media_roots) if source.exists() else source
-    own = (project_dir(ctx) / "media").resolve()
-    if source.exists() and not source.resolve().is_relative_to(own):
-        raise PathNotAllowedError("That file is outside the project's media folder.")
-    return source
-
-
 def verify_validate(ctx: StageContext, _result: dict[str, Any]) -> bool:
     """A cached probe is only reused while the original is still where we expect it."""
     return Path(str(ctx.params["source"])).is_file()
@@ -65,7 +55,7 @@ def _pair(rate: Fraction | None) -> list[int] | None:
 
 
 def run_validate(ctx: StageContext) -> dict[str, Any]:
-    source = _checked_source(ctx)
+    source = checked_source(ctx)
     if not source.is_file():
         raise SourceMissingError(
             f"The original file '{source.name}' is missing or was moved. Relink it to continue."
@@ -117,7 +107,7 @@ def persist_validate(session: Session, ctx: StageContext, result: dict[str, Any]
 
 def run_proxy(ctx: StageContext) -> dict[str, Any]:
     info = source_info(ctx)
-    source = _checked_source(ctx)
+    source = checked_source(ctx)
     rel, dest = _artifact(ctx, "proxy", ".mp4" if info.has_video else ".m4a")
     dest.parent.mkdir(parents=True, exist_ok=True)
     needed = int(info.duration_s * _PROXY_MBIT * 125_000) + _MIN_FREE_BYTES
@@ -258,5 +248,6 @@ register_chain(
             persist=persist_waveform,
         ),
         *SHOT_STAGES,
+        *QUALITY_STAGES,
     ],
 )

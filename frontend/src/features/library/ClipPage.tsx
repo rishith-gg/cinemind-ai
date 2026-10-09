@@ -10,6 +10,7 @@ import {
 import { ErrorState, Loading } from "../../components/states";
 import { errorMessage } from "../../lib/errors";
 import { toast } from "../../lib/toast";
+import { QualityPanel } from "../quality/QualityPanel";
 import { mediaStatus } from "./format";
 import { StatusBadge } from "./MediaCard";
 import { MetadataPanel } from "./MetadataPanel";
@@ -91,7 +92,10 @@ export function ClipPage() {
             {status === "failed" ? "No playable proxy was created." : "The proxy is still being created. This page updates by itself."}
           </p>
         )}
-        <MetadataPanel media={data} />
+        <div className="space-y-6">
+          <QualityPanel mediaId={data.id} />
+          <MetadataPanel media={data} />
+        </div>
       </div>
     </section>
   );

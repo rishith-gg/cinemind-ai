@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { browseFolder, cancelJob, createProject, createTimeline, deleteMedia, deleteProject, deleteTimeline, exportTimeline, getHealth, getJob, getKeyframe, getMedia, getPoster, getProject, getStrip, getTimeline, getWaveform, importMedia, listJobs, listMedia, listMediaShots, listProjects, listProjectShots, listTimelines, type Options, processMedia, processProject, relinkMedia, retryJob, streamJobEvents, streamProxy, updateProject, uploadMedia } from '../sdk.gen';
-import type { BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RetryJobData, RetryJobError, RetryJobResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
+import { browseFolder, cancelJob, createProject, createTimeline, deleteMedia, deleteProject, deleteTimeline, exportTimeline, getHealth, getJob, getKeyframe, getMedia, getMediaQuality, getPoster, getProject, getStrip, getTimeline, getWaveform, importMedia, listJobs, listMedia, listMediaShots, listProjects, listProjectShots, listTimelines, type Options, processMedia, processProject, relinkMedia, retryJob, streamJobEvents, streamProxy, updateProject, uploadMedia } from '../sdk.gen';
+import type { BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaQualityData, GetMediaQualityError, GetMediaQualityResponse, GetMediaResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RetryJobData, RetryJobError, RetryJobResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -477,7 +477,7 @@ export const listProjectShotsQueryKey = (options: Options<ListProjectShotsData>)
 /**
  * List Project Shots
  *
- * Every shot in the project, clip by clip in file-name order.
+ * Every shot in the project, clip by clip in the same file-name order timelines use.
  */
 export const listProjectShotsOptions = (options: Options<ListProjectShotsData>) => queryOptions<ListProjectShotsResponse, ListProjectShotsError, ListProjectShotsResponse, ReturnType<typeof listProjectShotsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -508,6 +508,27 @@ export const getKeyframeOptions = (options: Options<GetKeyframeData>) => queryOp
         return data;
     },
     queryKey: getKeyframeQueryKey(options)
+});
+
+export const getMediaQualityQueryKey = (options: Options<GetMediaQualityData>) => createQueryKey('getMediaQuality', options);
+
+/**
+ * Get Media Quality
+ *
+ * Everything needed to explain a clip's score: per-shot metrics and sub-scores, audio
+ * measurements, flags with the value and threshold behind each, and the settings in force.
+ */
+export const getMediaQualityOptions = (options: Options<GetMediaQualityData>) => queryOptions<GetMediaQualityResponse, GetMediaQualityError, GetMediaQualityResponse, ReturnType<typeof getMediaQualityQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMediaQuality({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMediaQualityQueryKey(options)
 });
 
 export const listTimelinesQueryKey = (options: Options<ListTimelinesData>) => createQueryKey('listTimelines', options);

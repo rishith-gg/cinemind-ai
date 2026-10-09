@@ -5,7 +5,8 @@ from pathlib import Path
 
 from sqlalchemy.orm import Session
 
-from cinemind.core.errors import InvalidInputError, NotFoundError
+from cinemind.core.errors import InvalidInputError, NotFoundError, PathNotAllowedError
+from cinemind.core.paths import resolve_in_roots
 from cinemind.db.models import MediaAsset
 from cinemind.jobs.registry import StageContext
 from cinemind.pipeline.ffprobe import MediaInfo
@@ -50,3 +51,15 @@ def source_info(ctx: StageContext) -> MediaInfo:
 
 def proxy_file(ctx: StageContext) -> Path:
     return project_dir(ctx) / ctx.previous["proxy"]["proxy"]
+
+
+def checked_source(ctx: StageContext) -> Path:
+    """The source must still be inside the approved roots (reference) or our own media dir
+    (copy/upload): a symlink swapped in later, or a removed root, must not be read."""
+    source = Path(str(ctx.params["source"]))
+    if ctx.params.get("import_mode", "reference") == "reference":
+        return resolve_in_roots(source, ctx.settings.media_roots) if source.exists() else source
+    own = (project_dir(ctx) / "media").resolve()
+    if source.exists() and not source.resolve().is_relative_to(own):
+        raise PathNotAllowedError("That file is outside the project's media folder.")
+    return source

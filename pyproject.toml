@@ -18,6 +18,7 @@ dependencies = [
     "scenedetect>=0.7.1,<0.8",
     "opentimelineio>=0.18.1,<0.19",
     "opencv-python>=5.0,<6",
+    "numpy>=2.0,<3",
 ]
 
 [project.scripts]

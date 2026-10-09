@@ -23,6 +23,7 @@ from cinemind.db.base import new_id
 from cinemind.db.models import Job, MediaAsset
 from cinemind.jobs import queue
 from cinemind.pipeline.hashing import content_hash
+from cinemind.pipeline.qc import detector_params
 
 log = logging.getLogger(__name__)
 
@@ -227,6 +228,7 @@ def enqueue_ingest(session: Session, settings: Settings, asset: MediaAsset) -> J
             "shot_threshold": settings.shot_threshold,
             "shot_min_len_s": settings.shot_min_len_s,
             "keyframes_per_shot": settings.keyframes_per_shot,
+            "qc_detect": detector_params(settings.quality),
         },
     )
 

@@ -123,8 +123,8 @@ def test_ingest_stores_shots_and_keyframes_with_provenance(
     with factory() as s:
         job = s.get(Job, job_id)
         assert job and job.status == "succeeded"
-        assert [st.name for st in job.stages][-2:] == ["shots", "keyframes"]
-        assert job.stages[-2].model_name == "pyscenedetect"
+        assert [st.name for st in job.stages][4:6] == ["shots", "keyframes"]
+        assert job.stages[4].model_name == "pyscenedetect"
         rows = list(s.query(Shot).filter_by(media_id=asset_id).order_by(Shot.index))
         assert [(r.start_frame, r.end_frame) for r in rows] == list(
             zip(TRUTH[:-1], TRUTH[1:], strict=True)
@@ -141,7 +141,7 @@ def test_ingest_stores_shots_and_keyframes_with_provenance(
                 assert (root / key.path).stat().st_size > 0
         ids = [r.id for r in rows], [k.id for r in rows for k in r.keyframes]
 
-    assert _rerun(factory, settings, asset_id) == ["cached"] * 6
+    assert _rerun(factory, settings, asset_id) == ["cached"] * 8
     with factory() as s:
         rows = list(s.query(Shot).filter_by(media_id=asset_id).order_by(Shot.index))
         assert ([r.id for r in rows], [k.id for r in rows for k in r.keyframes]) == ids
@@ -157,11 +157,11 @@ def test_changed_setting_redetects_and_lost_keyframes_are_recreated(
         assert asset and key
         lost = settings.project_dir(asset.project_id) / key.path
     lost.unlink()
-    assert _rerun(factory, settings, asset_id)[-2:] == ["cached", "succeeded"]
+    assert _rerun(factory, settings, asset_id)[4:6] == ["cached", "succeeded"]
     assert lost.is_file()
 
     settings.shot_min_len_s = 3.0  # too long for the 1.52 s segment: fewer shots
-    assert _rerun(factory, settings, asset_id)[-2:] == ["succeeded", "succeeded"]
+    assert _rerun(factory, settings, asset_id)[4:6] == ["succeeded", "succeeded"]
     with factory() as s:
         rows = list(s.query(Shot).filter_by(media_id=asset_id).order_by(Shot.index))
         assert 1 <= len(rows) < 4 and rows[0].detection["min_len_frames"] == 75

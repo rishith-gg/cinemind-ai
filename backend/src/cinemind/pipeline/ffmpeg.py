@@ -22,6 +22,9 @@ WAVEFORM_RATE = 8000
 STRIP_FRAMES = 20
 STRIP_TILE_HEIGHT = 90
 POSTER_HEIGHT = 360
+CONVERT_FAILED = (
+    "FFmpeg could not convert this file. It may be corrupt or use an unsupported format."
+)
 PROXY_CRF = 23
 PROXY_PRESET = "veryfast"
 GOP_SECONDS = 2
@@ -75,9 +78,12 @@ def run_ffmpeg(
     duration_s: float,
     progress: Callable[[float], None],
     check_cancelled: Callable[[], None],
-) -> None:
-    """Run ffmpeg with `-progress`, reporting 0..1 and honouring cancellation."""
-    cmd = [require_tool("ffmpeg"), "-hide_banner", "-nostdin", "-y", "-loglevel", "error"]
+    loglevel: str = "error",
+    failure: str = CONVERT_FAILED,
+) -> str:
+    """Run ffmpeg with `-progress`, reporting 0..1 and honouring cancellation. Returns what it
+    wrote to stderr (analysis filters report there when `loglevel` is "info")."""
+    cmd = [require_tool("ffmpeg"), "-hide_banner", "-nostdin", "-y", "-loglevel", loglevel]
     cmd += ["-progress", "pipe:1", "-nostats", *args]
     with tempfile.TemporaryFile("w+") as err:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=err, text=True)  # noqa: S603
@@ -96,14 +102,12 @@ def run_ffmpeg(
         finally:
             proc.stdout.close()
         code = proc.wait()
+        err.seek(0)
+        output = err.read()
         if code != 0:
-            err.seek(0)
-            tail = err.read()[-500:].strip()
-            log.warning("ffmpeg failed (%d): %s", code, tail)
-            raise UnreadableMediaError(
-                "FFmpeg could not convert this file. It may be corrupt or use an unsupported "
-                "format."
-            )
+            log.warning("ffmpeg failed (%d): %s", code, output[-500:].strip())
+            raise UnreadableMediaError(failure)
+        return output
 
 
 def make_proxy(

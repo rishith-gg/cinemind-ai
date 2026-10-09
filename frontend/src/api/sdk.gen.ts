@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RetryJobData, RetryJobErrors, RetryJobResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
+import type { BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaQualityData, GetMediaQualityErrors, GetMediaQualityResponses, GetMediaResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RetryJobData, RetryJobErrors, RetryJobResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -189,7 +189,7 @@ export const listMediaShots = <ThrowOnError extends boolean = false>(options: Op
 /**
  * List Project Shots
  *
- * Every shot in the project, clip by clip in file-name order.
+ * Every shot in the project, clip by clip in the same file-name order timelines use.
  */
 export const listProjectShots = <ThrowOnError extends boolean = false>(options: Options<ListProjectShotsData, ThrowOnError>): RequestResult<ListProjectShotsResponses, ListProjectShotsErrors, ThrowOnError> => (options.client ?? client).get<ListProjectShotsResponses, ListProjectShotsErrors, ThrowOnError>({ url: '/api/projects/{project_id}/shots', ...options });
 
@@ -197,6 +197,14 @@ export const listProjectShots = <ThrowOnError extends boolean = false>(options: 
  * Get Keyframe
  */
 export const getKeyframe = <ThrowOnError extends boolean = false>(options: Options<GetKeyframeData, ThrowOnError>): RequestResult<GetKeyframeResponses, GetKeyframeErrors, ThrowOnError> => (options.client ?? client).get<GetKeyframeResponses, GetKeyframeErrors, ThrowOnError>({ url: '/api/keyframes/{keyframe_id}/image', ...options });
+
+/**
+ * Get Media Quality
+ *
+ * Everything needed to explain a clip's score: per-shot metrics and sub-scores, audio
+ * measurements, flags with the value and threshold behind each, and the settings in force.
+ */
+export const getMediaQuality = <ThrowOnError extends boolean = false>(options: Options<GetMediaQualityData, ThrowOnError>): RequestResult<GetMediaQualityResponses, GetMediaQualityErrors, ThrowOnError> => (options.client ?? client).get<GetMediaQualityResponses, GetMediaQualityErrors, ThrowOnError>({ url: '/api/media/{media_id}/quality', ...options });
 
 /**
  * List Timelines

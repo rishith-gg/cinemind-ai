@@ -31,7 +31,7 @@ export function useJobEvents(onEvent?: (e: JobEvent) => void): { connected: bool
         void qc.invalidateQueries({
           predicate: (q) => {
             const id = (q.queryKey[0] as { _id?: string } | undefined)?._id;
-            return id === "listMedia" || id === "getMedia" || id === "listMediaShots" || id === "listProjectShots";
+            return id === "listMedia" || id === "getMedia" || id === "listMediaShots" || id === "listProjectShots" || id === "getMediaQuality";
           },
         });
       }, 1000);

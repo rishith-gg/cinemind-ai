@@ -40,6 +40,9 @@ const base = {
   has_waveform: true,
   proxy_encoder: "libx264",
   strip_frames: 20,
+  quality_score: null,
+  low_quality: false,
+  qc_flags: [],
   job: null,
 };
 

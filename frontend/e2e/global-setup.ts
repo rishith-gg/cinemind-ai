@@ -5,7 +5,8 @@ import { join } from "node:path";
 import { FOOTAGE_DIR } from "./footage";
 
 /** Tiny synthetic clips (no real footage): one ProRes .mov that browsers cannot play natively,
- * one H.264 mp4, a corrupt file, and a clip with two known cuts. */
+ * one H.264 mp4, a corrupt file, a clip with two known cuts, and a clip that is blurred and has a
+ * 3 s gap of silence (ground truth for the quality checks). */
 export default function globalSetup() {
   rmSync(FOOTAGE_DIR, { recursive: true, force: true });
   mkdirSync(FOOTAGE_DIR, { recursive: true });
@@ -25,5 +26,15 @@ export default function globalSetup() {
     ...["-f", "lavfi", "-i", "sine=frequency=330:duration=6"],
     ...["-filter_complex", "[0:v][1:v][2:v]concat=n=3:v=1[v]", "-map", "[v]", "-map", "3:a"],
     ...["-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", join(FOOTAGE_DIR, "three_shots.mp4")],
+  );
+  const beep = ["-f", "lavfi", "-i", "sine=frequency=440:duration=1"];
+  ff(
+    ...["-f", "lavfi", "-i", "testsrc2=size=320x240:rate=25:duration=5"],
+    ...beep,
+    ...["-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono"],
+    ...beep,
+    ...["-filter_complex", "[0:v]gblur=sigma=8[v];[2:a]atrim=duration=3[s];[1:a][s][3:a]concat=n=3:v=0:a=1[a]"],
+    ...["-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac"],
+    join(FOOTAGE_DIR, "soft_quiet.mp4"),
   );
 }

@@ -31,7 +31,7 @@ from cinemind.core.errors import (
     PathNotAllowedError,
 )
 from cinemind.core.paths import resolve_in_roots, validate_project_id
-from cinemind.db.models import Job, JobEvent, MediaAsset, Project
+from cinemind.db.models import Job, JobEvent, MediaAsset, Project, QcFlag
 from cinemind.pipeline import importer
 from cinemind.pipeline.hashing import content_hash
 
@@ -75,7 +75,20 @@ def _encoder(asset: MediaAsset) -> str | None:
     return proxy.get("encoder")
 
 
-def to_out(asset: MediaAsset, job: Job | None) -> MediaOut:
+def _flag_kinds(session: Session, media_ids: list[str]) -> dict[str, list[str]]:
+    rows = session.execute(
+        select(QcFlag.media_id, QcFlag.kind).where(QcFlag.media_id.in_(media_ids)).distinct()
+    )
+    kinds: dict[str, list[str]] = {}
+    for media_id, kind in rows:
+        kinds.setdefault(media_id, []).append(kind)
+    return {media_id: sorted(found) for media_id, found in kinds.items()}
+
+
+def to_out(
+    asset: MediaAsset, job: Job | None, settings: Settings, flags: list[str] | None = None
+) -> MediaOut:
+    score = asset.quality_score
     return MediaOut(
         id=asset.id,
         project_id=asset.project_id,
@@ -107,21 +120,25 @@ def to_out(asset: MediaAsset, job: Job | None) -> MediaOut:
         has_waveform=asset.waveform_path is not None,
         proxy_encoder=_encoder(asset),
         strip_frames=int(asset.artifacts.get("strip_frames", 0)),
+        quality_score=score,
+        low_quality=score is not None and score < settings.quality.low_quality_below,
+        qc_flags=flags or [],
         job=JobBrief.model_validate(job) if job else None,
     )
 
 
-def _out(session: Session, asset: MediaAsset) -> MediaOut:
-    return to_out(asset, _latest_jobs(session, [asset.id]).get(asset.id))
+def _out(session: Session, settings: Settings, asset: MediaAsset) -> MediaOut:
+    flags = _flag_kinds(session, [asset.id]).get(asset.id)
+    return to_out(asset, _latest_jobs(session, [asset.id]).get(asset.id), settings, flags)
 
 
 # --- import -----------------------------------------------------------------------------------
 
 
-def _item(session: Session, result: importer.ImportResult) -> ImportItem:
+def _item(session: Session, settings: Settings, result: importer.ImportResult) -> ImportItem:
     return ImportItem(
         path=result.path,
-        media=_out(session, result.asset) if result.asset else None,
+        media=_out(session, settings, result.asset) if result.asset else None,
         duplicate=result.duplicate,
         error_code=result.error_code,
         error_message=result.error_message,
@@ -158,7 +175,7 @@ def import_media(
                 error_code="unreadable_file",
                 error_message=f"'{source.name}' could not be read or copied ({exc.strerror}).",
             )
-        items.append(_item(session, result))
+        items.append(_item(session, settings, result))
     return ImportResponse(items=items)
 
 
@@ -217,7 +234,7 @@ async def upload_media(
             raise
         if result.asset and not result.duplicate:
             importer.enqueue_ingest(session, settings, result.asset)
-        return _item(session, result)
+        return _item(session, settings, result)
 
     return await run_in_threadpool(register)
 
@@ -231,7 +248,7 @@ async def upload_media(
     responses=ERRORS,
     operation_id="listMedia",
 )
-def list_media(project_id: str, session: SessionDep) -> list[MediaOut]:
+def list_media(project_id: str, session: SessionDep, settings: SettingsDep) -> list[MediaOut]:
     get_project(session, project_id)
     assets = list(
         session.scalars(
@@ -240,15 +257,16 @@ def list_media(project_id: str, session: SessionDep) -> list[MediaOut]:
             .order_by(MediaAsset.created_at.desc(), MediaAsset.id)
         )
     )
-    jobs = _latest_jobs(session, [a.id for a in assets])
-    return [to_out(a, jobs.get(a.id)) for a in assets]
+    ids = [a.id for a in assets]
+    jobs, flags = _latest_jobs(session, ids), _flag_kinds(session, ids)
+    return [to_out(a, jobs.get(a.id), settings, flags.get(a.id)) for a in assets]
 
 
 @router.get(
     "/api/media/{media_id}", response_model=MediaOut, responses=ERRORS, operation_id="getMedia"
 )
-def get_media(media_id: str, session: SessionDep) -> MediaOut:
-    return _out(session, get_asset(session, media_id))
+def get_media(media_id: str, session: SessionDep, settings: SettingsDep) -> MediaOut:
+    return _out(session, settings, get_asset(session, media_id))
 
 
 @router.delete(
@@ -315,7 +333,7 @@ def relink_media(
         )
     asset.path, asset.filename = str(new_path), new_path.name
     session.commit()
-    return _out(session, asset)
+    return _out(session, settings, asset)
 
 
 # --- files (derived data only; Range requests are handled by FileResponse) ---------------------

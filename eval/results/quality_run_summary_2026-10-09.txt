@@ -1,0 +1,29 @@
+data directory: data/phase4-verify
+clips: 17  with a score: 17
+score min 0.14  median 0.93  max 1.00
+shots measured: 20
+clips with at least one QC flag: 3
+  flag low_audio_level: 2
+  flag overexposed: 1
+  flag underexposed: 1
+stage wall time, summed over fresh (uncached) runs:
+  quality: 31.4 s over 34 runs
+  audio_qc: 13.9 s over 34 runs
+per clip (score, LUFS, clipped %, silent %, flags):
+  B6FA6CD2-7B5C-4E9C-A727-BDB1 0.1371  -35.1  0.0  0.0  underexposed,low_audio_level
+  IMG_5034.MOV                 0.711  -41.4  0.0  0.0  low_audio_level
+  26DCAFA3-20A5-43AB-823E-567D 0.8394  -32.1  0.0  0.0  -
+  43307CA1-E1C4-4C4A-9E26-DA78 0.8603  -15.0  0.0  0.0  -
+  IMG_0870.MOV                 0.8682  -16.2  0.0  0.0  -
+  IMG_4494.MOV                 0.875  -30.6  0.0  0.0  -
+  IMG_0850.MOV                 0.8945  -17.3  0.0  0.0  overexposed
+  IMG_4379.MOV                 0.9133  -21.1  0.0  0.0  -
+  IMG_0867.MOV                 0.9251  -18.9  0.0  0.0  -
+  A3DE29FB-7C5C-4C7B-BB56-35B5 0.9355  -25.1  0.0  0.0  -
+  IMG_0872.MOV                 0.954  -17.0  0.0  0.0  -
+  IMG_0190.MOV                 0.9602  -18.2  0.0  0.0  -
+  IMG_9764.MOV                 0.9644  -28.1  0.0  0.0  -
+  5977460-uhd_3840_2160_25fps. 0.978  None  None  None  -
+  IMG_0177.MOV                 0.9799  -17.3  0.0  0.0  -
+  5A9A08CE-C345-4EDF-9EFA-343B 0.994  -18.0  0.0  0.0  -
+  IMG_4405.MOV                 0.9998  -24.4  0.0  0.0  -

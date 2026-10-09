@@ -5,6 +5,50 @@ export type ClientOptions = {
 };
 
 /**
+ * AudioQualityOut
+ */
+export type AudioQualityOut = {
+    /**
+     * Integrated Lufs
+     */
+    integrated_lufs: number | null;
+    /**
+     * Loudness Range
+     */
+    loudness_range: number | null;
+    /**
+     * True Peak Db
+     */
+    true_peak_db: number | null;
+    /**
+     * Sample Peak
+     */
+    sample_peak: number;
+    /**
+     * Clipped Pct
+     */
+    clipped_pct: number;
+    /**
+     * Silence S
+     */
+    silence_s: number;
+    /**
+     * Silence Pct
+     */
+    silence_pct: number;
+    /**
+     * Score
+     */
+    score: number;
+    /**
+     * Details
+     */
+    details: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Check
  */
 export type Check = {
@@ -535,6 +579,18 @@ export type MediaOut = {
      * Strip Frames
      */
     strip_frames: number;
+    /**
+     * Quality Score
+     */
+    quality_score: number | null;
+    /**
+     * Low Quality
+     */
+    low_quality: boolean;
+    /**
+     * Qc Flags
+     */
+    qc_flags: Array<string>;
     job: JobBrief | null;
 };
 
@@ -649,6 +705,79 @@ export type ProjectUpdate = {
 };
 
 /**
+ * QcFlagOut
+ */
+export type QcFlagOut = {
+    /**
+     * Kind
+     */
+    kind: string;
+    /**
+     * Source
+     */
+    source: string;
+    /**
+     * Shot Id
+     */
+    shot_id: string | null;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Details
+     */
+    details: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * QualityOut
+ */
+export type QualityOut = {
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Measured
+     */
+    measured: boolean;
+    /**
+     * Score
+     */
+    score: number | null;
+    /**
+     * Low Quality
+     */
+    low_quality: boolean;
+    /**
+     * Shots
+     */
+    shots: Array<ShotQualityOut>;
+    audio: AudioQualityOut | null;
+    /**
+     * Flags
+     */
+    flags: Array<QcFlagOut>;
+    /**
+     * Config
+     */
+    config: {
+        [key: string]: number;
+    };
+    /**
+     * Settings Changed
+     */
+    settings_changed: boolean;
+};
+
+/**
  * RelinkRequest
  */
 export type RelinkRequest = {
@@ -708,6 +837,68 @@ export type ShotOut = {
      * Keyframes
      */
     keyframes: Array<KeyframeOut>;
+};
+
+/**
+ * ShotQualityOut
+ */
+export type ShotQualityOut = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Frames
+     */
+    frames: number;
+    /**
+     * Sharpness
+     */
+    sharpness: number;
+    /**
+     * Blur
+     */
+    blur: number;
+    /**
+     * Luma Mean
+     */
+    luma_mean: number;
+    /**
+     * Luma Std
+     */
+    luma_std: number;
+    /**
+     * Spread
+     */
+    spread: number;
+    /**
+     * Clipped
+     */
+    clipped: number;
+    /**
+     * Crushed
+     */
+    crushed: number;
+    /**
+     * Sharpness Score
+     */
+    sharpness_score: number | null;
+    /**
+     * Exposure Score
+     */
+    exposure_score: number;
+    /**
+     * Contrast Score
+     */
+    contrast_score: number;
+    /**
+     * Score
+     */
+    score: number;
 };
 
 /**
@@ -2040,6 +2231,52 @@ export type GetKeyframeResponses = {
      */
     200: unknown;
 };
+
+export type GetMediaQualityData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/quality';
+};
+
+export type GetMediaQualityErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetMediaQualityError = GetMediaQualityErrors[keyof GetMediaQualityErrors];
+
+export type GetMediaQualityResponses = {
+    /**
+     * Successful Response
+     */
+    200: QualityOut;
+};
+
+export type GetMediaQualityResponse = GetMediaQualityResponses[keyof GetMediaQualityResponses];
 
 export type ListTimelinesData = {
     body?: never;

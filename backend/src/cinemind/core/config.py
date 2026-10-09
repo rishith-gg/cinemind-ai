@@ -12,6 +12,8 @@ from pydantic_settings import (
     TomlConfigSettingsSource,
 )
 
+from cinemind.core.quality_config import QualityConfig
+
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
 
 # <repo>/backend/src/cinemind/core/config.py -> repo root
@@ -41,6 +43,7 @@ class Settings(BaseSettings):
     shot_threshold: float | None = None
     shot_min_len_s: float = 0.5
     keyframes_per_shot: int = 3
+    quality: QualityConfig = QualityConfig()
     worker_poll_seconds: float = 0.5
     # Importable modules that register extra stage chains (used by tests and plugins).
     extra_stage_modules: list[str] = []

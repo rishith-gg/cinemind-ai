@@ -1,0 +1,40 @@
+clips: 17  original frames: 55  images measured: 495  grouped folds: 5
+
+original frames, percentiles [0, 10, 25, 50, 75, 90, 100]:
+  blur: [0.0338, 0.0497, 0.0667, 0.1264, 0.1635, 0.2243, 0.5055]
+  sharpness: [5.3227, 43.2504, 75.4268, 313.3875, 615.6138, 1048.9575, 1605.7682]
+  luma_mean: [0.1138, 0.3526, 0.4062, 0.524, 0.5671, 0.6002, 0.6909]
+  spread: [0.1451, 0.4463, 0.6196, 0.7216, 0.7902, 0.8376, 0.9176]
+  clipped: [0.0, 0.0, 0.0, 0.0002, 0.0064, 0.0489, 0.2992]
+  crushed: [0.0, 0.0, 0.0, 0.0001, 0.003, 0.0134, 0.101]
+
+out_of_focus (re-blur ratio)
+  rule (fitted on all clips): blur above 0.547 OR sharpness below 5.3227
+  held-out: precision 0.994  recall 1.0  F1 0.997  accuracy 0.995  (tp 165 fp 1 fn 0 tn 54)
+  AUC of the primary metric: 1.0
+  share flagged by the final rule: {'original': 0.0, 'blur_1.5': 0.455, 'blur_3': 1.0, 'blur_6': 1.0, 'blur_12': 1.0}
+
+out_of_focus (Laplacian variance)
+  rule (fitted on all clips): sharpness below 19.4935
+  held-out: precision 0.976  recall 0.994  F1 0.985  accuracy 0.977  (tp 164 fp 4 fn 1 tn 51)
+  AUC of the primary metric: 0.996
+  share flagged by the final rule: {'original': 0.036, 'blur_1.5': 0.436, 'blur_3': 0.982, 'blur_6': 1.0, 'blur_12': 1.0}
+
+overexposed
+  rule (fitted on all clips): luma_mean above 0.6341 OR clipped above 0.2992
+  held-out: precision 0.963  recall 0.945  F1 0.954  accuracy 0.955  (tp 52 fp 2 fn 3 tn 53)
+  AUC of the primary metric: 0.96
+  share flagged by the final rule: {'original': 0.036, 'over_1.5': 0.691, 'over_3': 0.964}
+
+underexposed
+  rule (fitted on all clips): luma_mean below 0.2538 OR crushed above 0.101
+  held-out: precision 0.965  recall 1.0  F1 0.982  accuracy 0.982  (tp 55 fp 2 fn 0 tn 53)
+  AUC of the primary metric: 0.986
+  share flagged by the final rule: {'original': 0.036, 'under_2': 0.4, 'under_4': 1.0}
+
+shipped default settings (picture_flags, all frames, flagged/total):
+  out_of_focus: {'original': '0/55', 'blur_1.5': '24/55', 'blur_3': '54/55', 'blur_6': '54/55', 'blur_12': '54/55'}
+  overexposed: {'original': '2/55', 'over_1.5': '39/55', 'over_3': '53/55'}
+  underexposed: {'original': '2/55', 'under_2': '22/55', 'under_4': '55/55'}
+
+Precision, F1 and accuracy above hold only for this constructed mix of degraded and original frames; in real footage degraded frames are rarer. Recall and the count of flagged originals are the figures that carry over.
