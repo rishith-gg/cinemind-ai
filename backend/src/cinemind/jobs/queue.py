@@ -115,6 +115,13 @@ def requeue_orphans(session: Session, max_attempts: int = 3) -> list[str]:
 
 
 def _reset_unfinished(job: Job) -> None:
+    # A job created before a stage was added to its chain gets the missing stage rows.
+    try:
+        names = [stage.name for stage in get_chain(job.chain)]
+    except NotFoundError:
+        names = []
+    for ordinal in range(len(job.stages), len(names)):
+        job.stages.append(JobStage(ordinal=ordinal, name=names[ordinal]))
     for st in job.stages:
         if st.status not in ("succeeded", "cached"):
             st.status = "pending"

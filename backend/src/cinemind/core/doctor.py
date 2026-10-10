@@ -11,11 +11,13 @@ from cinemind import __version__
 from cinemind.core.config import Settings
 from cinemind.core.hardware import (
     HardwareInfo,
+    Tier,
     TierRecommendation,
     detect_hardware,
     recommend_tier,
     run_probe,
 )
+from cinemind.core.transcribe_config import TIER_MODEL, WHISPER_MODELS, model_dir, model_ready
 
 Status = Literal["ok", "missing", "warn"]
 
@@ -137,11 +139,34 @@ def check_disk(hw: HardwareInfo) -> Check:
     )
 
 
+def check_speech_model(settings: Settings, tier: Tier) -> Check:
+    """Is the Whisper model for this tier on disk? Optional: everything but transcripts works
+    without it, and it is only ever fetched by `cinemind models pull`."""
+    name = settings.transcribe.model
+    name = TIER_MODEL[tier] if name == "auto" else name
+    spec = WHISPER_MODELS[name]
+    if model_ready(model_dir(settings.models_path, name)):
+        return Check(name="speech model", status="ok", required=False, version=name)
+    return Check(
+        name="speech model",
+        status="warn",
+        required=False,
+        version=name,
+        detail=f"not downloaded ({spec.size_mb} MB); clips are processed without transcripts",
+        fix="uv run cinemind models pull",
+    )
+
+
 def run_doctor(settings: Settings, disk_path: str = ".") -> DoctorReport:
     hw = detect_hardware(disk_path)
     rec = recommend_tier(hw)
-    checks = [check_python(), *(check_tool(*t) for t in _TOOLS), check_disk(hw)]
     selected = rec.tier if settings.model_tier == "auto" else settings.model_tier
+    checks = [
+        check_python(),
+        *(check_tool(*t) for t in _TOOLS),
+        check_disk(hw),
+        check_speech_model(settings, selected),
+    ]
     return DoctorReport(
         app_version=__version__,
         ok=all(c.status != "missing" for c in checks if c.required),

@@ -1,0 +1,11 @@
+WER on 82 of 1089 utterances (10.17 min)
+dataset data/eval/librispeech-dev-clean-2
+date 2026-10-10 | Apple M1, 8 threads, 8.0 GB RAM, Darwin | engine 1.2.1+ct2-4.8.2
+settings {'language': 'auto', 'device': 'auto', 'compute_type': 'auto', 'beam_size': 5, 'vad_threshold': 0.5, 'vad_min_silence_ms': 2000} | sample seed 0
+scoring: lower case, punctuation removed, whitespace collapsed; errors / reference words over the whole sample
+
+model     revision      WER %   sub   del   ins  ref words  other-lang  sec/audio-sec  RSS MB
+base      ebe41f70d5b6   6.60    90    11    10       1682           0          0.104     504
+small     536b0662742c   4.70    64     8     7       1682           0          0.290     499
+
+compute: cpu int8

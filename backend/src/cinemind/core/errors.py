@@ -69,3 +69,13 @@ class ExportWriteError(DomainError):
 class PayloadTooLargeError(DomainError):
     code = "too_large"
     status_code = 413
+
+
+class ModelMissingError(DomainError):
+    code = "model_missing"
+    status_code = 409
+
+
+class TranscriptionError(DomainError):
+    code = "transcription_failed"
+    status_code = 500

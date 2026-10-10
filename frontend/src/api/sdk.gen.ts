@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaQualityData, GetMediaQualityErrors, GetMediaQualityResponses, GetMediaResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RetryJobData, RetryJobErrors, RetryJobResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
+import type { BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaQualityData, GetMediaQualityErrors, GetMediaQualityResponses, GetMediaResponses, GetMediaTranscriptData, GetMediaTranscriptErrors, GetMediaTranscriptResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListProjectTranscriptsData, ListProjectTranscriptsErrors, ListProjectTranscriptsResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RetryJobData, RetryJobErrors, RetryJobResponses, SearchTranscriptsData, SearchTranscriptsErrors, SearchTranscriptsResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -243,6 +243,29 @@ export const getTimeline = <ThrowOnError extends boolean = false>(options: Optio
  * Write the timeline to the project's exports folder and download it.
  */
 export const exportTimeline = <ThrowOnError extends boolean = false>(options: Options<ExportTimelineData, ThrowOnError>): RequestResult<ExportTimelineResponses, ExportTimelineErrors, ThrowOnError> => (options.client ?? client).get<ExportTimelineResponses, ExportTimelineErrors, ThrowOnError>({ url: '/api/timelines/{timeline_id}/export/{fmt}', ...options });
+
+/**
+ * Get Media Transcript
+ *
+ * The clip's transcript with word timings, and what produced it (model, revision, engine,
+ * settings). Segments the model itself did not accept are marked `uncertain`.
+ */
+export const getMediaTranscript = <ThrowOnError extends boolean = false>(options: Options<GetMediaTranscriptData, ThrowOnError>): RequestResult<GetMediaTranscriptResponses, GetMediaTranscriptErrors, ThrowOnError> => (options.client ?? client).get<GetMediaTranscriptResponses, GetMediaTranscriptErrors, ThrowOnError>({ url: '/api/media/{media_id}/transcript', ...options });
+
+/**
+ * List Project Transcripts
+ *
+ * One row per clip: transcript state, language, and how much text there is.
+ */
+export const listProjectTranscripts = <ThrowOnError extends boolean = false>(options: Options<ListProjectTranscriptsData, ThrowOnError>): RequestResult<ListProjectTranscriptsResponses, ListProjectTranscriptsErrors, ThrowOnError> => (options.client ?? client).get<ListProjectTranscriptsResponses, ListProjectTranscriptsErrors, ThrowOnError>({ url: '/api/projects/{project_id}/transcripts', ...options });
+
+/**
+ * Search Transcripts
+ *
+ * Keyword search in the project's transcripts (all words must occur; each matches the start
+ * of a word). Hits are ordered by BM25 and carry the time the first matching word is spoken.
+ */
+export const searchTranscripts = <ThrowOnError extends boolean = false>(options: Options<SearchTranscriptsData, ThrowOnError>): RequestResult<SearchTranscriptsResponses, SearchTranscriptsErrors, ThrowOnError> => (options.client ?? client).get<SearchTranscriptsResponses, SearchTranscriptsErrors, ThrowOnError>({ url: '/api/projects/{project_id}/transcripts/search', ...options });
 
 /**
  * Health

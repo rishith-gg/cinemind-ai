@@ -13,6 +13,11 @@ Test footage is synthetic and generated on demand with ffmpeg (never committed).
 - `three_shots.mp4` (E2E) has cuts at 2.0 s and 4.0 s.
 - Export round trip: each exported file is re-read with OpenTimelineIO's own adapters (`fcp_xml`, `cmx_3600`,
   `otio_json`) and every cut's name, source in, duration and record position must equal the timeline.
+- Transcription: unit and API tests replace the speech model with a fixed fake (test code only) so they need no
+  download; they check storage, word times, the keyword index, `jump_s`, cache behaviour and every "no text" state.
+  One test (`-m model`, skipped unless the model is in `data/models/` and macOS `say` exists) runs the real model on
+  a synthesised sentence with known words and on a pure tone that must give no speech. The E2E data folder has no
+  model on purpose: it checks the "not downloaded" path in the real app.
 - Timecode: drop-frame conversion is checked against known values and round-tripped frame by frame across minute and
   ten-minute boundaries.
 

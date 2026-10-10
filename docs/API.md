@@ -3,7 +3,7 @@
 OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors are always
 `{"code": "<machine code>", "message": "<plain language>"}`; codes: `invalid_input` (422), `not_found` (404),
 `path_not_allowed` (403), `job_state` (409), `unreadable_media` / `unsupported_media` (422), `source_missing` (404),
-`too_large` (413), `low_disk_space` (507), `ffmpeg_missing` (500), `export_failed` (500).
+`too_large` (413), `low_disk_space` (507), `ffmpeg_missing` (500), `export_failed` (500), `model_missing` (409), `transcription_failed` (500).
 
 ## Implemented (Phase 1)
 - `GET /api/system/health`
@@ -45,7 +45,21 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
   with its time range and the value/threshold (or detector) behind it, and the `[quality]` settings in force.
   Formulas: AI_PIPELINE.md. Where the thresholds come from: EVALUATION.md.
 
-## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc
+## Implemented (Phase 6): transcripts and keyword search
+- Media items carry `transcript_status` (null until the stage ran) and `transcript_language`.
+- `GET /api/media/{id}/transcript`: `status` (`pending`, `done`, `no_speech`, `no_audio`, `model_missing`,
+  `audio_unreadable`), a plain `message` whenever there is no text, language and its probability, model, revision,
+  engine and settings, and the segments with their words (start, end, probability). `uncertain` and
+  `language_uncertain` are explained in AI_PIPELINE.md; the limits are returned in `thresholds`.
+- `GET /api/projects/{id}/transcripts`: one row per clip (status, language, seconds of speech, segment and word count).
+- `GET /api/projects/{id}/transcripts/search?q=...&media_id=...&limit=50`: keyword search (FTS5, BM25 order). Each
+  hit has the clip, the segment's time range, `jump_s` (when the first word starting with the first search term is
+  spoken, else the segment start) and the text split
+  into `parts` with `match` set on the found words. An entry without any letter or digit is a 422.
+- CLI: `cinemind models list`, `cinemind models pull [name] [--yes]` (asks before a download over 2 GB).
+  `cinemind doctor` and `/api/system/health` report whether the tier's speech model is on disk.
+
+## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc, transcribe
 - validate: ffprobe (by content, not extension): rational fps, VFR flag (avg vs nominal rate differ > 0.5 %),
   codecs, display size (rotation applied), timecode, colour tags. Corrupt or non-media files fail with a plain message.
 - proxy: H.264 (+AAC), <= `proxy_max_height` (720), constant frame rate (the source's average rate, halved above 60), `+faststart`.
@@ -59,6 +73,9 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
 - quality: picture metrics per shot on the proxy, plus ffmpeg black/frozen-picture detection. audio_qc: loudness,
   silence and clipped samples on the original file's audio. Both cache measurements only; scores and flags are
   recomputed from the current `[quality]` settings on every run.
+- transcribe: faster-whisper on the original file's audio (16 kHz mono), voice-activity detection first, word
+  timings, language detection. Never downloads; without the model it records `model_missing` and retries on the next
+  run. Its cache key depends on the source file and the `[transcribe]` settings only (`Stage.upstream`).
 - Stage cache for these stages is per project and re-validated against the files on disk (`Stage.scope_project`,
   `Stage.verify`); `Stage.persist` copies results onto the media row, also on a cache hit.
 

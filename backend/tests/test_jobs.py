@@ -1,5 +1,8 @@
+import hashlib
+import json
 import threading
 from pathlib import Path
+from typing import Any
 
 import pytest
 from sqlalchemy import select
@@ -9,7 +12,7 @@ from cinemind.core.config import Settings
 from cinemind.core.errors import JobStateError, NotFoundError
 from cinemind.db.models import Job, JobEvent, StageResult
 from cinemind.jobs import queue
-from cinemind.jobs.runner import run_job
+from cinemind.jobs.runner import cache_key, run_job
 
 
 def _run(factory: sessionmaker[Session], settings: Settings, **kw: object) -> Job:
@@ -156,3 +159,71 @@ def test_poison_job_fails_after_max_attempts(factory: sessionmaker[Session]) -> 
     with factory() as s:
         job = queue.get_job(s, job_id)
         assert job.status == "failed" and job.error_code == "worker_crashed"
+
+
+def test_stage_cache_keys_chain_to_the_previous_stage_unless_upstream_is_named(
+    factory: sessionmaker[Session], settings: Settings
+) -> None:
+    from cinemind.jobs import registry
+    from cinemind.jobs.registry import Stage, StageContext
+
+    def run(_ctx: StageContext) -> dict[str, Any]:
+        return {}
+
+    registry.register_chain(
+        "upstream_test",
+        [
+            Stage("a", run, param_keys=()),
+            Stage("b", run, param_keys=("x",)),
+            Stage("c", run, param_keys=(), upstream=("a",)),
+        ],
+    )
+
+    def keys(x: int) -> list[str | None]:
+        with factory() as session:
+            job_id = queue.enqueue(session, "upstream_test", params={"x": x}).id
+        queue.claim_next(factory)
+        run_job(factory, settings, job_id)
+        with factory() as session:
+            return [stage.cache_key for stage in queue.get_job(session, job_id).stages]
+
+    first, second = keys(1), keys(2)
+    # b depends on x; c hangs on a only, so b's change does not reach it.
+    assert first[0] == second[0] and first[1] != second[1] and first[2] == second[2]
+    # Unchanged rule for ordinary stages: the key is chained to the stage before it.
+    stage_b = registry.get_chain("upstream_test")[1]
+    hashed = json.dumps({"job": {"x": 1}, "stage": {}}, sort_keys=True).encode()
+    params_hash = hashlib.sha256(hashed).hexdigest()
+    assert first[1] == cache_key("project:-", stage_b, params_hash, str(first[0]))
+
+    with pytest.raises(ValueError, match="upstream"):
+        registry.register_chain("bad", [Stage("a", run, upstream=("later",)), Stage("later", run)])
+
+
+def test_retry_adds_stage_rows_for_stages_added_to_the_chain_since(
+    factory: sessionmaker[Session], settings: Settings
+) -> None:
+    from cinemind.jobs import registry
+    from cinemind.jobs.registry import Stage, StageContext
+
+    def run(_ctx: StageContext) -> dict[str, Any]:
+        return {}
+
+    registry.register_chain("grows", [Stage("one", run)])
+    with factory() as session:
+        job = queue.enqueue(session, "grows")
+        job.status = "failed"
+        session.commit()
+        job_id = job.id
+    registry.register_chain("grows", [Stage("one", run), Stage("two", run)])
+    with factory() as session:
+        queue.retry(session, job_id)
+    queue.claim_next(factory)
+    run_job(factory, settings, job_id)
+    with factory() as session:
+        job = queue.get_job(session, job_id)
+        assert job.status == "succeeded"
+        assert [(s.name, s.status) for s in job.stages] == [
+            ("one", "succeeded"),
+            ("two", "succeeded"),
+        ]

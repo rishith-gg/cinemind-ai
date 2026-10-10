@@ -4,3 +4,7 @@ port = 8000
 data_dir = "data"           # derived files only; source footage is never touched
 media_roots = []            # folders the app may read footage from; set yours in .env (see .env.example)
 model_tier = "auto"         # auto | lite | balanced | quality
+
+[transcribe]
+model = "auto"              # auto = by tier (lite/balanced: small, quality: large-v3) | tiny | base | small | medium | large-v3
+language = "auto"           # auto = detect per clip; or a code such as "en", "hi", "ta", "kn"

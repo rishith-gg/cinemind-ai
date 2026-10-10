@@ -31,7 +31,7 @@ from cinemind.core.errors import (
     PathNotAllowedError,
 )
 from cinemind.core.paths import resolve_in_roots, validate_project_id
-from cinemind.db.models import Job, JobEvent, MediaAsset, Project, QcFlag
+from cinemind.db.models import Job, JobEvent, MediaAsset, Project, QcFlag, Transcript
 from cinemind.pipeline import importer
 from cinemind.pipeline.hashing import content_hash
 
@@ -85,8 +85,17 @@ def _flag_kinds(session: Session, media_ids: list[str]) -> dict[str, list[str]]:
     return {media_id: sorted(found) for media_id, found in kinds.items()}
 
 
+def _transcripts(session: Session, media_ids: list[str]) -> dict[str, Transcript]:
+    rows = session.scalars(select(Transcript).where(Transcript.media_id.in_(media_ids)))
+    return {row.media_id: row for row in rows}
+
+
 def to_out(
-    asset: MediaAsset, job: Job | None, settings: Settings, flags: list[str] | None = None
+    asset: MediaAsset,
+    job: Job | None,
+    settings: Settings,
+    flags: list[str] | None = None,
+    transcript: Transcript | None = None,
 ) -> MediaOut:
     score = asset.quality_score
     return MediaOut(
@@ -123,13 +132,16 @@ def to_out(
         quality_score=score,
         low_quality=score is not None and score < settings.quality.low_quality_below,
         qc_flags=flags or [],
+        transcript_status=transcript.status if transcript else None,
+        transcript_language=transcript.language if transcript else None,
         job=JobBrief.model_validate(job) if job else None,
     )
 
 
 def _out(session: Session, settings: Settings, asset: MediaAsset) -> MediaOut:
     flags = _flag_kinds(session, [asset.id]).get(asset.id)
-    return to_out(asset, _latest_jobs(session, [asset.id]).get(asset.id), settings, flags)
+    job = _latest_jobs(session, [asset.id]).get(asset.id)
+    return to_out(asset, job, settings, flags, session.get(Transcript, asset.id))
 
 
 # --- import -----------------------------------------------------------------------------------
@@ -258,8 +270,12 @@ def list_media(project_id: str, session: SessionDep, settings: SettingsDep) -> l
         )
     )
     ids = [a.id for a in assets]
-    jobs, flags = _latest_jobs(session, ids), _flag_kinds(session, ids)
-    return [to_out(a, jobs.get(a.id), settings, flags.get(a.id)) for a in assets]
+    jobs, flags, spoken = (
+        _latest_jobs(session, ids),
+        _flag_kinds(session, ids),
+        _transcripts(session, ids),
+    )
+    return [to_out(a, jobs.get(a.id), settings, flags.get(a.id), spoken.get(a.id)) for a in assets]
 
 
 @router.get(

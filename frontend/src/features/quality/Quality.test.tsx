@@ -120,6 +120,8 @@ const media = (id: string, filename: string, quality_score: number | null, low_q
   quality_score,
   low_quality,
   qc_flags,
+  transcript_status: null,
+  transcript_language: null,
   project_id: "p1",
   path: `/f/${filename}`,
   import_mode: "reference",

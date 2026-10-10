@@ -36,3 +36,11 @@ Datetimes are stored as naive UTC and returned timezone-aware (`UTCDateTime`).
 | `qc_flags` | `kind`, `source` (picture or audio), optional `shot_id`, `start_s`/`end_s`, and `details` (metric, value, threshold, direction, or detector and settings). |
 
 `media_assets` gained `quality_score` (clip-level Technical Quality Score, null until measured).
+
+## Phase 6 tables (migrations 0006, 0007)
+| Table | Purpose |
+|---|---|
+| `transcripts` | one row per clip once the transcribe stage ran: `status`, `language` and its probability, `model` and `model_revision`, `speech_s` (seconds kept by the voice-activity detector), `digest` (hash of the stage result the rows were written from; an unchanged result keeps its rows and ids), `details` (engine version, device, compute type, settings, reason when there is no text). |
+| `transcript_segments` | `index`, `start_s`/`end_s`, `text`, `confidence` (mean word probability), and the model's `avg_logprob`, `no_speech_prob`, `compression_ratio`. Integer id. Cascades from `media_assets`. |
+| `transcript_words` | `segment_id`, `index`, `start_s`/`end_s`, `word`, `probability`. Cascades from `transcript_segments`. |
+| `transcript_fts` | FTS5 virtual table over `transcript_segments.text` (external content, `rowid` = segment id, tokenizer `unicode61 remove_diacritics 2 categories 'L* N* Co Mn Mc'` since 0007, which rebuilds the index so combining marks stay inside words). Three triggers on `transcript_segments` keep it in step, also for cascaded deletes. Not an ORM model; created with raw SQL in the migration. |

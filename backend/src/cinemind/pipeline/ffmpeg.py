@@ -4,11 +4,15 @@ import contextlib
 import logging
 import subprocess
 import tempfile
+import threading
 from array import array
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from fractions import Fraction
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
+
+import numpy as np
 
 from cinemind.core.errors import DomainError, JobCancelled, UnreadableMediaError
 from cinemind.pipeline.ffprobe import MediaInfo, require_tool
@@ -227,3 +231,49 @@ def waveform_peaks(src: Path, bins: int = WAVEFORM_BINS) -> list[float]:
         if (chunk := samples[i : i + step])
     ]
     return [round(p, 4) for p in peaks] + [0.0] * (bins - len(peaks))
+
+
+_READ_BYTES = 1 << 20
+_DECODE_TIMEOUT_S = 3600
+
+
+def pcm_chunks(
+    source: Path,
+    check_cancelled: Callable[[], None],
+    failure: str,
+    rate: int | None = None,
+    mono: bool = False,
+) -> Generator[Any]:
+    """The first audio stream decoded to 16-bit PCM, as int16 arrays of about a megabyte each
+    (channels interleaved unless `mono`). Raises UnreadableMediaError(`failure`) if ffmpeg fails."""
+    cmd = [require_tool("ffmpeg"), "-hide_banner", "-nostdin", "-loglevel", "error"]
+    cmd += ["-protocol_whitelist", "file", "-i", str(source), "-map", "0:a:0", "-vn"]
+    cmd += (["-ac", "1"] if mono else []) + (["-ar", str(rate)] if rate else [])
+    cmd += ["-f", "s16le", "-c:a", "pcm_s16le", "-"]
+    with tempfile.TemporaryFile("w+") as err:
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=err, text=False)  # noqa: S603
+        if proc.stdout is None:  # pragma: no cover - PIPE always provides it
+            raise RuntimeError("ffmpeg stdout unavailable")
+        # A stalled decoder (sleeping disk, damaged file) must not hang the worker for ever.
+        watchdog = threading.Timer(_DECODE_TIMEOUT_S, proc.kill)
+        watchdog.start()
+        try:
+            carry = b""
+            while chunk := proc.stdout.read(_READ_BYTES):
+                check_cancelled()
+                data = carry + chunk
+                usable = len(data) - len(data) % 2
+                carry = data[usable:]
+                if usable:
+                    yield np.frombuffer(data[:usable], dtype="<i2")
+        except BaseException:
+            proc.kill()
+            raise
+        finally:
+            watchdog.cancel()
+            proc.stdout.close()
+            code = proc.wait()
+        if code != 0:
+            err.seek(0)
+            log.warning("audio decode failed for %s (%d): %s", source.name, code, err.read()[-300:])
+            raise UnreadableMediaError(failure)

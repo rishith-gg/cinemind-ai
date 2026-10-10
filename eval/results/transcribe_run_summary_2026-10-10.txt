@@ -1,0 +1,31 @@
+data directory: data
+clips: 21
+  done: 8
+  no_audio: 1
+  no_speech: 12
+segments: 50  marked uncertain: 22
+language probability under 0.5: 5
+transcribe stage, fresh runs: 491.2 s for 473.4 s of footage (21 clips, 1.04 s per footage second)
+per clip (duration s, status, model, language, probability, speech s, segments,
+          uncertain segments, words, stage s):
+  1787323393287409.MP4           59.6  no_speech     small  -   -    0.0    0   0    0  14.6
+  1787593409393965.MP4           42.2  done          small  hi  0.3651    6.8    5   5   26  41.7
+  26DCAFA3-20A5-43AB-823E-567D    7.9  no_speech     small  -   -    0.0    0   0    0  0.8
+  43307CA1-E1C4-4C4A-9E26-DA78    7.5  no_speech     small  -   -    0.0    0   0    0  0.8
+  5977460-uhd_3840_2160_25fps.   13.0  no_audio      small  -   -    0.0    0   0    0  0.0
+  5A9A08CE-C345-4EDF-9EFA-343B   17.1  no_speech     small  -   -   11.4    0   0    0  50.5
+  A3DE29FB-7C5C-4C7B-BB56-35B5    5.9  done          small  en  0.49    1.0    1   0    4  2.7
+  B6FA6CD2-7B5C-4E9C-A727-BDB1   12.8  done          small  hi  0.3238    9.0    3   0   10  3.7
+  IMG_0177.MOV                    8.0  no_speech     small  -   -    0.0    0   0    0  1.6
+  IMG_0190.MOV                    3.0  no_speech     small  -   -    0.0    0   0    0  0.8
+  IMG_0850.MOV                   73.5  done          small  kn  0.6886   67.6    9   9   50  166.5
+  IMG_0867.MOV                   90.1  done          small  kn  0.7174   77.7   19   1  117  47.6
+  IMG_0870.MOV                    6.2  done          small  kn  0.2646    6.2    7   7   22  77.0
+  IMG_0872.MOV                   11.8  no_speech     small  -   -   11.8    0   0    0  27.7
+  IMG_4379.MOV                    7.4  no_speech     small  -   -    0.0    0   0    0  1.0
+  IMG_4405.MOV                   18.6  no_speech     small  -   -   13.9    0   0    0  45.7
+  IMG_4494.MOV                   17.3  no_speech     small  -   -    0.0    0   0    0  1.0
+  IMG_5034.MOV                    5.3  no_speech     small  -   -    0.0    0   0    0  1.0
+  IMG_9764.MOV                   47.2  no_speech     small  -   -    0.0    0   0    0  0.9
+  Timeline One.mov               12.5  done          small  en  0.6825   12.3    3   0   22  2.9
+  VID_20260527_184440314.MP4      6.3  done          small  en  0.4324    6.0    3   0   11  2.7

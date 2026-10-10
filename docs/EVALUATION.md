@@ -69,3 +69,51 @@ shot; the overexposed shot is bright fog); nobody labelled the footage.
 
 ## 3. Phase 4 run summary
 `eval/phase4_run_summary.py`, output `eval/results/phase4_run_summary_2026-10-09.txt`; discussed in PROGRESS.md.
+
+## 4. Transcription: word error rate and speed (Phase 6)
+Script: `uv run python eval/wer.py fetch`, then
+`uv run python eval/wer.py run data/eval/librispeech-dev-clean-2 --models base small --minutes 10`
+Output: `eval/results/wer_librispeech-dev-clean-2_2026-10-10.{txt,json}` (the json lists the utterance ids).
+
+Sample: 82 of the 1089 utterances of Mini LibriSpeech dev-clean-2 (10.17 min, fixed random sample, seed 0): English
+audiobooks read aloud in quiet rooms, with reference transcripts (CC BY 4.0). The script calls the same decode and
+transcribe functions as the pipeline, with the default settings (language detection on).
+Hardware: Apple M1, 8 GB RAM, CPU, int8. Engine: faster-whisper 1.2.1, CTranslate2 4.8.2.
+
+| Model (revision) | WER | Substitutions | Deletions | Insertions | Reference words | Seconds per second of audio |
+|---|---|---|---|---|---|---|
+| base (`ebe41f70d5b6`) | 6.60 % | 90 | 11 | 10 | 1682 | 0.104 |
+| small (`536b0662742c`) | 4.70 % | 64 | 8 | 7 | 1682 | 0.290 |
+
+No utterance was detected as a language other than English. Scoring: lower case, punctuation removed; numbers the
+model writes as digits count as errors against spelled-out references. `small` is the default of the lite tier.
+
+**What this does and does not show.**
+- It shows the pipeline (decode, voice-activity detection, model, word assembly) transcribes clean English correctly
+  and what the two small models cost on this machine.
+- It says nothing about the user's footage. Read audiobook speech is about the easiest input there is; phone footage
+  with wind, water, music, several speakers and other languages is far harder (section 5).
+- One sample of 10 minutes, one run. No confidence interval was computed.
+- The memory column in the output file is the whole process after each model, including the decoded sample; it is
+  not a per-model peak and is not quoted here.
+- A WER on the user's own material needs hand-written transcripts: put `clip.txt` next to `clip.mov` in a folder and
+  run `eval/wer.py run <folder>`. Not done yet.
+
+## 5. Transcription run on the user's footage (not an accuracy figure)
+Script: `uv run python eval/transcribe_run_summary.py data`
+Output: `eval/results/transcribe_run_summary_2026-10-10.txt`. Model `small`, language detection on, M1 CPU.
+
+21 clips (473.4 s): 8 with a transcript, 12 `no_speech`, 1 `no_audio`, no failed job. 50 segments, 22 of them marked
+uncertain; in 5 of the 8 transcripts the language probability is under 0.5. Detected languages: 3 English, 3 Kannada,
+2 Hindi. The transcribe stage took 491.2 s in total (1.04 s per second of footage), very unevenly: the 11 clips
+where the voice-activity detector kept nothing took 0.8 to 1.6 s each, except one at 14.6 s; 7 clips took between
+27.7 and 166.5 s (the longest for 73.5 s of footage, another 77.0 s for 6.2 s of footage), because the model retries
+segments it does not accept.
+
+Nobody has checked these words against what is said. Observations, not measurements:
+- An earlier trial run of the same model on the same files gave different text for several noisy clips, and for one
+  clip English sentences instead of Kannada script. Results on such audio are not repeatable (AI_PIPELINE.md).
+- Three clips where the voice-activity detector kept 11.4 to 13.9 s as speech ended as `no_speech`: the model
+  produced no text for them. Three other clips have only uncertain segments.
+- The one clip recorded as dialogue ("Timeline One.mov", 12.5 s) came out as three English sentences with none
+  marked uncertain. Whether they are the words spoken has to be confirmed by the user.

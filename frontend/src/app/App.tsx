@@ -10,10 +10,10 @@ import { ProjectPage } from "../features/projects/ProjectPage";
 import { ProjectsPage } from "../features/projects/ProjectsPage";
 import { ShotsPage } from "../features/shots/ShotsPage";
 import { SettingsPage } from "../features/system/SettingsPage";
+import { TranscriptsPage } from "../features/transcripts/TranscriptsPage";
 
 const LATER = [
   { path: "actors", title: "Actors", phase: 7 },
-  { path: "transcripts", title: "Transcripts", phase: 6 },
   { path: "search", title: "Search", phase: 9 },
   { path: "timeline", title: "Timeline", phase: 11 },
 ];
@@ -28,6 +28,7 @@ export function App() {
         <Route path="library" element={<LibraryPage />} />
         <Route path="library/:mediaId" element={<ClipPage />} />
         <Route path="shots" element={<ShotsPage />} />
+        <Route path="transcripts" element={<TranscriptsPage />} />
         <Route path="export" element={<ExportPage />} />
         <Route path="settings" element={<SettingsPage />} />
         {LATER.map((l) => (

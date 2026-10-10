@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { browseFolder, cancelJob, createProject, createTimeline, deleteMedia, deleteProject, deleteTimeline, exportTimeline, getHealth, getJob, getKeyframe, getMedia, getMediaQuality, getPoster, getProject, getStrip, getTimeline, getWaveform, importMedia, listJobs, listMedia, listMediaShots, listProjects, listProjectShots, listTimelines, type Options, processMedia, processProject, relinkMedia, retryJob, streamJobEvents, streamProxy, updateProject, uploadMedia } from '../sdk.gen';
-import type { BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaQualityData, GetMediaQualityError, GetMediaQualityResponse, GetMediaResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RetryJobData, RetryJobError, RetryJobResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
+import { browseFolder, cancelJob, createProject, createTimeline, deleteMedia, deleteProject, deleteTimeline, exportTimeline, getHealth, getJob, getKeyframe, getMedia, getMediaQuality, getMediaTranscript, getPoster, getProject, getStrip, getTimeline, getWaveform, importMedia, listJobs, listMedia, listMediaShots, listProjects, listProjectShots, listProjectTranscripts, listTimelines, type Options, processMedia, processProject, relinkMedia, retryJob, searchTranscripts, streamJobEvents, streamProxy, updateProject, uploadMedia } from '../sdk.gen';
+import type { BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaQualityData, GetMediaQualityError, GetMediaQualityResponse, GetMediaResponse, GetMediaTranscriptData, GetMediaTranscriptError, GetMediaTranscriptResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListProjectTranscriptsData, ListProjectTranscriptsError, ListProjectTranscriptsResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RetryJobData, RetryJobError, RetryJobResponse, SearchTranscriptsData, SearchTranscriptsError, SearchTranscriptsResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -623,6 +623,68 @@ export const exportTimelineOptions = (options: Options<ExportTimelineData>) => q
         return data;
     },
     queryKey: exportTimelineQueryKey(options)
+});
+
+export const getMediaTranscriptQueryKey = (options: Options<GetMediaTranscriptData>) => createQueryKey('getMediaTranscript', options);
+
+/**
+ * Get Media Transcript
+ *
+ * The clip's transcript with word timings, and what produced it (model, revision, engine,
+ * settings). Segments the model itself did not accept are marked `uncertain`.
+ */
+export const getMediaTranscriptOptions = (options: Options<GetMediaTranscriptData>) => queryOptions<GetMediaTranscriptResponse, GetMediaTranscriptError, GetMediaTranscriptResponse, ReturnType<typeof getMediaTranscriptQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMediaTranscript({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMediaTranscriptQueryKey(options)
+});
+
+export const listProjectTranscriptsQueryKey = (options: Options<ListProjectTranscriptsData>) => createQueryKey('listProjectTranscripts', options);
+
+/**
+ * List Project Transcripts
+ *
+ * One row per clip: transcript state, language, and how much text there is.
+ */
+export const listProjectTranscriptsOptions = (options: Options<ListProjectTranscriptsData>) => queryOptions<ListProjectTranscriptsResponse, ListProjectTranscriptsError, ListProjectTranscriptsResponse, ReturnType<typeof listProjectTranscriptsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listProjectTranscripts({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listProjectTranscriptsQueryKey(options)
+});
+
+export const searchTranscriptsQueryKey = (options: Options<SearchTranscriptsData>) => createQueryKey('searchTranscripts', options);
+
+/**
+ * Search Transcripts
+ *
+ * Keyword search in the project's transcripts (all words must occur; each matches the start
+ * of a word). Hits are ordered by BM25 and carry the time the first matching word is spoken.
+ */
+export const searchTranscriptsOptions = (options: Options<SearchTranscriptsData>) => queryOptions<SearchTranscriptsResponse, SearchTranscriptsError, SearchTranscriptsResponse, ReturnType<typeof searchTranscriptsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchTranscripts({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchTranscriptsQueryKey(options)
 });
 
 export const getHealthQueryKey = (options?: Options<GetHealthData>) => createQueryKey('getHealth', options);

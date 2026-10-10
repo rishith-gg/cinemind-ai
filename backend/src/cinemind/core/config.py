@@ -13,6 +13,7 @@ from pydantic_settings import (
 )
 
 from cinemind.core.quality_config import QualityConfig
+from cinemind.core.transcribe_config import TranscribeConfig
 
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
 
@@ -44,6 +45,7 @@ class Settings(BaseSettings):
     shot_min_len_s: float = 0.5
     keyframes_per_shot: int = 3
     quality: QualityConfig = QualityConfig()
+    transcribe: TranscribeConfig = TranscribeConfig()
     worker_poll_seconds: float = 0.5
     # Importable modules that register extra stage chains (used by tests and plugins).
     extra_stage_modules: list[str] = []
@@ -56,6 +58,11 @@ class Settings(BaseSettings):
     @property
     def db_path(self) -> Path:
         return self.data_path / "cinemind.db"
+
+    @property
+    def models_path(self) -> Path:
+        """Downloaded models (fetched once by `cinemind models pull`, never while processing)."""
+        return self.data_path / "models"
 
     def project_dir(self, project_id: str) -> Path:
         return self.data_path / "projects" / project_id

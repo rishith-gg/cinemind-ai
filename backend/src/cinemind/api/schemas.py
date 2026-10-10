@@ -119,6 +119,9 @@ class MediaOut(BaseModel):
     quality_score: float | None
     low_quality: bool
     qc_flags: list[str]
+    # Transcript state (None until the transcribe stage ran) and the detected language.
+    transcript_status: str | None
+    transcript_language: str | None
     job: JobBrief | None
 
 
@@ -297,3 +300,89 @@ class QualityOut(BaseModel):
     # have changed since (reprocess to re-score).
     config: dict[str, float]
     settings_changed: bool
+
+
+class TranscriptWordOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    start_s: float
+    end_s: float
+    word: str
+    probability: float
+
+
+class TranscriptSegmentOut(BaseModel):
+    id: int
+    index: int
+    start_s: float
+    end_s: float
+    text: str
+    # Mean word probability; None when the segment has no timed words.
+    confidence: float | None
+    avg_logprob: float
+    no_speech_prob: float
+    compression_ratio: float
+    # The model's own acceptance limits were crossed: treat the text as a guess.
+    uncertain: bool
+    words: list[TranscriptWordOut]
+
+
+TranscriptStatus = Literal[
+    "pending", "done", "no_speech", "no_audio", "model_missing", "audio_unreadable"
+]
+
+
+class TranscriptOut(BaseModel):
+    media_id: str
+    status: TranscriptStatus
+    # Plain-language explanation whenever there is no text to show.
+    message: str | None
+    language: str | None
+    language_probability: float | None
+    language_uncertain: bool
+    model: str
+    model_revision: str
+    speech_s: float
+    # Engine version, device, compute type and the settings the transcript was made with.
+    details: dict[str, Any]
+    # The limits behind `uncertain` and `language_uncertain`.
+    thresholds: dict[str, float]
+    segments: list[TranscriptSegmentOut]
+
+
+class TranscriptSummary(BaseModel):
+    media_id: str
+    filename: str
+    duration_s: float | None
+    status: TranscriptStatus
+    message: str | None
+    language: str | None
+    speech_s: float
+    segments: int
+    words: int
+
+
+class TextPart(BaseModel):
+    text: str
+    match: bool
+
+
+class TranscriptHit(BaseModel):
+    segment_id: int
+    media_id: str
+    filename: str
+    start_s: float
+    end_s: float
+    # When the first word starting with the first search term is spoken (else the segment start).
+    jump_s: float
+    parts: list[TextPart]
+    uncertain: bool
+    # BM25 rank from SQLite FTS5 (lower is better); hits are returned in this order.
+    rank: float
+
+
+class TranscriptSearchOut(BaseModel):
+    query: str
+    # How the query was read: every term must occur, each matching the start of a word.
+    terms: list[str]
+    hits: list[TranscriptHit]

@@ -43,6 +43,8 @@ const base = {
   quality_score: null,
   low_quality: false,
   qc_flags: [],
+  transcript_status: null,
+  transcript_language: null,
   job: null,
 };
 

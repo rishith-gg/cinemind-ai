@@ -1,11 +1,11 @@
 # Progress
 
-_Last updated: 2026-10-09_
+_Last updated: 2026-10-10_
 
 ## Project context
 - Deadline / demo date: TBD (not provided)
 - DaVinci Resolve: **free edition, 21.1.0** (read from `/Applications/DaVinci Resolve.app` Info.plist on 2026-10-09). Free edition: plan on a manual import test, do not rely on external scripting.
-- Footage: `/Volumes/externalssd/CineMind-Footage` (set as `CINEMIND_MEDIA_ROOTS` in the gitignored `.env`), 17 clips, 1.9 GB, phone footage: 11 HEVC + 6 H.264, mostly 4K, 24/25/30/59.94/60 fps, average and base frame rate differ slightly on 10 clips, 1 is flagged variable frame rate by the 0.5 % rule, one 1080p 120 fps, one clip without audio. Languages: TBD
+- Footage: `/Volumes/externalssd/CineMind-Footage` (set as `CINEMIND_MEDIA_ROOTS` in the gitignored `.env`), 21 clips since 2026-10-10 (the figures that follow describe the first 17), 1.9 GB, phone footage: 11 HEVC + 6 H.264, mostly 4K, 24/25/30/59.94/60 fps, average and base frame rate differ slightly on 10 clips, 1 is flagged variable frame rate by the 0.5 % rule, one 1080p 120 fps, one clip without audio. Languages: not stated by the user; the model detected English, Kannada and Hindi (unconfirmed)
 - Machine: macOS (Darwin 25.5), Apple M1 8 cores, 8 GB RAM, Apple GPU (MPS), ~480 GB free on external SSD
 - Recommended model tier: **lite** (see DECISIONS.md D-006)
 
@@ -16,7 +16,7 @@ _Last updated: 2026-10-09_
 - [x] Phase 3: Ingest, metadata, proxies, thumbnails
 - [x] Phase 4: Shots, keyframes + first timeline export (Resolve test). Confirmed by the user in DaVinci Resolve 21.1 free on 2026-10-09 (FCP7 XML)
 - [x] Phase 5: Quality + audio QC (thresholds calibrated on synthetic degradations of real frames, see EVALUATION.md)
-- [ ] Phase 6: Transcription
+- [x] Phase 6: Transcription (WER measured on a public English sample; the user's own clips are not labelled yet)
 - [ ] Phase 7: Faces and actors
 - [ ] Phase 8: Embeddings, tags, scenes
 - [ ] Phase 9: Hybrid search
@@ -27,13 +27,14 @@ _Last updated: 2026-10-09_
 - [ ] Phase 14: Polish, packaging, demo
 
 ## Current state
-Phase 5 is complete. Each clip now gets a Technical Quality Score and QC flags: picture metrics per shot (focus,
-exposure, contrast), black/frozen picture, loudness, silence and clipping, each flag with the value and threshold
-behind it. Library cards show the score and flags and can be filtered and sorted by them; the clip page has a quality
-panel and a QC lane on the time axis. Formulas: AI_PIPELINE.md. Calibration and its limits: EVALUATION.md.
+Phase 6 is complete. Each clip is transcribed on this machine by faster-whisper (model `small` on the lite tier) with
+voice-activity detection, word timings and language detection. The clip page shows the transcript following playback
+(click a word to jump to it); the Transcripts page lists every clip's state and searches spoken words (SQLite FTS5),
+opening the clip at the moment a word is spoken. Parts the model itself did not accept are marked uncertain. The
+model is downloaded once with `uv run cinemind models pull` (done here: `small` and `base` in `data/models/`);
+processing never downloads. Details: AI_PIPELINE.md. Numbers: EVALUATION.md sections 4 and 5.
 
-Next step: Phase 6 (transcription with faster-whisper). It needs a model download; ask before pulling anything over
-2 GB, and ask the user for a clip with clear dialogue.
+Next step: Phase 7 (faces and actors). It needs model downloads (ask above 2 GB) and clips with several people.
 
 Export path for the rest of the project (decided in Phase 4): FCP7 XML into DaVinci Resolve.
 
@@ -55,6 +56,17 @@ file was re-read with OTIO: same cuts, gapless.
 None.
 
 ## Open issues / notes
+- Phase 6, needs the user: (1) say which languages are spoken in the footage; (2) read the transcript of
+  "Timeline One.mov" in the app and say whether the words are right; (3) for a WER on own material, write the true
+  words of one or two clips into `clip.txt` files (EVALUATION.md section 4).
+- Phase 6 limitations: on noisy clips without clear speech (water, music, crowds) Whisper writes fluent text that was
+  never said; it is marked uncertain in most but not all cases, and nothing is hidden. Results on such audio differ
+  from run to run, and those clips are slow (up to 166 s for one clip here). One language per clip. `small` is weak
+  outside English; `medium` (1.5 GB) was not tried on this 8 GB machine. The keyword index has no stemming and is
+  tested with English plus a few Hindi and Kannada words. The GPU path has never run on a real NVIDIA card. No speaker labels, no subtitle (SRT) export, no transcript editing, no "speech present" quality flag. The
+  whole audio of a clip is held in memory. The transcript list re-renders on every time update (fine for short
+  clips, untested on hour-long ones). Search results are capped at 50 without paging. `models pull` cannot repair a damaged model folder (delete
+  the folder under `data/models/whisper/` and pull again). The evaluation download has no checksum.
 - E2E: `T e2e` (Playwright, real built app, throwaway `data/e2e`). Needs a one-time `pnpm exec playwright install chromium`; here only full Chrome for Testing downloaded (headless shell stalled), so `playwright.config.ts` uses `channel: "chromium"`.
 - shadcn/ui is deferred until a screen needs a dialog/table (D-021); delete confirmation uses `window.confirm` for now. Wavesurfer, Recharts and dnd-kit arrive with their screens.
 - Phase 5 limitations: the flag thresholds were calibrated on synthetically degraded frames from 17 phone clips, not

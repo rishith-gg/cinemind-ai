@@ -114,7 +114,7 @@ def test_ingest_produces_proxy_thumbs_waveform(
         job = s.get(Job, job_id)
         asset = s.get(MediaAsset, asset_id)
         assert job and asset and job.status == "succeeded"
-        assert [st.status for st in job.stages] == ["succeeded"] * 8
+        assert [st.status for st in job.stages] == ["succeeded"] * 9
         assert asset.probed and asset.video_codec == "prores" and asset.duration_s
         root = settings.project_dir(project)
         assert asset.proxy_path and asset.poster_path and asset.strip_path and asset.waveform_path
@@ -179,7 +179,8 @@ def test_rerun_uses_cache_and_recreates_deleted_artifacts(
     run_job(factory, settings, job_id)
     with factory() as s:
         job = s.get(Job, job_id)
-        assert job and [st.status for st in job.stages] == ["cached"] * 8
+        # The last stage (transcribe) has no model in tests, so it is tried again, not cached.
+        assert job and [st.status for st in job.stages] == ["cached"] * 8 + ["succeeded"]
 
     proxy_file = settings.project_dir(project) / asset.proxy_path
     proxy_file.unlink()  # cached result must not be trusted when the file is gone
@@ -237,7 +238,8 @@ def test_deleted_thumbnails_and_waveform_are_regenerated(
     with factory() as s:
         job = s.get(Job, job_id)
         assert job and [st.status for st in job.stages] == [
-            "cached", "cached", "succeeded", "succeeded", "cached", "cached", "cached", "cached"
+            "cached", "cached", "succeeded", "succeeded", "cached", "cached", "cached", "cached",
+            "succeeded",
         ]  # fmt: skip
     assert (root / asset.strip_path).is_file() and (root / asset.waveform_path).is_file()
 
@@ -257,3 +259,34 @@ def test_hardware_encoder_failure_falls_back_to_cpu(
         lambda: None,
     )
     assert used == "libx264" and (tmp_path / "p.mp4").is_file()  # nvenc cannot run on this host
+
+
+def test_pcm_reader_cleans_up_when_the_consumer_stops_or_cancels(tmp_path: Path) -> None:
+    from cinemind.core.errors import JobCancelled
+    from cinemind.pipeline.ffmpeg import pcm_chunks
+
+    long = tmp_path / "long.wav"
+    cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi"]
+    cmd += ["-i", "sine=frequency=440:duration=120", "-ac", "2", str(long)]
+    subprocess.run(cmd, check=True, timeout=120)  # noqa: S603
+
+    def running() -> int:
+        out = subprocess.run(["pgrep", "-f", str(long)], capture_output=True, text=True)  # noqa: S603, S607
+        return len(out.stdout.split())
+
+    total = sum(len(c) for c in pcm_chunks(long, lambda: None, "x", rate=16000, mono=True))
+    assert total == pytest.approx(120 * 16000, rel=0.001)
+
+    reader = pcm_chunks(long, lambda: None, "x")
+    assert len(next(reader)) > 0
+    reader.close()  # the consumer stops early: ffmpeg must not be left running
+    assert running() == 0
+
+    def cancel() -> None:
+        raise JobCancelled
+
+    with pytest.raises(JobCancelled):
+        list(pcm_chunks(long, cancel, "x"))
+    assert running() == 0
+    with pytest.raises(UnreadableMediaError, match="no audio here"):
+        list(pcm_chunks(tmp_path / "missing.wav", lambda: None, "no audio here"))

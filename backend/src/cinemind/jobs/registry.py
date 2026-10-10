@@ -44,6 +44,9 @@ class Stage:
     # Stages that write files under the project directory cache per project, so the same footage
     # imported into two projects still gets its own artifacts.
     scope_project: bool = False
+    # Stages whose cache keys this stage's key is chained to (None = the stage before it). An
+    # expensive stage names what it really reads, so unrelated settings do not invalidate it.
+    upstream: tuple[str, ...] | None = None
     # Cached results are only reused if this says the output files still exist.
     verify: Callable[[StageContext, dict[str, Any]], bool] | None = None
     # Store the result in the database; runs after a fresh run AND after a cache hit.
@@ -54,6 +57,12 @@ _CHAINS: dict[str, list[Stage]] = {}
 
 
 def register_chain(name: str, stages: list[Stage]) -> None:
+    seen: set[str] = set()
+    for stage in stages:
+        unknown = set(stage.upstream or ()) - seen
+        if unknown:
+            raise ValueError(f"stage '{stage.name}' names upstream stages not before it: {unknown}")
+        seen.add(stage.name)
     _CHAINS[name] = stages
 
 

@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router";
 import type { MediaOut } from "../../api";
 import { QcLane } from "../quality/QcLane";
 import { ShotStrip } from "../shots/ShotStrip";
+import { TranscriptPanel } from "../transcripts/TranscriptPanel";
 import { handlePlayerKey, type PlayerState } from "./playerKeys";
 import { Waveform } from "./Waveform";
 
@@ -13,7 +14,8 @@ function isTyping(target: EventTarget | null): boolean {
 }
 
 /** Proxy player with editor shortcuts (Space/K/L/J, arrows = frame step, I/O marks), a
- * thumbnail strip (click to seek), the shot strip and the waveform. Always plays the browser-safe proxy. */
+ * thumbnail strip (click to seek), the shot strip, the waveform and the transcript following
+ * playback. Always plays the browser-safe proxy. */
 export function Player({ media }: { media: MediaOut }) {
   const [video, setVideo] = useState<HTMLVideoElement | null>(null);
   const [time, setTime] = useState(0);
@@ -46,6 +48,9 @@ export function Player({ media }: { media: MediaOut }) {
     setVideo(el); // state copy so the shortcuts/waveform effects re-run when it mounts
   }, []);
 
+  const seekTo = (seconds: number) => {
+    if (videoRef.current) videoRef.current.currentTime = Math.max(0, seconds);
+  };
   const seekToFraction = (fraction: number) => {
     if (videoRef.current) videoRef.current.currentTime = Math.min(1, Math.max(0, fraction)) * duration;
   };
@@ -86,6 +91,7 @@ export function Player({ media }: { media: MediaOut }) {
       {duration > 0 && !!media.width && <ShotStrip mediaId={media.id} duration={duration} time={time} onSeek={(t) => seekToFraction(t / duration)} />}
       <QcLane mediaId={media.id} duration={duration} onSeek={(t) => seekToFraction(t / duration)} />
       {media.has_waveform && <Waveform mediaId={media.id} video={video} />}
+      {media.probed && <TranscriptPanel mediaId={media.id} time={time} onSeek={seekTo} />}
       <p className="text-xs text-neutral-500">
         Keys: Space/K play·pause · L play (again = faster) · J back 1 s · ←/→ one frame (Shift: 1 s) · I/O mark
       </p>

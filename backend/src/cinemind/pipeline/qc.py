@@ -3,9 +3,6 @@ black and frozen picture, loudness (EBU R128), silence, and clipped samples."""
 
 import logging
 import re
-import subprocess
-import tempfile
-import threading
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -14,8 +11,7 @@ import numpy as np
 
 from cinemind.core.errors import UnreadableMediaError
 from cinemind.core.quality_config import QualityConfig
-from cinemind.pipeline.ffmpeg import run_ffmpeg
-from cinemind.pipeline.ffprobe import require_tool
+from cinemind.pipeline.ffmpeg import pcm_chunks, run_ffmpeg
 
 log = logging.getLogger(__name__)
 
@@ -29,8 +25,6 @@ _SILENCE = re.compile(rf"silence_(start|end): {_NUM}")
 _LOUDNESS = re.compile(rf"\bI:\s+{_NUM} LUFS")
 _RANGE = re.compile(rf"\bLRA:\s+{_NUM} LU")
 _PEAK = re.compile(rf"\bPeak:\s+{_NUM} dBFS")
-_READ_BYTES = 1 << 20
-_DECODE_TIMEOUT_S = 3600
 # Loudness needs a few complete 400 ms blocks; under this length "no reading" means "too short".
 MIN_LOUDNESS_S = 1.0
 ANALYSIS_FAILED = (
@@ -144,43 +138,17 @@ def measure_loudness(
 def count_clipped(source: Path, level: float, check: Check) -> dict[str, Any]:
     """Share of samples at (or within a hair of) full scale, decoded to 16-bit PCM. Samples
     above full scale in a float source count too (they clip when written as integers)."""
-    cmd = [require_tool("ffmpeg"), "-hide_banner", "-nostdin", "-loglevel", "error"]
-    cmd += ["-protocol_whitelist", "file", "-i", str(source), "-map", "0:a:0", "-vn"]
-    cmd += ["-f", "s16le", "-c:a", "pcm_s16le", "-"]
     limit = int(level * 32767)
     total = clipped = peak = 0
-    with tempfile.TemporaryFile("w+") as err:
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=err, text=False)  # noqa: S603
-        if proc.stdout is None:  # pragma: no cover - PIPE always provides it
-            raise RuntimeError("ffmpeg stdout unavailable")
-        # A stalled decoder (sleeping disk, damaged file) must not hang the worker for ever.
-        watchdog = threading.Timer(_DECODE_TIMEOUT_S, proc.kill)
-        watchdog.start()
-        try:
-            carry = b""
-            while chunk := proc.stdout.read(_READ_BYTES):
-                check()
-                data = carry + chunk
-                usable = len(data) - len(data) % 2
-                carry = data[usable:]
-                samples = np.abs(np.frombuffer(data[:usable], dtype="<i2").astype(np.int32))
-                if samples.size:
-                    total += int(samples.size)
-                    clipped += int((samples >= limit).sum())
-                    peak = max(peak, int(samples.max()))
-        except BaseException:
-            proc.kill()
-            raise
-        finally:
-            watchdog.cancel()
-            proc.stdout.close()
-            code = proc.wait()
-        if code != 0 or total == 0:
-            err.seek(0)
-            log.warning("audio decode failed for %s (%d): %s", source.name, code, err.read()[-300:])
-            raise UnreadableMediaError(
-                "The audio track could not be decoded for the quality check."
-            )
+    failure = "The audio track could not be decoded for the quality check."
+    for chunk in pcm_chunks(source, check, failure):
+        samples = np.abs(chunk.astype(np.int32))
+        total += int(samples.size)
+        clipped += int((samples >= limit).sum())
+        peak = max(peak, int(samples.max()))
+    if total == 0:
+        log.warning("audio decode produced no samples for %s", source.name)
+        raise UnreadableMediaError(failure)
     return {
         "samples": total,
         "clipped_pct": round(100.0 * clipped / total, 5),

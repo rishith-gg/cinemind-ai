@@ -591,6 +591,14 @@ export type MediaOut = {
      * Qc Flags
      */
     qc_flags: Array<string>;
+    /**
+     * Transcript Status
+     */
+    transcript_status: string | null;
+    /**
+     * Transcript Language
+     */
+    transcript_language: string | null;
     job: JobBrief | null;
 };
 
@@ -902,6 +910,20 @@ export type ShotQualityOut = {
 };
 
 /**
+ * TextPart
+ */
+export type TextPart = {
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Match
+     */
+    match: boolean;
+};
+
+/**
  * TierRecommendation
  */
 export type TierRecommendation = {
@@ -1136,6 +1158,238 @@ export type TimelineOut = {
      * Formats
      */
     formats: Array<string>;
+};
+
+/**
+ * TranscriptHit
+ */
+export type TranscriptHit = {
+    /**
+     * Segment Id
+     */
+    segment_id: number;
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Jump S
+     */
+    jump_s: number;
+    /**
+     * Parts
+     */
+    parts: Array<TextPart>;
+    /**
+     * Uncertain
+     */
+    uncertain: boolean;
+    /**
+     * Rank
+     */
+    rank: number;
+};
+
+/**
+ * TranscriptOut
+ */
+export type TranscriptOut = {
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Status
+     */
+    status: 'pending' | 'done' | 'no_speech' | 'no_audio' | 'model_missing' | 'audio_unreadable';
+    /**
+     * Message
+     */
+    message: string | null;
+    /**
+     * Language
+     */
+    language: string | null;
+    /**
+     * Language Probability
+     */
+    language_probability: number | null;
+    /**
+     * Language Uncertain
+     */
+    language_uncertain: boolean;
+    /**
+     * Model
+     */
+    model: string;
+    /**
+     * Model Revision
+     */
+    model_revision: string;
+    /**
+     * Speech S
+     */
+    speech_s: number;
+    /**
+     * Details
+     */
+    details: {
+        [key: string]: unknown;
+    };
+    /**
+     * Thresholds
+     */
+    thresholds: {
+        [key: string]: number;
+    };
+    /**
+     * Segments
+     */
+    segments: Array<TranscriptSegmentOut>;
+};
+
+/**
+ * TranscriptSearchOut
+ */
+export type TranscriptSearchOut = {
+    /**
+     * Query
+     */
+    query: string;
+    /**
+     * Terms
+     */
+    terms: Array<string>;
+    /**
+     * Hits
+     */
+    hits: Array<TranscriptHit>;
+};
+
+/**
+ * TranscriptSegmentOut
+ */
+export type TranscriptSegmentOut = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Confidence
+     */
+    confidence: number | null;
+    /**
+     * Avg Logprob
+     */
+    avg_logprob: number;
+    /**
+     * No Speech Prob
+     */
+    no_speech_prob: number;
+    /**
+     * Compression Ratio
+     */
+    compression_ratio: number;
+    /**
+     * Uncertain
+     */
+    uncertain: boolean;
+    /**
+     * Words
+     */
+    words: Array<TranscriptWordOut>;
+};
+
+/**
+ * TranscriptSummary
+ */
+export type TranscriptSummary = {
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Duration S
+     */
+    duration_s: number | null;
+    /**
+     * Status
+     */
+    status: 'pending' | 'done' | 'no_speech' | 'no_audio' | 'model_missing' | 'audio_unreadable';
+    /**
+     * Message
+     */
+    message: string | null;
+    /**
+     * Language
+     */
+    language: string | null;
+    /**
+     * Speech S
+     */
+    speech_s: number;
+    /**
+     * Segments
+     */
+    segments: number;
+    /**
+     * Words
+     */
+    words: number;
+};
+
+/**
+ * TranscriptWordOut
+ */
+export type TranscriptWordOut = {
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Word
+     */
+    word: string;
+    /**
+     * Probability
+     */
+    probability: number;
 };
 
 /**
@@ -2511,6 +2765,159 @@ export type ExportTimelineResponses = {
      */
     200: unknown;
 };
+
+export type GetMediaTranscriptData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/transcript';
+};
+
+export type GetMediaTranscriptErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetMediaTranscriptError = GetMediaTranscriptErrors[keyof GetMediaTranscriptErrors];
+
+export type GetMediaTranscriptResponses = {
+    /**
+     * Successful Response
+     */
+    200: TranscriptOut;
+};
+
+export type GetMediaTranscriptResponse = GetMediaTranscriptResponses[keyof GetMediaTranscriptResponses];
+
+export type ListProjectTranscriptsData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/transcripts';
+};
+
+export type ListProjectTranscriptsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListProjectTranscriptsError = ListProjectTranscriptsErrors[keyof ListProjectTranscriptsErrors];
+
+export type ListProjectTranscriptsResponses = {
+    /**
+     * Response Listprojecttranscripts
+     *
+     * Successful Response
+     */
+    200: Array<TranscriptSummary>;
+};
+
+export type ListProjectTranscriptsResponse = ListProjectTranscriptsResponses[keyof ListProjectTranscriptsResponses];
+
+export type SearchTranscriptsData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query: {
+        /**
+         * Q
+         */
+        q: string;
+        /**
+         * Media Id
+         */
+        media_id?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/projects/{project_id}/transcripts/search';
+};
+
+export type SearchTranscriptsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type SearchTranscriptsError = SearchTranscriptsErrors[keyof SearchTranscriptsErrors];
+
+export type SearchTranscriptsResponses = {
+    /**
+     * Successful Response
+     */
+    200: TranscriptSearchOut;
+};
+
+export type SearchTranscriptsResponse = SearchTranscriptsResponses[keyof SearchTranscriptsResponses];
 
 export type GetHealthData = {
     body?: never;

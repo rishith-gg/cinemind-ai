@@ -1,6 +1,6 @@
 """The `ingest` chain: validate -> proxy -> thumbnails -> waveform -> shots -> keyframes
--> quality -> audio_qc (SPEC sections 4 and 5; the later ones live in `shot_stages.py` and
-`quality_stages.py`).
+-> quality -> audio_qc -> transcribe (SPEC sections 4 and 5; the later ones live in
+`shot_stages.py`, `quality_stages.py` and `transcribe_stages.py`).
 
 Stages return plain dicts (cached in `stage_results`); the `persist_*` functions copy them onto
 the media asset row. Artifact paths are stored relative to the project directory.
@@ -30,6 +30,7 @@ from cinemind.pipeline.stage_utils import (
     proxy_file,
     source_info,
 )
+from cinemind.pipeline.transcribe_stages import TRANSCRIBE_STAGES
 
 PIPELINE_VERSION = "1"
 _PROXY_MBIT = 4  # generous upper bound for proxy bitrate when estimating disk use
@@ -249,5 +250,6 @@ register_chain(
         ),
         *SHOT_STAGES,
         *QUALITY_STAGES,
+        *TRANSCRIBE_STAGES,
     ],
 )

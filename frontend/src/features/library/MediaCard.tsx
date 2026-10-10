@@ -2,6 +2,7 @@ import { Link } from "react-router";
 
 import type { MediaOut } from "../../api";
 import { QualityBadge } from "../quality/QualityBadge";
+import { languageName } from "../transcripts/labels";
 import { formatBytes, formatDuration, mediaStatus, STATUS_LABEL, type Status } from "./format";
 
 const STATUS_STYLE: Record<Status, string> = {
@@ -41,6 +42,11 @@ export function MediaCard({ media }: { media: MediaOut }) {
           <div className="flex flex-wrap items-center gap-1">
             <StatusBadge media={media} />
             <QualityBadge media={media} id={`quality-${media.id}`} />
+            {media.transcript_status === "done" && (
+              <span title="This clip has a transcript" className="rounded bg-neutral-800 px-2 py-0.5 text-xs text-neutral-300">
+                Speech · {languageName(media.transcript_language)}
+              </span>
+            )}
           </div>
           {failed && media.job?.error_message && <p className="text-xs text-red-300">{media.job.error_message}</p>}
         </div>

@@ -15,10 +15,13 @@ score. Settings named in `code` live in `cinemind.toml` / `.env` (`core/config.p
 | 6 | keyframes | OpenCV (Laplacian) | anchor points, sharpest-of-5 rule |
 | 7 | quality | OpenCV primitives; ffmpeg `blackdetect`, `freezedetect` | the metrics, sub-scores, score and flags below |
 | 8 | audio_qc | ffmpeg `ebur128`, `silencedetect` | clipped-sample count, audio score, flags |
+| 9 | transcribe | faster-whisper (Whisper weights on CTranslate2) with its Silero voice-activity detector | model choice per hardware tier, offline model handling, stored shape, "uncertain" marking, keyword index |
 
 Every stage result is cached by (media content hash, stage, parameters, tool version) and chained to the stage
 before it. Stages 7 and 8 cache MEASUREMENTS only; scores and flags are recomputed from them with the current
 settings every time the job runs, so a changed weight or threshold needs no video decoding ("Process all").
+Stage 9 is chained to stage 1 only (the source file), so shot or quality settings never send audio through the
+speech model again.
 
 ## Technical quality (stages 7 and 8)
 These are technical measurements: focus, exposure, tonal range, audio level. They say nothing about whether a shot is
@@ -91,4 +94,58 @@ Picture metrics are measured on the proxy.
 - The median over a shot hides a few blurred frames (a whip pan inside a sharp shot is not flagged).
 - Heavy compression adds block edges that look like detail; the absolute `sharpness` floor exists for that case.
 - "Overexposed" is a brightness statistic: a deliberately bright scene (snow, fog, a white wall) is flagged too.
-- No face-region sharpness yet (needs faces, Phase 7), no noise or shake metric, no speech-present flag (Phase 6).
+- No face-region sharpness yet (needs faces, Phase 7), no noise or shake metric. The transcript (stage 9) is not
+  part of the score.
+
+## Transcription (stage 9)
+**Existing parts.** The speech model is OpenAI Whisper, run by faster-whisper (CTranslate2). Speech is found first
+by the Silero voice-activity detector that faster-whisper ships, so silence and noise are not sent to the model.
+Word times come from the model's cross-attention alignment (`word_timestamps`). None of this is ours.
+
+**Ours.**
+- *Model choice.* `[transcribe] model = "auto"` takes the hardware tier's model: lite and balanced `small`,
+  quality `large-v3` (all multilingual). Each model is pinned to a repository revision
+  (`core/transcribe_config.py`); the name and revision are stored with every transcript.
+- *No download while processing.* `uv run cinemind models pull` fetches the model once into `data/models/`.
+  The stage only reads that folder. Without the model the clip is processed as usual, the transcript is recorded
+  as `model_missing`, every transcript view says how to fix it, and the next run tries again.
+- *Audio.* The original file's first audio stream, decoded by our ffmpeg call to 16 kHz mono.
+- *Settings* (all part of the cache key and stored with the transcript): `language` (`auto` = detected from the
+  start of the speech, one language per clip), `beam_size` 5, `vad_threshold` 0.5, `vad_min_silence_ms` 2000,
+  `device`/`compute_type` (`auto` = int8 on the CPU, float16 on an NVIDIA GPU; an automatically chosen GPU that
+  fails to load falls back to the CPU). The numeric values are the library's defaults, not tuned by us.
+- *What is stored.* Per segment: start, end, text, the model's `avg_logprob`, `no_speech_prob` and
+  `compression_ratio`, and `confidence` = mean of the word probabilities. Per word: start, end, text, probability.
+  Segments made only of punctuation are dropped.
+- *Uncertain.* A segment is marked uncertain when `avg_logprob < -1.0` or `compression_ratio > 2.4`. Those are
+  Whisper's own acceptance limits: it retries such a segment at higher temperatures and keeps the last attempt even
+  if that fails too. The language is marked a guess when its probability is under 0.5 (Whisper's own
+  `language_detection_threshold`). These limits are conventions taken from the model; we have not evaluated them.
+  Uncertain text is kept, shown dimmed and labelled, and still searchable.
+- *States.* `done`, `no_speech` (the detector or the model found nothing), `no_audio`, `model_missing`,
+  `audio_unreadable` (the picture results are kept). Each has a plain message in the API and the UI.
+
+**Keyword search.** Segment text is indexed in an SQLite FTS5 table (tokenizer `unicode61`, diacritics removed,
+combining marks kept inside words so Hindi or Kannada words are not cut at their vowel signs).
+A query is split at spaces; every term must occur and matches the beginning of a word (`walk` finds `walking`);
+quotes and operators typed by the user are treated as text. Ranking is SQLite's BM25. Each hit carries `jump_s`,
+the start time of the first word that begins with the first search term (the segment start if none does). With
+several terms that is the first term's word, not necessarily the earliest match.
+This is the keyword part of search only; semantic and visual search come in Phase 9.
+
+### Known limits
+- Whisper invents fluent text for music, crowd noise, wind and water; the voice-activity detector lets some of that
+  through. On the user's own phone footage most "transcripts" of noisy clips are of this kind (EVALUATION.md).
+- Results on hard audio are not repeatable: the retries sample at random, so a clip transcribed again after a cache
+  miss can come out with different words or a different language. Finished results are cached and do not change.
+- Hard audio is slow: every retry decodes the segment again (seconds of audio can take a minute on the CPU).
+- One language per clip, detected from the beginning. Mixed-language clips are transcribed as the first language.
+- The `small` model is weak on many languages other than English; a larger model needs more memory than the lite
+  tier has.
+- Times are relative to the start of the audio stream; a stream that starts late in the file is not compensated.
+- The whole audio is held in memory: about 230 MB per hour while transcribing, about 350 MB per hour for a moment
+  while it is decoded (by reading the code, not measured).
+- The keyword index is tested with English and with a few Hindi and Kannada words; no stemming. Scripts without
+  spaces between words are not segmented.
+- `audio_unreadable` and `model_missing` are tried again on every run; a GPU that fails while decoding is replaced
+  by the CPU only when the device was chosen automatically (tested with a stand-in, never on a real NVIDIA GPU).

@@ -298,3 +298,71 @@ class QcFlag(Base):
     details: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
     __table_args__ = (Index("ix_qc_flags_media", "media_id"),)
+
+
+TRANSCRIPT_STATUSES = ("done", "no_speech", "no_audio", "model_missing", "audio_unreadable")
+
+
+class Transcript(Base):
+    """What the transcribe stage found for one clip, and what produced it (rule 6)."""
+
+    __tablename__ = "transcripts"
+
+    media_id: Mapped[str] = mapped_column(
+        ForeignKey("media_assets.id", ondelete="CASCADE"), primary_key=True
+    )
+    status: Mapped[str] = mapped_column(String(32))
+    language: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    language_probability: Mapped[float | None] = mapped_column(nullable=True)
+    model: Mapped[str] = mapped_column(String(100), default="")
+    model_revision: Mapped[str] = mapped_column(String(64), default="")
+    # Seconds of audio the voice-activity detector kept as speech.
+    speech_s: Mapped[float] = mapped_column(default=0.0)
+    # Hash of the stage result these rows were written from: an unchanged result keeps its rows
+    # (and their ids) when a clip is processed again.
+    digest: Mapped[str] = mapped_column(String(64), default="")
+    # Engine version, device, compute type, settings, and the reason when there is no text.
+    details: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+
+
+class TranscriptSegment(Base):
+    """One stretch of speech. `text` is indexed for keyword search in the FTS5 table
+    `transcript_fts`, kept in step by triggers (see migration 0006)."""
+
+    __tablename__ = "transcript_segments"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    media_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id", ondelete="CASCADE"))
+    index: Mapped[int]
+    start_s: Mapped[float]
+    end_s: Mapped[float]
+    text: Mapped[str] = mapped_column(Text)
+    # Mean word probability (None if the segment has no timed words) and the model's own
+    # per-segment figures.
+    confidence: Mapped[float | None] = mapped_column(nullable=True)
+    avg_logprob: Mapped[float]
+    no_speech_prob: Mapped[float]
+    compression_ratio: Mapped[float]
+
+    words: Mapped[list["TranscriptWord"]] = relationship(
+        order_by="TranscriptWord.index", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+    __table_args__ = (Index("ix_transcript_segments_media", "media_id", "index"),)
+
+
+class TranscriptWord(Base):
+    __tablename__ = "transcript_words"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    segment_id: Mapped[int] = mapped_column(
+        ForeignKey("transcript_segments.id", ondelete="CASCADE")
+    )
+    media_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id", ondelete="CASCADE"))
+    index: Mapped[int]
+    start_s: Mapped[float]
+    end_s: Mapped[float]
+    word: Mapped[str] = mapped_column(String(200))
+    probability: Mapped[float]
+
+    __table_args__ = (Index("ix_transcript_words_segment", "segment_id", "index"),)

@@ -22,6 +22,7 @@ from cinemind.core.paths import resolve_in_roots, sanitize_filename
 from cinemind.db.base import new_id
 from cinemind.db.models import Job, MediaAsset
 from cinemind.jobs import queue
+from cinemind.pipeline import transcribe_stages
 from cinemind.pipeline.hashing import content_hash
 from cinemind.pipeline.qc import detector_params
 
@@ -229,6 +230,7 @@ def enqueue_ingest(session: Session, settings: Settings, asset: MediaAsset) -> J
             "shot_min_len_s": settings.shot_min_len_s,
             "keyframes_per_shot": settings.keyframes_per_shot,
             "qc_detect": detector_params(settings.quality),
+            "transcribe": transcribe_stages.job_params(settings),
         },
     )
 

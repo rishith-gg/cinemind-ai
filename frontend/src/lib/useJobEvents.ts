@@ -3,6 +3,18 @@ import { useEffect, useRef, useState } from "react";
 
 import { getJobQueryKey } from "../api/@tanstack/react-query.gen";
 
+// Queries showing results that processing produces.
+const REFRESHED = new Set([
+  "listMedia",
+  "getMedia",
+  "listMediaShots",
+  "listProjectShots",
+  "getMediaQuality",
+  "getMediaTranscript",
+  "listProjectTranscripts",
+  "searchTranscripts",
+]);
+
 export interface JobEvent {
   job_id: string;
   type: string;
@@ -31,7 +43,7 @@ export function useJobEvents(onEvent?: (e: JobEvent) => void): { connected: bool
         void qc.invalidateQueries({
           predicate: (q) => {
             const id = (q.queryKey[0] as { _id?: string } | undefined)?._id;
-            return id === "listMedia" || id === "getMedia" || id === "listMediaShots" || id === "listProjectShots" || id === "getMediaQuality";
+            return !!id && REFRESHED.has(id);
           },
         });
       }, 1000);

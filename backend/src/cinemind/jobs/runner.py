@@ -41,6 +41,7 @@ def run_job(factory: sessionmaker[Session], settings: Settings, job_id: str) -> 
 
     previous: dict[str, dict[str, Any]] = {}
     upstream_key = ""
+    keys: dict[str, str] = {}
     try:
         for ordinal, stage in enumerate(stages):
             _check_cancel(factory, job_id)
@@ -51,8 +52,10 @@ def run_job(factory: sessionmaker[Session], settings: Settings, job_id: str) -> 
             )
             params_hash = _hash({"job": used, "stage": stage.params})
             scope = _hash([media_hash, project_id]) if stage.scope_project else media_hash
+            if stage.upstream is not None:
+                upstream_key = _hash([keys[name] for name in stage.upstream])
             key = cache_key(scope, stage, params_hash, upstream_key)
-            upstream_key = key
+            upstream_key = keys[stage.name] = key
             prov = {
                 "cache_key": key,
                 "params_hash": params_hash,
