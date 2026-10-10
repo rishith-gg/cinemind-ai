@@ -44,3 +44,17 @@ Datetimes are stored as naive UTC and returned timezone-aware (`UTCDateTime`).
 | `transcript_segments` | `index`, `start_s`/`end_s`, `text`, `confidence` (mean word probability), and the model's `avg_logprob`, `no_speech_prob`, `compression_ratio`. Integer id. Cascades from `media_assets`. |
 | `transcript_words` | `segment_id`, `index`, `start_s`/`end_s`, `word`, `probability`. Cascades from `transcript_segments`. |
 | `transcript_fts` | FTS5 virtual table over `transcript_segments.text` (external content, `rowid` = segment id, tokenizer `unicode61 remove_diacritics 2 categories 'L* N* Co Mn Mc'` since 0007, which rebuilds the index so combining marks stay inside words). Three triggers on `transcript_segments` keep it in step, also for cascaded deletes. Not an ORM model; created with raw SQL in the migration. |
+
+## Phase 7 tables (migration 0008)
+Models live in `db/people.py` (imported by `db/models.py`).
+
+| Table | Purpose |
+|---|---|
+| `face_scans` | one row per clip once the faces stage ran: `status` (`done`, `no_faces`, `no_video`, `model_missing`), `frames_sampled`, `faces_detected`, `faces_used`, `max_in_frame`, `digest` (hash of the stage result; an unchanged result keeps its tracks, their ids and their actors), `details` (models, revisions, settings, faces left out per check, reason). |
+| `face_tracks` | one face followed through one shot: `media_id`, `shot_id`, `index`, `start_s`/`end_s`, `face_count`, `embedding` (128 float32, length 1: the mean SFace vector), `crop_path` (inside the scan's own folder), `actor_id` (null when set aside), `state` (`auto`, `pinned`, `ignored`, `unknown`), `assignment` (why it sits with its actor). Id = hash of (media, first frame, first box). |
+| `faces` | every used face: `track_id`, `frame`, `time_s`, box `x`,`y`,`w`,`h` as fractions of the frame, `score`, `size_px`, `sharpness`, `turn`. Cascades from `face_tracks`. |
+| `actors` | a group of tracks: `project_id`, `number` (lowest free number when created), `name` ("Actor 001" until renamed), `named`. Local to the project. |
+| `face_pins` | the user's corrections, one row per face of a corrected track: `media_id`, `time_s`, box, `state` (`actor` = moved there by hand, `kept` = was with the actor when it was named or corrected, `ignored`, `unknown`), `actor_id`, and `track_id` (the track it currently belongs to; reset when the clip is scanned again and found again by place and time). Cascades from the clip and from the actor. |
+| `actor_runs` | one row per project: `digest` (hash of what the grouping depends on: scan digests, pins, method, distance; an unchanged project is not grouped again), `details` (engine, method, distance, counts), `clustered_at`. |
+| `feedback_events` | append-only log of corrections: `kind` (`actor_rename`, `actor_merge`, `actor_split`, `face_place`) and `payload`. Not read by the app yet; kept for the ranking phase. |
+

@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from "react-router";
 
 import { Layout } from "../components/Layout";
+import { ActorPage } from "../features/actors/ActorPage";
+import { ActorsPage } from "../features/actors/ActorsPage";
 import { ComingSoon } from "../features/ComingSoon";
 import { DashboardPage } from "../features/DashboardPage";
 import { ExportPage } from "../features/export/ExportPage";
@@ -13,7 +15,6 @@ import { SettingsPage } from "../features/system/SettingsPage";
 import { TranscriptsPage } from "../features/transcripts/TranscriptsPage";
 
 const LATER = [
-  { path: "actors", title: "Actors", phase: 7 },
   { path: "search", title: "Search", phase: 9 },
   { path: "timeline", title: "Timeline", phase: 11 },
 ];
@@ -29,6 +30,8 @@ export function App() {
         <Route path="library/:mediaId" element={<ClipPage />} />
         <Route path="shots" element={<ShotsPage />} />
         <Route path="transcripts" element={<TranscriptsPage />} />
+        <Route path="actors" element={<ActorsPage />} />
+        <Route path="actors/:actorId" element={<ActorPage />} />
         <Route path="export" element={<ExportPage />} />
         <Route path="settings" element={<SettingsPage />} />
         {LATER.map((l) => (

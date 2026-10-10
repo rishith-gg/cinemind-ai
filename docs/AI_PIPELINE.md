@@ -16,12 +16,15 @@ score. Settings named in `code` live in `cinemind.toml` / `.env` (`core/config.p
 | 7 | quality | OpenCV primitives; ffmpeg `blackdetect`, `freezedetect` | the metrics, sub-scores, score and flags below |
 | 8 | audio_qc | ffmpeg `ebur128`, `silencedetect` | clipped-sample count, audio score, flags |
 | 9 | transcribe | faster-whisper (Whisper weights on CTranslate2) with its Silero voice-activity detector | model choice per hardware tier, offline model handling, stored shape, "uncertain" marking, keyword index |
+| 10 | faces | OpenCV `FaceDetectorYN` (YuNet) and `FaceRecognizerSF` (SFace) | frame sampling, the four face checks, tracking inside a shot, what is stored |
 
 Every stage result is cached by (media content hash, stage, parameters, tool version) and chained to the stage
 before it. Stages 7 and 8 cache MEASUREMENTS only; scores and flags are recomputed from them with the current
 settings every time the job runs, so a changed weight or threshold needs no video decoding ("Process all").
 Stage 9 is chained to stage 1 only (the source file), so shot or quality settings never send audio through the
 speech model again.
+Stage 10 is chained to stage 5 (the shots). Grouping the faces of a whole project into actors is not a stage: it
+runs after a project's last queued job and after "Group again" (see "Faces and actors").
 
 ## Technical quality (stages 7 and 8)
 These are technical measurements: focus, exposure, tonal range, audio level. They say nothing about whether a shot is
@@ -149,3 +152,84 @@ This is the keyword part of search only; semantic and visual search come in Phas
   spaces between words are not segmented.
 - `audio_unreadable` and `model_missing` are tried again on every run; a GPU that fails while decoding is replaced
   by the CPU only when the device was chosen automatically (tested with a stand-in, never on a real NVIDIA GPU).
+
+## Faces and actors (stage 10 and the project-level grouping)
+**Existing parts.** YuNet finds faces and five landmarks per face; SFace turns an aligned 112 px face crop into a
+128-number vector. Both are models from the OpenCV model zoo, run by OpenCV itself. Grouping uses scikit-learn's
+average-linkage agglomerative clustering or HDBSCAN, and SciPy's assignment solver for tracking. None of this is
+ours.
+
+**Ours.**
+- *No download while processing.* `uv run cinemind models pull` fetches both files once (37 MB) into
+  `data/models/faces/` and checks each against a SHA-256. Without them a clip is processed as usual, its faces are
+  recorded as `model_missing`, the Actors page and the clip page say how to fix it, and the next run tries again.
+- *Sampling.* `sample_fps` (2) frames per second of the proxy, in one sequential decode.
+- *Which faces are used.* Every box the detector returns with confidence >= 0.6 is counted as detected. A face is
+  used only if it passes four checks, in this order; the first one failed is counted per clip:
+  `low_score` (detector confidence < `min_score` 0.8), `small` (shorter box side < `min_size_px` 40 on the proxy),
+  `turned` (`turn` > `max_turn` 0.6), `blurry` (variance of the Laplacian of the aligned crop < `min_sharpness` 20).
+  `turn` = distance of the nose from the middle of the eyes, measured along the eye line, divided by the eye
+  distance: 0 for a frontal face, larger towards a profile; a head tilted sideways stays 0.
+  These four limits are conventions, not values we evaluated.
+- *Tracking.* Inside one shot, the used faces of a sampled frame are matched one to one to the open tracks so that
+  the total similarity is highest. A face may continue a track when the cosine similarity of its vector to the
+  track's mean vector is >= `track_similarity` (0.363, the SFace authors' same-person threshold), or >= half of
+  that while its box overlaps the track's last box by >= `track_overlap` (0.5 intersection over union). A track ends
+  at the end of the shot or after `track_max_gap_s` (2 s) without a match. A track's vector is the mean of its
+  faces' vectors; one crop (the largest, most confident face) is kept per track for the UI.
+- *Files.* Each scan writes its crops and track vectors into a folder of its own, named after its settings
+  (`faces/<clip>/<settings hash>/`), so a cached result can never be paired with another scan's files. If the proxy
+  ends more than 2 % (and two samples) before the frame count shot detection saw, the stage fails with a message
+  instead of storing "no faces" for footage nobody looked at. If the models are missing after an earlier good
+  scan, that scan's tracks and actors stay and only the state changes.
+- *Grouping into actors* (two passes, SPEC section 9). Pass 1 groups the tracks of each clip; pass 2 groups across
+  the project, starting from the pass-1 groups. Both use `cluster_method` (`agglomerative`, average linkage) and
+  `cluster_distance` (0.6 cosine distance; confirmed in EVALUATION.md section 6). HDBSCAN has no distance setting
+  and none is recorded for it. Two tracks with a face in the same
+  frame are never grouped (their distance is set so large that no average falls under the threshold). HDBSCAN can
+  still join such a pair through a chain of others; a group where that happened is regrouped with the
+  agglomerative method.
+- *Names and identity.* A new group becomes "Actor 001", "Actor 002", ... (the lowest number not in use). A group
+  keeps the actor most of its faces belonged to before, also across a rescan of a clip, so numbers and names stay
+  put when the project is grouped again. Actors are local to the
+  project and are never matched to a real-world identity.
+- *Corrections.* Rename, merge, split, move to another person, "not a face" and "unknown person" change exactly
+  the chosen appearances and nothing else; the project is not grouped again. Each correction also stores a pin for
+  every face of the affected tracks (clip, time, box, and the actor or "set aside"). Two kinds of actor pin are
+  told apart: `actor` for tracks the user moved by hand ("placed by you"), and `kept` for tracks that were already
+  with a person when the user named, merged or corrected that person ("kept with this person by your correction";
+  their similarity figures stay stored). When the project is grouped again, pinned tracks of one actor are merged
+  into one point before clustering, tracks pinned to different actors are kept apart, and set aside tracks are
+  left out. After a clip was scanned again a pin finds its face by place: a face of the same clip within 0.5 s
+  whose box overlaps the pin's by >= 0.3. A track takes the majority of its pins, but only if those pins reach
+  over at least half of the time the track covers, so one stray pin does not decide a long track. Pins that find
+  no face are kept and counted. "Hand back" removes the pins and groups the project again. Every correction is
+  also appended to `feedback_events`.
+- *When grouping runs.* After an ingest job once no job of the project is queued or running, when the last queued
+  job is cancelled, when a clip is removed, on "Group again", and on "hand back". It is skipped when nothing it
+  depends on changed (scans, pins, method, distance). A correction made while scans still wait to be grouped does
+  not mark the project as up to date. Grouping and corrections take SQLite's write lock before they read, so the
+  API and the worker cannot overwrite each other.
+- *What is stored* (rule 6). Per clip: status, frames sampled, faces detected and used, the most faces in one
+  frame, the count per failed check, models, revisions and settings. Per face: frame, time, box (fractions of the
+  frame), detector confidence, size, sharpness, turn. Per track: time range, mean vector, crop, actor, state, and
+  why it sits there (by similarity with its similarity to the group's mean, the method and distance; or placed by
+  the user). Per grouping run: engine, method, distance, counts.
+
+### Known limits
+- The grouping is a suggestion. On the user's own footage several groups visibly mix different people and the same
+  person appears in several groups (EVALUATION.md section 7); the public test set in section 6 is far easier.
+- Small, turned, blurred, covered or badly lit faces are left out, so a person seen only that way is not found, and
+  "seconds seen" counts only the time a usable face was tracked.
+- YuNet and SFace are the lite-tier pair of SPEC section 6. InsightFace (the stack's first choice for the larger
+  tiers) is not implemented; every tier uses YuNet + SFace for now (DECISIONS D-061).
+- Faces are searched on the 720p proxy; a face that is small in a wide 4K shot is lost.
+- Two people who never share a frame and look alike to the model are merged; twins and children are known weak
+  spots of face models in general (not measured here).
+- A pin is found again by place and time. If a clip is replaced by a different edit of itself, its pins stay
+  unmatched.
+- Tracking at 2 frames per second relies on the face vector far more than on position; a face that leaves and
+  returns within 2 s continues its track.
+- Grouping builds a full distance table of all tracks in memory (about 0.4 GB at 7000 tracks) and is not capped;
+  this project has 72. A job created before this phase and retried after a `[faces]` change can reuse a stale
+  cached scan (its cache key has no face settings); "Process all" creates a new job and does not have that problem.

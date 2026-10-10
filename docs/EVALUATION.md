@@ -117,3 +117,69 @@ Nobody has checked these words against what is said. Observations, not measureme
   produced no text for them. Three other clips have only uncertain segments.
 - The one clip recorded as dialogue ("Timeline One.mov", 12.5 s) came out as three English sentences with none
   marked uncertain. Whether they are the words spoken has to be confirmed by the user.
+
+## 6. Face grouping: purity, ARI, NMI, B-cubed (Phase 7)
+Script: `uv run python eval/face_clusters.py fetch` then `uv run python eval/face_clusters.py run data/eval/lfw`
+Output: `eval/results/face_clusters_lfw_2026-10-10.txt` and `.json`. M1, 8 GB, CPU.
+
+**What is measured.** The app's own face code (YuNet + SFace through `FaceEngine` with the `[faces]` checks, then
+`face_cluster.cluster`) on Labeled Faces in the Wild, a public research set of web photos of public figures with
+one name per photo (173 MB, checksum verified on download). Each photo counts as one track.
+
+**Design.** People with at least 5 photos (the first 20 of each) are split into two halves by name order, every
+other person; each half also gets 200 people who have a single photo, because most people in real footage are
+seen once. The grouping distance is chosen on the tuning half (best B-cubed F1 over 0.30 to 0.90 in steps of
+0.05). Every figure below is from the held-out half, which that choice never saw.
+
+| | Tuning half | Held-out half |
+|---|---|---|
+| Photos | 2295 of 412 people | 2307 of 411 people |
+| With a usable face | 2287 (left out: 5 turned, 3 blurry) | 2298, 409 people (left out: 7 turned, 2 blurry) |
+
+Chosen on the tuning half: distance **0.60** (B-cubed F1 0.993; 0.55 gives 0.986, 0.65 gives 0.988, 0.70 gives 0.954).
+It is the value the setting already had, taken from rounding the SFace authors' pair threshold; the sweep confirms
+it rather than moving it.
+
+Held-out half, 409 true people:
+
+| Method | Groups | Purity | ARI | NMI | B-cubed precision | B-cubed recall | B-cubed F1 |
+|---|---|---|---|---|---|---|---|
+| agglomerative, distance 0.60 (the default) | 410 | 0.997 | 0.991 | 0.998 | 0.995 | 0.991 | 0.993 |
+| HDBSCAN (min cluster size 2, unassigned points as one-person groups; it has no distance setting) | 445 | 0.985 | 0.945 | 0.984 | 0.976 | 0.935 | 0.955 |
+
+Finding faces and vectors took 9 to 10 ms per photo; grouping about 2300 points took 0.1 s (agglomerative) and
+0.2 s (HDBSCAN).
+
+**What these numbers do not show.**
+- LFW is easy next to footage: posed or press photos, one centred face, good light, 250 px images. The numbers show
+  that the code path works and which method and distance to prefer, not how well the user's footage is grouped
+  (section 7).
+- The SFace model was trained by its authors on other photos of public figures. Whether its training data contains
+  the people in LFW is not something we checked; if it does, these figures are optimistic.
+- The set is known to be unbalanced in age, sex and skin tone; no per-group figures were computed.
+- One photo per track: the mean over several faces of a shot and the "same frame, different people" rule, which the
+  app uses, do not exist in this set and are not evaluated by it. Tracking is not evaluated at all.
+- The four face checks left out 17 of 4602 photos here; on the user's footage they leave out 45 % of the detected
+  faces (section 7). Their limits are conventions and were not tuned.
+
+## 7. Faces run on the user's footage (not an accuracy figure)
+Script: `uv run python eval/faces_run_summary.py data`
+Output: `eval/results/faces_run_summary_2026-10-10.txt`. YuNet + SFace, 2 frames per second, M1 CPU.
+
+21 clips (473.4 s): 16 with usable faces, 5 with none, no failed job. 957 frames sampled, 849 faces detected, 469
+used; left out: 178 low detector confidence, 132 turned, 58 small, 12 blurry. The faces stage took 20.3 s in total
+(0.043 s per second of footage). 72 tracks were grouped into 27 actors; 16 of the 27 consist of a single track, 13
+of those of a single face. The largest group has 20 tracks in 6 clips (229 faces, 121 s).
+
+Nobody has labelled who is who in this footage, so there is no purity or ARI for it. Observations from looking at
+the crops of the 14 largest groups, not measurements:
+- Five of the eight largest groups look like one person each across different clips, light and headwear.
+- At least two groups (the third and fifth largest) visibly mix different people, for example faces with and
+  without glasses.
+- The same person also appears in several small groups, mostly from clips filmed sideways or upside down, in water,
+  or with part of the face covered.
+- Tracks break often: one 73.5 s clip gives 14 tracks, which end up in 7 actors.
+
+A measured figure for this footage needs labels: correct the groups on the Actors page (the corrections are the
+labels), or put face crops into one folder per person and run `eval/face_clusters.py run <folder>`. Not done yet.
+

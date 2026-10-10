@@ -8,12 +8,16 @@ import threading
 import time
 from types import FrameType
 
+from sqlalchemy.orm import Session, sessionmaker
+
 from cinemind.core.config import Settings, get_settings
 from cinemind.db.base import make_engine, make_session_factory
 from cinemind.db.migrate import upgrade_head
-from cinemind.jobs.queue import claim_next, requeue_orphans
+from cinemind.db.models import Job
+from cinemind.jobs.queue import claim_next, emit, requeue_orphans
 from cinemind.jobs.registry import load_extra_modules
 from cinemind.jobs.runner import run_job
+from cinemind.pipeline import actors
 
 log = logging.getLogger(__name__)
 
@@ -44,6 +48,21 @@ def run_worker(
             run_job(factory, settings, job_id)
         except Exception:  # a bad job must not take the worker down
             log.exception("job %s aborted unexpectedly", job_id)
+        _group_actors(factory, settings, job_id)
+
+
+def _group_actors(factory: sessionmaker[Session], settings: Settings, job_id: str) -> None:
+    """After an ingest job: group the project's faces into actors once its queue is empty."""
+    try:
+        with factory() as session:
+            job = session.get(Job, job_id)
+            if job is None or job.chain != "ingest" or job.project_id is None:
+                return
+            if actors.regroup_if_idle(session, settings, job.project_id):
+                emit(session, job_id, "actors")  # tells open pages to reload the people
+                session.commit()
+    except Exception:  # grouping can be repeated from the Actors page; never stop the worker
+        log.exception("grouping faces into actors failed after job %s", job_id)
 
 
 def main() -> None:

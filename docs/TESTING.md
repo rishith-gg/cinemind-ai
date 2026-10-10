@@ -18,6 +18,13 @@ Test footage is synthetic and generated on demand with ffmpeg (never committed).
   One test (`-m model`, skipped unless the model is in `data/models/` and macOS `say` exists) runs the real model on
   a synthesised sentence with known words and on a pure tone that must give no speech. The E2E data folder has no
   model on purpose: it checks the "not downloaded" path in the real app.
+- Faces and actors: unit and API tests replace the face models with a fixed fake (test code only) that returns
+  made-up people at known places, so they need no download. They check the tracking rule, tracks ending at cuts,
+  the grouping with "never the same person" and "always the same person" constraints for both methods, every
+  correction, corrections surviving a rescan with other settings, a correction whose face is gone, the cache
+  behaviour (including going back to earlier settings), ids from another project, a cancelled last job, a proxy
+  that ends early, models that disappear after a good scan, and every "no faces" state. The grouping quality on real photos is measured by
+  `eval/face_clusters.py`, not by a test. The E2E data folder has no face models on purpose.
 - Timecode: drop-frame conversion is checked against known values and round-tripped frame by frame across minute and
   ten-minute boundaries.
 

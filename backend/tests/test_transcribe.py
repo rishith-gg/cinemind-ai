@@ -164,7 +164,7 @@ def test_transcript_with_word_timings_and_provenance(
     assert [(s["filename"], s["status"], s["segments"], s["words"]) for s in summary] == [
         ("a_h264.mp4", "done", 2, 8)
     ]
-    stage = client.get(f"/api/jobs/{job['job']['id']}").json()["stages"][-1]
+    stage = client.get(f"/api/jobs/{job['job']['id']}").json()["stages"][8]
     assert (stage["name"], stage["model_name"]) == ("transcribe", "faster-whisper")
     assert stage["model_version"].startswith(transcriber.engine_version())
 

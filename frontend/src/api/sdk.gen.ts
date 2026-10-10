@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaQualityData, GetMediaQualityErrors, GetMediaQualityResponses, GetMediaResponses, GetMediaTranscriptData, GetMediaTranscriptErrors, GetMediaTranscriptResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListProjectTranscriptsData, ListProjectTranscriptsErrors, ListProjectTranscriptsResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RetryJobData, RetryJobErrors, RetryJobResponses, SearchTranscriptsData, SearchTranscriptsErrors, SearchTranscriptsResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
+import type { BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetActorData, GetActorErrors, GetActorResponses, GetFaceCropData, GetFaceCropErrors, GetFaceCropResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaFacesData, GetMediaFacesErrors, GetMediaFacesResponses, GetMediaQualityData, GetMediaQualityErrors, GetMediaQualityResponses, GetMediaResponses, GetMediaTranscriptData, GetMediaTranscriptErrors, GetMediaTranscriptResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListActorsData, ListActorsErrors, ListActorsResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListProjectTranscriptsData, ListProjectTranscriptsErrors, ListProjectTranscriptsResponses, ListSetAsideFacesData, ListSetAsideFacesErrors, ListSetAsideFacesResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, MergeActorsData, MergeActorsErrors, MergeActorsResponses, PlaceFaceTracksData, PlaceFaceTracksErrors, PlaceFaceTracksResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RegroupActorsData, RegroupActorsErrors, RegroupActorsResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RenameActorData, RenameActorErrors, RenameActorResponses, RetryJobData, RetryJobErrors, RetryJobResponses, SearchTranscriptsData, SearchTranscriptsErrors, SearchTranscriptsResponses, SplitActorData, SplitActorErrors, SplitActorResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -266,6 +266,99 @@ export const listProjectTranscripts = <ThrowOnError extends boolean = false>(opt
  * of a word). Hits are ordered by BM25 and carry the time the first matching word is spoken.
  */
 export const searchTranscripts = <ThrowOnError extends boolean = false>(options: Options<SearchTranscriptsData, ThrowOnError>): RequestResult<SearchTranscriptsResponses, SearchTranscriptsErrors, ThrowOnError> => (options.client ?? client).get<SearchTranscriptsResponses, SearchTranscriptsErrors, ThrowOnError>({ url: '/api/projects/{project_id}/transcripts/search', ...options });
+
+/**
+ * List Actors
+ *
+ * The project's people, most seen first, with what the last grouping used.
+ */
+export const listActors = <ThrowOnError extends boolean = false>(options: Options<ListActorsData, ThrowOnError>): RequestResult<ListActorsResponses, ListActorsErrors, ThrowOnError> => (options.client ?? client).get<ListActorsResponses, ListActorsErrors, ThrowOnError>({ url: '/api/projects/{project_id}/actors', ...options });
+
+/**
+ * Regroup Actors
+ *
+ * Group the project's faces again with the current `[faces]` settings. Corrections stay.
+ */
+export const regroupActors = <ThrowOnError extends boolean = false>(options: Options<RegroupActorsData, ThrowOnError>): RequestResult<RegroupActorsResponses, RegroupActorsErrors, ThrowOnError> => (options.client ?? client).post<RegroupActorsResponses, RegroupActorsErrors, ThrowOnError>({ url: '/api/projects/{project_id}/actors/regroup', ...options });
+
+/**
+ * List Set Aside
+ *
+ * Faces the user set aside: marked "not a face" (ignored) or "unknown person".
+ */
+export const listSetAsideFaces = <ThrowOnError extends boolean = false>(options: Options<ListSetAsideFacesData, ThrowOnError>): RequestResult<ListSetAsideFacesResponses, ListSetAsideFacesErrors, ThrowOnError> => (options.client ?? client).get<ListSetAsideFacesResponses, ListSetAsideFacesErrors, ThrowOnError>({ url: '/api/projects/{project_id}/face-tracks', ...options });
+
+/**
+ * Place Tracks
+ *
+ * Move faces to another person, set them aside, or hand them back to automatic grouping.
+ */
+export const placeFaceTracks = <ThrowOnError extends boolean = false>(options: Options<PlaceFaceTracksData, ThrowOnError>): RequestResult<PlaceFaceTracksResponses, PlaceFaceTracksErrors, ThrowOnError> => (options.client ?? client).post<PlaceFaceTracksResponses, PlaceFaceTracksErrors, ThrowOnError>({
+    url: '/api/projects/{project_id}/face-tracks/place',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get Actor
+ */
+export const getActor = <ThrowOnError extends boolean = false>(options: Options<GetActorData, ThrowOnError>): RequestResult<GetActorResponses, GetActorErrors, ThrowOnError> => (options.client ?? client).get<GetActorResponses, GetActorErrors, ThrowOnError>({ url: '/api/actors/{actor_id}', ...options });
+
+/**
+ * Rename Actor
+ */
+export const renameActor = <ThrowOnError extends boolean = false>(options: Options<RenameActorData, ThrowOnError>): RequestResult<RenameActorResponses, RenameActorErrors, ThrowOnError> => (options.client ?? client).patch<RenameActorResponses, RenameActorErrors, ThrowOnError>({
+    url: '/api/actors/{actor_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Merge Actors
+ *
+ * Merge the listed people into this one.
+ */
+export const mergeActors = <ThrowOnError extends boolean = false>(options: Options<MergeActorsData, ThrowOnError>): RequestResult<MergeActorsResponses, MergeActorsErrors, ThrowOnError> => (options.client ?? client).post<MergeActorsResponses, MergeActorsErrors, ThrowOnError>({
+    url: '/api/actors/{actor_id}/merge',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Split Actor
+ *
+ * Move the chosen faces of this person to a new person, which is returned.
+ */
+export const splitActor = <ThrowOnError extends boolean = false>(options: Options<SplitActorData, ThrowOnError>): RequestResult<SplitActorResponses, SplitActorErrors, ThrowOnError> => (options.client ?? client).post<SplitActorResponses, SplitActorErrors, ThrowOnError>({
+    url: '/api/actors/{actor_id}/split',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get Media Faces
+ *
+ * Faces found in one clip: counts, what the checks left out, and the tracks with the
+ * person each one was grouped with.
+ */
+export const getMediaFaces = <ThrowOnError extends boolean = false>(options: Options<GetMediaFacesData, ThrowOnError>): RequestResult<GetMediaFacesResponses, GetMediaFacesErrors, ThrowOnError> => (options.client ?? client).get<GetMediaFacesResponses, GetMediaFacesErrors, ThrowOnError>({ url: '/api/media/{media_id}/faces', ...options });
+
+/**
+ * Get Face Crop
+ */
+export const getFaceCrop = <ThrowOnError extends boolean = false>(options: Options<GetFaceCropData, ThrowOnError>): RequestResult<GetFaceCropResponses, GetFaceCropErrors, ThrowOnError> => (options.client ?? client).get<GetFaceCropResponses, GetFaceCropErrors, ThrowOnError>({ url: '/api/face-tracks/{track_id}/image', ...options });
 
 /**
  * Health

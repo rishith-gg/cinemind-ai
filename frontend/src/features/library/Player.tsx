@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router";
 import type { MediaOut } from "../../api";
 import { QcLane } from "../quality/QcLane";
 import { ShotStrip } from "../shots/ShotStrip";
+import { PeoplePanel } from "../actors/PeoplePanel";
 import { TranscriptPanel } from "../transcripts/TranscriptPanel";
 import { handlePlayerKey, type PlayerState } from "./playerKeys";
 import { Waveform } from "./Waveform";
@@ -91,6 +92,7 @@ export function Player({ media }: { media: MediaOut }) {
       {duration > 0 && !!media.width && <ShotStrip mediaId={media.id} duration={duration} time={time} onSeek={(t) => seekToFraction(t / duration)} />}
       <QcLane mediaId={media.id} duration={duration} onSeek={(t) => seekToFraction(t / duration)} />
       {media.has_waveform && <Waveform mediaId={media.id} video={video} />}
+      {media.probed && !!media.width && <PeoplePanel mediaId={media.id} onSeek={seekTo} />}
       {media.probed && <TranscriptPanel mediaId={media.id} time={time} onSeek={seekTo} />}
       <p className="text-xs text-neutral-500">
         Keys: Space/K play·pause · L play (again = faster) · J back 1 s · ←/→ one frame (Shift: 1 s) · I/O mark

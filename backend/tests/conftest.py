@@ -9,10 +9,12 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 
 import dummy_chain
+from cinemind.ai import faces as face_engine
 from cinemind.api.app import create_app
 from cinemind.core.config import Settings
 from cinemind.db.base import make_engine, make_session_factory
 from cinemind.db.migrate import upgrade_head
+from face_helpers import FakeFaces, engine_factory, install_models, person
 
 # Importing registers the test-only chains.
 REGISTERED_CHAINS = dummy_chain.__name__
@@ -159,3 +161,12 @@ def qc_footage(tmp_path_factory: pytest.TempPathFactory) -> Path:
     _ffmpeg(*tone, "-af", "volume=30dB", str(root / "clipped.wav"))
     _ffmpeg(*tone, "-af", "volume=-45dB", str(root / "quiet.wav"))
     return root
+
+
+@pytest.fixture
+def fake(api_settings: Settings, monkeypatch: pytest.MonkeyPatch) -> FakeFaces:
+    """The face models replaced by made-up persons 0 and 1, side by side in every frame."""
+    stand_in = FakeFaces([(0.1, person(0)), (0.6, person(1))])
+    install_models(api_settings)
+    monkeypatch.setattr(face_engine, "FaceEngine", engine_factory(stand_in))
+    return stand_in

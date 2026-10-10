@@ -366,3 +366,7 @@ class TranscriptWord(Base):
     probability: Mapped[float]
 
     __table_args__ = (Index("ix_transcript_words_segment", "segment_id", "index"),)
+
+
+# Faces and actors live in their own module; importing it here registers their tables.
+from cinemind.db import people as people  # noqa: E402

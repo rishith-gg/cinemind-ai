@@ -17,7 +17,7 @@ _Last updated: 2026-10-10_
 - [x] Phase 4: Shots, keyframes + first timeline export (Resolve test). Confirmed by the user in DaVinci Resolve 21.1 free on 2026-10-09 (FCP7 XML)
 - [x] Phase 5: Quality + audio QC (thresholds calibrated on synthetic degradations of real frames, see EVALUATION.md)
 - [x] Phase 6: Transcription (WER measured on a public English sample; the user's own clips are not labelled yet)
-- [ ] Phase 7: Faces and actors
+- [x] Phase 7: Faces and actors (purity/ARI measured on a public face set; the user's own footage has no identity labels yet)
 - [ ] Phase 8: Embeddings, tags, scenes
 - [ ] Phase 9: Hybrid search
 - [ ] Phase 10: Ranking, selects, explainability
@@ -27,14 +27,17 @@ _Last updated: 2026-10-10_
 - [ ] Phase 14: Polish, packaging, demo
 
 ## Current state
-Phase 6 is complete. Each clip is transcribed on this machine by faster-whisper (model `small` on the lite tier) with
-voice-activity detection, word timings and language detection. The clip page shows the transcript following playback
-(click a word to jump to it); the Transcripts page lists every clip's state and searches spoken words (SQLite FTS5),
-opening the clip at the moment a word is spoken. Parts the model itself did not accept are marked uncertain. The
-model is downloaded once with `uv run cinemind models pull` (done here: `small` and `base` in `data/models/`);
-processing never downloads. Details: AI_PIPELINE.md. Numbers: EVALUATION.md sections 4 and 5.
+Phase 7 is complete. Each clip is searched for faces on this machine (OpenCV YuNet + SFace, 2 frames per second);
+usable faces are followed through their shot and the tracks of the whole project are grouped into actors
+("Actor 001", ...). The Actors page shows the people; a person can be renamed, merged, split, and single appearances
+moved, marked "not a face" or "unknown person". Corrections change only what was chosen, are stored as pins, and
+come back when the project is grouped or scanned again. The clip page lists the people in the clip. The face models
+are downloaded once with `uv run cinemind models pull` (done here: 37 MB in `data/models/faces/`); processing never
+downloads. Details: AI_PIPELINE.md "Faces and actors". Numbers: EVALUATION.md sections 6 and 7.
 
-Next step: Phase 7 (faces and actors). It needs model downloads (ask above 2 GB) and clips with several people.
+Phase 6 (transcription) is described in AI_PIPELINE.md "Transcription" and EVALUATION.md sections 4 and 5.
+
+Next step: Phase 8 (embeddings, tags, scenes). It needs model downloads (ask above 2 GB).
 
 Export path for the rest of the project (decided in Phase 4): FCP7 XML into DaVinci Resolve.
 
@@ -56,6 +59,19 @@ file was re-read with OTIO: same cuts, gapless.
 None.
 
 ## Open issues / notes
+- Phase 7, needs the user: (1) look at the Actors page and say whether the groups are usable; correcting them there
+  (merge, split, move) also produces the labels a purity figure for this footage needs; (2) say whether keeping
+  YuNet + SFace on every tier is acceptable or InsightFace should be added (D-061).
+- Phase 7 limitations: the grouping is a suggestion; on the user's footage some groups mix different people and one
+  person is spread over several groups (seen by eye, not measured). Small, turned, blurred or covered faces are
+  left out (45 % of detected faces here). Only YuNet + SFace is implemented, on the 720p proxy. The face-check
+  limits and the tracking limits are conventions, not evaluated. Tracking is not evaluated. Evaluation is on a
+  public photo set that is far easier than footage. No face boxes are drawn on the player, no "speaking time per
+  actor", no actor filter in the library, actor names are not in the keyword index yet (Phase 9). The Actors page
+  loads every person and crop at once (fine for tens of people, untested for thousands of tracks). Left open from
+  review: grouping memory is not capped (full distance table); a pre-Phase-7 job retried after a `[faces]` change
+  can reuse a stale scan; the reasons behind a face's placement are tooltips only (not reachable by keyboard or
+  touch); merging two named people keeps one name without asking; `api/media.py` is 406 lines.
 - Phase 6, needs the user: (1) say which languages are spoken in the footage; (2) read the transcript of
   "Timeline One.mov" in the app and say whether the words are right; (3) for a WER on own material, write the true
   words of one or two clips into `clip.txt` files (EVALUATION.md section 4).

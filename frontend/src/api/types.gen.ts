@@ -5,6 +5,160 @@ export type ClientOptions = {
 };
 
 /**
+ * ActorDetail
+ */
+export type ActorDetail = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Project Id
+     */
+    project_id: string;
+    /**
+     * Number
+     */
+    number: number;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Named
+     */
+    named: boolean;
+    /**
+     * Tracks
+     */
+    tracks: number;
+    /**
+     * Faces
+     */
+    faces: number;
+    /**
+     * Clips
+     */
+    clips: number;
+    /**
+     * Seen S
+     */
+    seen_s: number;
+    /**
+     * Crop Url
+     */
+    crop_url: string | null;
+    /**
+     * Track List
+     */
+    track_list: Array<FaceTrackOut>;
+};
+
+/**
+ * ActorMerge
+ */
+export type ActorMerge = {
+    /**
+     * Actor Ids
+     */
+    actor_ids: Array<string>;
+};
+
+/**
+ * ActorOut
+ */
+export type ActorOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Project Id
+     */
+    project_id: string;
+    /**
+     * Number
+     */
+    number: number;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Named
+     */
+    named: boolean;
+    /**
+     * Tracks
+     */
+    tracks: number;
+    /**
+     * Faces
+     */
+    faces: number;
+    /**
+     * Clips
+     */
+    clips: number;
+    /**
+     * Seen S
+     */
+    seen_s: number;
+    /**
+     * Crop Url
+     */
+    crop_url: string | null;
+};
+
+/**
+ * ActorRename
+ */
+export type ActorRename = {
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * ActorsOut
+ */
+export type ActorsOut = {
+    /**
+     * Actors
+     */
+    actors: Array<ActorOut>;
+    /**
+     * Ignored
+     */
+    ignored: number;
+    /**
+     * Unknown
+     */
+    unknown: number;
+    /**
+     * Scans
+     */
+    scans: {
+        [key: string]: number;
+    };
+    /**
+     * Message
+     */
+    message: string | null;
+    /**
+     * Run
+     */
+    run: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Clustered At
+     */
+    clustered_at: string | null;
+};
+
+/**
  * AudioQualityOut
  */
 export type AudioQualityOut = {
@@ -114,6 +268,58 @@ export type ErrorResponse = {
      * Message
      */
     message: string;
+};
+
+/**
+ * FaceTrackOut
+ */
+export type FaceTrackOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Face Count
+     */
+    face_count: number;
+    /**
+     * Crop Url
+     */
+    crop_url: string;
+    /**
+     * Actor Id
+     */
+    actor_id: string | null;
+    /**
+     * Actor Name
+     */
+    actor_name: string | null;
+    /**
+     * State
+     */
+    state: 'auto' | 'pinned' | 'ignored' | 'unknown';
+    /**
+     * Assignment
+     */
+    assignment: {
+        [key: string]: unknown;
+    };
 };
 
 /**
@@ -451,6 +657,50 @@ export type KeyframeOut = {
      * Sharpness
      */
     sharpness: number;
+};
+
+/**
+ * MediaFacesOut
+ */
+export type MediaFacesOut = {
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Status
+     */
+    status: 'pending' | 'done' | 'no_faces' | 'no_video' | 'model_missing';
+    /**
+     * Message
+     */
+    message: string | null;
+    /**
+     * Frames Sampled
+     */
+    frames_sampled: number;
+    /**
+     * Faces Detected
+     */
+    faces_detected: number;
+    /**
+     * Faces Used
+     */
+    faces_used: number;
+    /**
+     * Max In Frame
+     */
+    max_in_frame: number;
+    /**
+     * Details
+     */
+    details: {
+        [key: string]: unknown;
+    };
+    /**
+     * Tracks
+     */
+    tracks: Array<FaceTrackOut>;
 };
 
 /**
@@ -1158,6 +1408,34 @@ export type TimelineOut = {
      * Formats
      */
     formats: Array<string>;
+};
+
+/**
+ * TrackPlacement
+ */
+export type TrackPlacement = {
+    /**
+     * Track Ids
+     */
+    track_ids: Array<string>;
+    /**
+     * State
+     */
+    state: 'actor' | 'ignored' | 'unknown' | 'auto';
+    /**
+     * Actor Id
+     */
+    actor_id?: string | null;
+};
+
+/**
+ * TrackSelection
+ */
+export type TrackSelection = {
+    /**
+     * Track Ids
+     */
+    track_ids: Array<string>;
 };
 
 /**
@@ -2918,6 +3196,466 @@ export type SearchTranscriptsResponses = {
 };
 
 export type SearchTranscriptsResponse = SearchTranscriptsResponses[keyof SearchTranscriptsResponses];
+
+export type ListActorsData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/actors';
+};
+
+export type ListActorsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListActorsError = ListActorsErrors[keyof ListActorsErrors];
+
+export type ListActorsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ActorsOut;
+};
+
+export type ListActorsResponse = ListActorsResponses[keyof ListActorsResponses];
+
+export type RegroupActorsData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/actors/regroup';
+};
+
+export type RegroupActorsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type RegroupActorsError = RegroupActorsErrors[keyof RegroupActorsErrors];
+
+export type RegroupActorsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ActorsOut;
+};
+
+export type RegroupActorsResponse = RegroupActorsResponses[keyof RegroupActorsResponses];
+
+export type ListSetAsideFacesData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/face-tracks';
+};
+
+export type ListSetAsideFacesErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListSetAsideFacesError = ListSetAsideFacesErrors[keyof ListSetAsideFacesErrors];
+
+export type ListSetAsideFacesResponses = {
+    /**
+     * Response Listsetasidefaces
+     *
+     * Successful Response
+     */
+    200: Array<FaceTrackOut>;
+};
+
+export type ListSetAsideFacesResponse = ListSetAsideFacesResponses[keyof ListSetAsideFacesResponses];
+
+export type PlaceFaceTracksData = {
+    body: TrackPlacement;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/face-tracks/place';
+};
+
+export type PlaceFaceTracksErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type PlaceFaceTracksError = PlaceFaceTracksErrors[keyof PlaceFaceTracksErrors];
+
+export type PlaceFaceTracksResponses = {
+    /**
+     * Successful Response
+     */
+    200: ActorsOut;
+};
+
+export type PlaceFaceTracksResponse = PlaceFaceTracksResponses[keyof PlaceFaceTracksResponses];
+
+export type GetActorData = {
+    body?: never;
+    path: {
+        /**
+         * Actor Id
+         */
+        actor_id: string;
+    };
+    query?: never;
+    url: '/api/actors/{actor_id}';
+};
+
+export type GetActorErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetActorError = GetActorErrors[keyof GetActorErrors];
+
+export type GetActorResponses = {
+    /**
+     * Successful Response
+     */
+    200: ActorDetail;
+};
+
+export type GetActorResponse = GetActorResponses[keyof GetActorResponses];
+
+export type RenameActorData = {
+    body: ActorRename;
+    path: {
+        /**
+         * Actor Id
+         */
+        actor_id: string;
+    };
+    query?: never;
+    url: '/api/actors/{actor_id}';
+};
+
+export type RenameActorErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type RenameActorError = RenameActorErrors[keyof RenameActorErrors];
+
+export type RenameActorResponses = {
+    /**
+     * Successful Response
+     */
+    200: ActorDetail;
+};
+
+export type RenameActorResponse = RenameActorResponses[keyof RenameActorResponses];
+
+export type MergeActorsData = {
+    body: ActorMerge;
+    path: {
+        /**
+         * Actor Id
+         */
+        actor_id: string;
+    };
+    query?: never;
+    url: '/api/actors/{actor_id}/merge';
+};
+
+export type MergeActorsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type MergeActorsError = MergeActorsErrors[keyof MergeActorsErrors];
+
+export type MergeActorsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ActorDetail;
+};
+
+export type MergeActorsResponse = MergeActorsResponses[keyof MergeActorsResponses];
+
+export type SplitActorData = {
+    body: TrackSelection;
+    path: {
+        /**
+         * Actor Id
+         */
+        actor_id: string;
+    };
+    query?: never;
+    url: '/api/actors/{actor_id}/split';
+};
+
+export type SplitActorErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type SplitActorError = SplitActorErrors[keyof SplitActorErrors];
+
+export type SplitActorResponses = {
+    /**
+     * Successful Response
+     */
+    200: ActorDetail;
+};
+
+export type SplitActorResponse = SplitActorResponses[keyof SplitActorResponses];
+
+export type GetMediaFacesData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/faces';
+};
+
+export type GetMediaFacesErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetMediaFacesError = GetMediaFacesErrors[keyof GetMediaFacesErrors];
+
+export type GetMediaFacesResponses = {
+    /**
+     * Successful Response
+     */
+    200: MediaFacesOut;
+};
+
+export type GetMediaFacesResponse = GetMediaFacesResponses[keyof GetMediaFacesResponses];
+
+export type GetFaceCropData = {
+    body?: never;
+    path: {
+        /**
+         * Track Id
+         */
+        track_id: string;
+    };
+    query?: never;
+    url: '/api/face-tracks/{track_id}/image';
+};
+
+export type GetFaceCropErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetFaceCropError = GetFaceCropErrors[keyof GetFaceCropErrors];
+
+export type GetFaceCropResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type GetHealthData = {
     body?: never;

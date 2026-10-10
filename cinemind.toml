@@ -8,3 +8,8 @@ model_tier = "auto"         # auto | lite | balanced | quality
 [transcribe]
 model = "auto"              # auto = by tier (lite/balanced: small, quality: large-v3) | tiny | base | small | medium | large-v3
 language = "auto"           # auto = detect per clip; or a code such as "en", "hi", "ta", "kn"
+
+[faces]
+sample_fps = 2.0            # frames per second searched for faces
+cluster_method = "agglomerative"   # agglomerative | hdbscan
+cluster_distance = 0.6      # agglomerative only; lower = stricter (more, purer groups); press "Group again" on the Actors page after changing

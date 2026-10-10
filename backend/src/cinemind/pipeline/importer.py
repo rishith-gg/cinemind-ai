@@ -22,7 +22,7 @@ from cinemind.core.paths import resolve_in_roots, sanitize_filename
 from cinemind.db.base import new_id
 from cinemind.db.models import Job, MediaAsset
 from cinemind.jobs import queue
-from cinemind.pipeline import transcribe_stages
+from cinemind.pipeline import face_stages, transcribe_stages
 from cinemind.pipeline.hashing import content_hash
 from cinemind.pipeline.qc import detector_params
 
@@ -231,6 +231,7 @@ def enqueue_ingest(session: Session, settings: Settings, asset: MediaAsset) -> J
             "keyframes_per_shot": settings.keyframes_per_shot,
             "qc_detect": detector_params(settings.quality),
             "transcribe": transcribe_stages.job_params(settings),
+            "faces": face_stages.job_params(settings),
         },
     )
 
@@ -242,5 +243,6 @@ def delete_asset_files(settings: Settings, asset: MediaAsset) -> None:
         if rel:
             (root / rel).unlink(missing_ok=True)
     shutil.rmtree(root / "keyframes" / asset.id, ignore_errors=True)
+    shutil.rmtree(root / "faces" / asset.id, ignore_errors=True)
     if asset.import_mode != "reference":
         shutil.rmtree(media_dir(settings, asset.project_id, asset.id), ignore_errors=True)

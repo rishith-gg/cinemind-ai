@@ -14,6 +14,7 @@ from cinemind.api.deps import FactoryDep, SessionDep, SettingsDep
 from cinemind.api.schemas import ErrorResponse, JobOut
 from cinemind.db.models import Job, JobEvent
 from cinemind.jobs import queue
+from cinemind.pipeline import actors
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 _ERR: dict[int | str, dict[str, Any]] = {
@@ -95,8 +96,13 @@ def get_job(job_id: str, session: SessionDep) -> JobOut:
 
 
 @router.post("/{job_id}/cancel", response_model=JobOut, responses=_ERR, operation_id="cancelJob")
-def cancel_job(job_id: str, session: SessionDep) -> JobOut:
-    return JobOut.model_validate(queue.request_cancel(session, job_id))
+def cancel_job(job_id: str, session: SessionDep, settings: SettingsDep) -> JobOut:
+    job = queue.request_cancel(session, job_id)
+    if job.status == "cancelled" and job.project_id is not None:
+        # A job cancelled while queued never reaches the worker; if it was the project's last
+        # one, the faces found by the jobs before it are grouped here.
+        actors.regroup_if_idle(session, settings, job.project_id)
+    return JobOut.model_validate(job)
 
 
 @router.post("/{job_id}/retry", response_model=JobOut, responses=_ERR, operation_id="retryJob")

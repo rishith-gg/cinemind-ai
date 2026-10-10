@@ -12,6 +12,7 @@ from pydantic_settings import (
     TomlConfigSettingsSource,
 )
 
+from cinemind.core.face_config import FaceConfig
 from cinemind.core.quality_config import QualityConfig
 from cinemind.core.transcribe_config import TranscribeConfig
 
@@ -46,6 +47,7 @@ class Settings(BaseSettings):
     keyframes_per_shot: int = 3
     quality: QualityConfig = QualityConfig()
     transcribe: TranscribeConfig = TranscribeConfig()
+    faces: FaceConfig = FaceConfig()
     worker_poll_seconds: float = 0.5
     # Importable modules that register extra stage chains (used by tests and plugins).
     extra_stage_modules: list[str] = []

@@ -1,0 +1,27 @@
+face grouping on lfw, 2026-10-10
+machine: macOS-26.5.2-arm64-arm-64bit-Mach-O, Apple M1, 8.0 GB RAM
+engine: yunet-sface (opencv-5.0.0), revisions 3cc26e7f1014, 3d7082438a6e
+face checks: min_score 0.8, min_size_px 40, min_sharpness 20.0, max_turn 0.6
+selection: people with >= 5 photos (first 20 each) + 200 one-photo people per half; halves = every other person by name
+tuning half: 2295 photos of 412 people; 2287 with a usable face (412 people), left out: {'turned': 5, 'blurry': 3}; 9 ms per photo
+held-out half: 2307 photos of 411 people; 2298 with a usable face (409 people), left out: {'turned': 7, 'blurry': 2}; 10 ms per photo
+tuning half, agglomerative (average linkage), by cosine distance:
+  distance 0.30          groups  1241  purity 1.000  ARI 0.473  NMI 0.900  B3 P 1.000 R 0.429 F1 0.600
+  distance 0.35          groups   899  purity 1.000  ARI 0.696  NMI 0.935  B3 P 1.000 R 0.610 F1 0.758
+  distance 0.40          groups   693  purity 1.000  ARI 0.845  NMI 0.962  B3 P 1.000 R 0.767 F1 0.868
+  distance 0.45          groups   543  purity 1.000  ARI 0.930  NMI 0.981  B3 P 1.000 R 0.883 F1 0.938
+  distance 0.50          groups   475  purity 1.000  ARI 0.967  NMI 0.991  B3 P 0.999 R 0.943 F1 0.970
+  distance 0.55          groups   442  purity 0.999  ARI 0.985  NMI 0.996  B3 P 0.999 R 0.974 F1 0.986
+  distance 0.60          groups   422  purity 0.998  ARI 0.994  NMI 0.998  B3 P 0.997 R 0.988 F1 0.993
+  distance 0.65          groups   391  purity 0.984  ARI 0.992  NMI 0.996  B3 P 0.983 R 0.992 F1 0.988
+  distance 0.70          groups   328  purity 0.938  ARI 0.947  NMI 0.987  B3 P 0.917 R 0.995 F1 0.954
+  distance 0.75          groups   233  purity 0.791  ARI 0.796  NMI 0.959  B3 P 0.735 R 0.995 F1 0.845
+  distance 0.80          groups   139  purity 0.594  ARI 0.592  NMI 0.912  B3 P 0.498 R 0.995 F1 0.664
+  distance 0.85          groups    62  purity 0.355  ARI 0.323  NMI 0.823  B3 P 0.259 R 0.995 F1 0.411
+  distance 0.90          groups    14  purity 0.105  ARI 0.073  NMI 0.598  B3 P 0.066 R 0.995 F1 0.124
+chosen on the tuning half (best B-cubed F1): distance 0.60
+held-out half (never used for the choice):
+  agglomerative 0.60     groups   410  purity 0.997  ARI 0.991  NMI 0.998  B3 P 0.995 R 0.991 F1 0.993  (0.1 s)
+  configured 0.60        groups   410  purity 0.997  ARI 0.991  NMI 0.998  B3 P 0.995 R 0.991 F1 0.993  (0.1 s)
+  hdbscan                groups   445  purity 0.985  ARI 0.945  NMI 0.984  B3 P 0.976 R 0.935 F1 0.955  (0.2 s)
+  true people in the held-out half: 409

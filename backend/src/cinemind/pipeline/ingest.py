@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from cinemind.core.errors import LowDiskSpaceError, SourceMissingError
 from cinemind.jobs.registry import Stage, StageContext, register_chain
 from cinemind.pipeline import ffmpeg
+from cinemind.pipeline.face_stages import FACE_STAGES
 from cinemind.pipeline.ffmpeg import make_proxy, make_thumbnails, waveform_peaks
 from cinemind.pipeline.ffprobe import probe
 from cinemind.pipeline.quality_stages import QUALITY_STAGES
@@ -251,5 +252,6 @@ register_chain(
         *SHOT_STAGES,
         *QUALITY_STAGES,
         *TRANSCRIBE_STAGES,
+        *FACE_STAGES,
     ],
 )

@@ -8,6 +8,7 @@ from typing import Literal
 from pydantic import BaseModel
 
 from cinemind import __version__
+from cinemind.core import face_config
 from cinemind.core.config import Settings
 from cinemind.core.hardware import (
     HardwareInfo,
@@ -157,6 +158,21 @@ def check_speech_model(settings: Settings, tier: Tier) -> Check:
     )
 
 
+def check_face_models(settings: Settings) -> Check:
+    """Are the face models on disk? Optional: everything but faces and actors works without."""
+    if face_config.models_ready(settings.models_path):
+        return Check(name="face models", status="ok", required=False, version=face_config.ENGINE)
+    size_mb = sum(spec.size_kb for spec in face_config.FACE_MODELS) / 1024
+    return Check(
+        name="face models",
+        status="warn",
+        required=False,
+        version=face_config.ENGINE,
+        detail=f"not downloaded ({size_mb:.0f} MB); clips are processed without faces",
+        fix="uv run cinemind models pull",
+    )
+
+
 def run_doctor(settings: Settings, disk_path: str = ".") -> DoctorReport:
     hw = detect_hardware(disk_path)
     rec = recommend_tier(hw)
@@ -166,6 +182,7 @@ def run_doctor(settings: Settings, disk_path: str = ".") -> DoctorReport:
         *(check_tool(*t) for t in _TOOLS),
         check_disk(hw),
         check_speech_model(settings, selected),
+        check_face_models(settings),
     ]
     return DoctorReport(
         app_version=__version__,

@@ -59,7 +59,29 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
 - CLI: `cinemind models list`, `cinemind models pull [name] [--yes]` (asks before a download over 2 GB).
   `cinemind doctor` and `/api/system/health` report whether the tier's speech model is on disk.
 
-## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc, transcribe
+## Implemented (Phase 7): faces and actors
+- `GET /api/media/{id}/faces`: `status` (`pending`, `done`, `no_faces`, `no_video`, `model_missing`), a plain
+  `message` when there is nothing to show, counts (frames sampled, faces detected and used, most in one frame),
+  `details` (models, revisions, settings, how many faces each check left out) and the clip's tracks, each with its
+  time range, crop, actor, `state` (`auto`, `pinned`, `ignored`, `unknown`) and `assignment` (why it sits there).
+- `GET /api/projects/{id}/actors`: the people, most seen first (name, `named`, tracks, faces, clips, seconds seen,
+  crop), how many tracks are set aside, clips per scan state, a `message` when faces are missing for a reason the
+  user can fix, and `run` (engine, method, distance, counts of the last grouping).
+- `POST /api/projects/{id}/actors/regroup`: group again with the current `[faces]` settings; corrections stay.
+- `GET /api/actors/{id}`: one person with every track. `PATCH /api/actors/{id}` `{name}`: rename.
+  `POST /api/actors/{id}/merge` `{actor_ids}`: merge the listed people into this one.
+  `POST /api/actors/{id}/split` `{track_ids}`: move those tracks to a new person (returned).
+  SPEC section 12 lists all three under `PATCH`; they are separate calls so each has one clear body.
+- `POST /api/projects/{id}/face-tracks/place` `{track_ids, state, actor_id?}`: `actor` (move to `actor_id`),
+  `ignored` (not a face), `unknown` (a person not worth naming), `auto` (hand back to automatic grouping).
+  `GET /api/projects/{id}/face-tracks`: the tracks currently set aside.
+- `GET /api/face-tracks/{id}/image`: the track's face crop (JPEG).
+- Ids from another project, unknown ids, an empty name, a move without a target or a split that would leave nobody
+  are 404/422 with a plain message. Cancelling a project's last queued job groups the faces found so far. The job event stream sends an `actors` event after a project was grouped.
+- CLI: `cinemind models pull` now also fetches the face models (`models pull faces` for those alone);
+  `models list`, `cinemind doctor` and `/api/system/health` report whether they are on disk.
+
+## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc, transcribe, faces
 - validate: ffprobe (by content, not extension): rational fps, VFR flag (avg vs nominal rate differ > 0.5 %),
   codecs, display size (rotation applied), timecode, colour tags. Corrupt or non-media files fail with a plain message.
 - proxy: H.264 (+AAC), <= `proxy_max_height` (720), constant frame rate (the source's average rate, halved above 60), `+faststart`.
@@ -76,6 +98,10 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
 - transcribe: faster-whisper on the original file's audio (16 kHz mono), voice-activity detection first, word
   timings, language detection. Never downloads; without the model it records `model_missing` and retries on the next
   run. Its cache key depends on the source file and the `[transcribe]` settings only (`Stage.upstream`).
+- faces: YuNet + SFace on the proxy at `[faces] sample_fps`, quality checks, tracking inside each shot; writes one
+  crop per track and the track vectors under `faces/<media id>/`. Never downloads; without the models it records
+  `model_missing` and retries on the next run. Its cache key depends on the shots and the `[faces]` settings other
+  than the grouping ones, so changing `cluster_distance` regroups without decoding video.
 - Stage cache for these stages is per project and re-validated against the files on disk (`Stage.scope_project`,
   `Stage.verify`); `Stage.persist` copies results onto the media row, also on a cache hit.
 
@@ -86,6 +112,8 @@ On startup it re-queues any job left `running` (assumes exactly one worker); fin
 cache, so a killed job resumes at the stage that was interrupted (that stage restarts from its beginning).
 Cancel is cooperative: stages call `ctx.check_cancelled()` and the runner checks between stages.
 Retry keeps succeeded stages.
+After an ingest job the worker groups the project's faces into actors, but only once no job of that project is
+queued or running, so a large import is grouped once at its end.
 
 ## Static frontend
 `cinemind serve` serves `frontend/dist`. Unknown extensionless non-`/api` paths return `index.html` (client-side routing deep links and reloads); missing files with an extension and unknown `/api` paths are real 404s.

@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { browseFolder, cancelJob, createProject, createTimeline, deleteMedia, deleteProject, deleteTimeline, exportTimeline, getHealth, getJob, getKeyframe, getMedia, getMediaQuality, getMediaTranscript, getPoster, getProject, getStrip, getTimeline, getWaveform, importMedia, listJobs, listMedia, listMediaShots, listProjects, listProjectShots, listProjectTranscripts, listTimelines, type Options, processMedia, processProject, relinkMedia, retryJob, searchTranscripts, streamJobEvents, streamProxy, updateProject, uploadMedia } from '../sdk.gen';
-import type { BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaQualityData, GetMediaQualityError, GetMediaQualityResponse, GetMediaResponse, GetMediaTranscriptData, GetMediaTranscriptError, GetMediaTranscriptResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListProjectTranscriptsData, ListProjectTranscriptsError, ListProjectTranscriptsResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RetryJobData, RetryJobError, RetryJobResponse, SearchTranscriptsData, SearchTranscriptsError, SearchTranscriptsResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
+import { browseFolder, cancelJob, createProject, createTimeline, deleteMedia, deleteProject, deleteTimeline, exportTimeline, getActor, getFaceCrop, getHealth, getJob, getKeyframe, getMedia, getMediaFaces, getMediaQuality, getMediaTranscript, getPoster, getProject, getStrip, getTimeline, getWaveform, importMedia, listActors, listJobs, listMedia, listMediaShots, listProjects, listProjectShots, listProjectTranscripts, listSetAsideFaces, listTimelines, mergeActors, type Options, placeFaceTracks, processMedia, processProject, regroupActors, relinkMedia, renameActor, retryJob, searchTranscripts, splitActor, streamJobEvents, streamProxy, updateProject, uploadMedia } from '../sdk.gen';
+import type { BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetActorData, GetActorError, GetActorResponse, GetFaceCropData, GetFaceCropError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaFacesData, GetMediaFacesError, GetMediaFacesResponse, GetMediaQualityData, GetMediaQualityError, GetMediaQualityResponse, GetMediaResponse, GetMediaTranscriptData, GetMediaTranscriptError, GetMediaTranscriptResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, ListActorsData, ListActorsError, ListActorsResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListProjectTranscriptsData, ListProjectTranscriptsError, ListProjectTranscriptsResponse, ListSetAsideFacesData, ListSetAsideFacesError, ListSetAsideFacesResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, MergeActorsData, MergeActorsError, MergeActorsResponse, PlaceFaceTracksData, PlaceFaceTracksError, PlaceFaceTracksResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RegroupActorsData, RegroupActorsError, RegroupActorsResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RenameActorData, RenameActorError, RenameActorResponse, RetryJobData, RetryJobError, RetryJobResponse, SearchTranscriptsData, SearchTranscriptsError, SearchTranscriptsResponse, SplitActorData, SplitActorError, SplitActorResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -685,6 +685,196 @@ export const searchTranscriptsOptions = (options: Options<SearchTranscriptsData>
         return data;
     },
     queryKey: searchTranscriptsQueryKey(options)
+});
+
+export const listActorsQueryKey = (options: Options<ListActorsData>) => createQueryKey('listActors', options);
+
+/**
+ * List Actors
+ *
+ * The project's people, most seen first, with what the last grouping used.
+ */
+export const listActorsOptions = (options: Options<ListActorsData>) => queryOptions<ListActorsResponse, ListActorsError, ListActorsResponse, ReturnType<typeof listActorsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listActors({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listActorsQueryKey(options)
+});
+
+/**
+ * Regroup Actors
+ *
+ * Group the project's faces again with the current `[faces]` settings. Corrections stay.
+ */
+export const regroupActorsMutation = (options?: Partial<Options<RegroupActorsData>>): UseMutationOptions<RegroupActorsResponse, RegroupActorsError, Options<RegroupActorsData>> => {
+    const mutationOptions: UseMutationOptions<RegroupActorsResponse, RegroupActorsError, Options<RegroupActorsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await regroupActors({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listSetAsideFacesQueryKey = (options: Options<ListSetAsideFacesData>) => createQueryKey('listSetAsideFaces', options);
+
+/**
+ * List Set Aside
+ *
+ * Faces the user set aside: marked "not a face" (ignored) or "unknown person".
+ */
+export const listSetAsideFacesOptions = (options: Options<ListSetAsideFacesData>) => queryOptions<ListSetAsideFacesResponse, ListSetAsideFacesError, ListSetAsideFacesResponse, ReturnType<typeof listSetAsideFacesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listSetAsideFaces({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listSetAsideFacesQueryKey(options)
+});
+
+/**
+ * Place Tracks
+ *
+ * Move faces to another person, set them aside, or hand them back to automatic grouping.
+ */
+export const placeFaceTracksMutation = (options?: Partial<Options<PlaceFaceTracksData>>): UseMutationOptions<PlaceFaceTracksResponse, PlaceFaceTracksError, Options<PlaceFaceTracksData>> => {
+    const mutationOptions: UseMutationOptions<PlaceFaceTracksResponse, PlaceFaceTracksError, Options<PlaceFaceTracksData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await placeFaceTracks({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getActorQueryKey = (options: Options<GetActorData>) => createQueryKey('getActor', options);
+
+/**
+ * Get Actor
+ */
+export const getActorOptions = (options: Options<GetActorData>) => queryOptions<GetActorResponse, GetActorError, GetActorResponse, ReturnType<typeof getActorQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getActor({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getActorQueryKey(options)
+});
+
+/**
+ * Rename Actor
+ */
+export const renameActorMutation = (options?: Partial<Options<RenameActorData>>): UseMutationOptions<RenameActorResponse, RenameActorError, Options<RenameActorData>> => {
+    const mutationOptions: UseMutationOptions<RenameActorResponse, RenameActorError, Options<RenameActorData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await renameActor({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Merge Actors
+ *
+ * Merge the listed people into this one.
+ */
+export const mergeActorsMutation = (options?: Partial<Options<MergeActorsData>>): UseMutationOptions<MergeActorsResponse, MergeActorsError, Options<MergeActorsData>> => {
+    const mutationOptions: UseMutationOptions<MergeActorsResponse, MergeActorsError, Options<MergeActorsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await mergeActors({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Split Actor
+ *
+ * Move the chosen faces of this person to a new person, which is returned.
+ */
+export const splitActorMutation = (options?: Partial<Options<SplitActorData>>): UseMutationOptions<SplitActorResponse, SplitActorError, Options<SplitActorData>> => {
+    const mutationOptions: UseMutationOptions<SplitActorResponse, SplitActorError, Options<SplitActorData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await splitActor({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getMediaFacesQueryKey = (options: Options<GetMediaFacesData>) => createQueryKey('getMediaFaces', options);
+
+/**
+ * Get Media Faces
+ *
+ * Faces found in one clip: counts, what the checks left out, and the tracks with the
+ * person each one was grouped with.
+ */
+export const getMediaFacesOptions = (options: Options<GetMediaFacesData>) => queryOptions<GetMediaFacesResponse, GetMediaFacesError, GetMediaFacesResponse, ReturnType<typeof getMediaFacesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMediaFaces({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMediaFacesQueryKey(options)
+});
+
+export const getFaceCropQueryKey = (options: Options<GetFaceCropData>) => createQueryKey('getFaceCrop', options);
+
+/**
+ * Get Face Crop
+ */
+export const getFaceCropOptions = (options: Options<GetFaceCropData>) => queryOptions<unknown, GetFaceCropError, unknown, ReturnType<typeof getFaceCropQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getFaceCrop({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getFaceCropQueryKey(options)
 });
 
 export const getHealthQueryKey = (options?: Options<GetHealthData>) => createQueryKey('getHealth', options);
