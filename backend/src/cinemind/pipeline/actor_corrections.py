@@ -1,4 +1,5 @@
-"""The user's corrections to the actors: rename, merge, split, move, set aside, hand back.
+"""The user's corrections to the actors: rename, merge, split, move, set aside, hand back, and
+answers to "same person?".
 
 A correction changes exactly the chosen tracks and nothing else; the project is not grouped
 again (except when tracks are handed back to automatic grouping, which is that request). Each
@@ -14,7 +15,15 @@ from sqlalchemy.orm import Session, selectinload
 
 from cinemind.core.config import Settings
 from cinemind.core.errors import InvalidInputError, NotFoundError
-from cinemind.db.people import Actor, ActorRun, FacePin, FaceTrack, FeedbackEvent
+from cinemind.db.people import (
+    Actor,
+    ActorPairAnswer,
+    ActorRun,
+    FacePin,
+    FaceTrack,
+    FeedbackEvent,
+)
+from cinemind.pipeline.actor_pairs import linkage_distance
 from cinemind.pipeline.actors import (
     KEPT,
     PLACED,
@@ -224,3 +233,36 @@ def place(
     else:
         _pin(session, project_id, moved, state, None)
     _settle(session, settings, project_id, current)
+
+
+def answer_pair(
+    session: Session, settings: Settings, first: Actor, second: Actor, same: bool
+) -> Actor:
+    """The user's answer to "are these two the same person?". Yes merges them (into the named
+    one, else the one with more faces) and returns the actor that remains; no keeps their
+    current tracks apart from now on. Both are stored with the distance the two had."""
+    if first.id == second.id or first.project_id != second.project_id:
+        raise InvalidInputError("Choose two different people of the same project.")
+    current = _begin(session, settings, first.project_id)  # before the answer joins the basis
+    tracks_a, tracks_b = _tracks_of(session, [first.id]), _tracks_of(session, [second.id])
+    if not tracks_a or not tracks_b:
+        raise NotFoundError("One of these people has no faces left. Reload the page.")
+    distance = linkage_distance(tracks_a, tracks_b)
+    ids_a, ids_b = sorted(t.id for t in tracks_a), sorted(t.id for t in tracks_b)
+    project_id = first.project_id
+    session.add(
+        ActorPairAnswer(
+            project_id=project_id, tracks_a=ids_a, tracks_b=ids_b, same=same, distance=distance
+        )
+    )
+    payload = {"actors": [first.id, second.id], "same": same, "distance": distance}
+    _log(session, project_id, "actor_pair", payload)
+    if not same:
+        _settle(session, settings, project_id, current)
+        return first
+    faces = {
+        a.id: sum(t.face_count for t in ts) for a, ts in ((first, tracks_a), (second, tracks_b))
+    }
+    keep, other = sorted((first, second), key=lambda a: (not a.named, -faces[a.id], a.number))
+    merge(session, settings, keep, [other])
+    return keep

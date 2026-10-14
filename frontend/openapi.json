@@ -2870,7 +2870,7 @@
           "actors"
         ],
         "summary": "List Set Aside",
-        "description": "Faces the user set aside: marked \"not a face\" (ignored) or \"unknown person\".",
+        "description": "Faces not with any person: marked \"not a face\" (ignored) or \"unknown person\" by the user,\nor seen too briefly to group (brief).",
         "operationId": "listSetAsideFaces",
         "parameters": [
           {
@@ -3509,6 +3509,182 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/actors/pairs": {
+      "get": {
+        "tags": [
+          "actors"
+        ],
+        "summary": "List Actor Pairs",
+        "description": "People whose faces look most alike, closest first: questions for the user.",
+        "operationId": "listActorPairs",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActorPairsOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/actors/pairs/answer": {
+      "post": {
+        "tags": [
+          "actors"
+        ],
+        "summary": "Answer Actor Pair",
+        "description": "Same person: merge the two. Different people: keep them apart in every later grouping.",
+        "operationId": "answerActorPair",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActorPairAnswerIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActorPairsOut"
+                }
               }
             }
           },
@@ -4603,6 +4779,89 @@
         ],
         "title": "ActorOut"
       },
+      "ActorPairAnswerIn": {
+        "properties": {
+          "first_id": {
+            "type": "string",
+            "title": "First Id"
+          },
+          "second_id": {
+            "type": "string",
+            "title": "Second Id"
+          },
+          "same": {
+            "type": "boolean",
+            "title": "Same"
+          }
+        },
+        "type": "object",
+        "required": [
+          "first_id",
+          "second_id",
+          "same"
+        ],
+        "title": "ActorPairAnswerIn"
+      },
+      "ActorPairOut": {
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/ActorOut"
+          },
+          "second": {
+            "$ref": "#/components/schemas/ActorOut"
+          },
+          "distance": {
+            "type": "number",
+            "title": "Distance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "first",
+          "second",
+          "distance"
+        ],
+        "title": "ActorPairOut",
+        "description": "Two people the grouping kept apart although their faces look alike."
+      },
+      "ActorPairsOut": {
+        "properties": {
+          "pairs": {
+            "items": {
+              "$ref": "#/components/schemas/ActorPairOut"
+            },
+            "type": "array",
+            "title": "Pairs"
+          },
+          "cluster_distance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cluster Distance"
+          },
+          "answered": {
+            "type": "integer",
+            "title": "Answered"
+          },
+          "answered_same": {
+            "type": "integer",
+            "title": "Answered Same"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pairs",
+          "cluster_distance",
+          "answered",
+          "answered_same"
+        ],
+        "title": "ActorPairsOut"
+      },
       "ActorRename": {
         "properties": {
           "name": {
@@ -4634,6 +4893,10 @@
           "unknown": {
             "type": "integer",
             "title": "Unknown"
+          },
+          "brief": {
+            "type": "integer",
+            "title": "Brief"
           },
           "scans": {
             "additionalProperties": {
@@ -4683,6 +4946,7 @@
           "actors",
           "ignored",
           "unknown",
+          "brief",
           "scans",
           "message",
           "run",
@@ -4908,8 +5172,7 @@
               "no_video",
               "no_speech",
               "no_transcript",
-              "model_missing",
-              "stale"
+              "model_missing"
             ],
             "title": "Status"
           },
@@ -5026,7 +5289,8 @@
               "auto",
               "pinned",
               "ignored",
-              "unknown"
+              "unknown",
+              "brief"
             ],
             "title": "State"
           },
@@ -6060,8 +6324,7 @@
               "no_video",
               "no_speech",
               "no_transcript",
-              "model_missing",
-              "stale"
+              "model_missing"
             ],
             "title": "Status"
           },

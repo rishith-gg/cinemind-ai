@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { FaceTrackOut } from "../../api";
 
 // Queries that show faces or people; every correction changes what they return.
-export const PEOPLE_QUERIES = new Set(["listActors", "getActor", "listSetAsideFaces", "getMediaFaces"]);
+export const PEOPLE_QUERIES = new Set(["listActors", "getActor", "listSetAsideFaces", "getMediaFaces", "listActorPairs"]);
 
 export function useRefreshPeople(): () => void {
   const qc = useQueryClient();

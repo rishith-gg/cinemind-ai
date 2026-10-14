@@ -181,7 +181,9 @@ the crops of the 14 largest groups, not measurements:
 - Tracks break often: one 73.5 s clip gives 14 tracks, which end up in 7 actors.
 
 A measured figure for this footage needs labels: correct the groups on the Actors page (the corrections are the
-labels), or put face crops into one folder per person and run `eval/face_clusters.py run <folder>`. Not done yet.
+labels), answer the "Same person?" questions there (`uv run python eval/actor_pairs.py data` reports, for each
+possible limit, how many answered pairs it would join wrongly or leave split), or put face crops into one folder
+per person and run `eval/face_clusters.py run <folder>`. No answers yet.
 
 
 ## 8. Tag thresholds: precision on labelled public photos (Phase 8)

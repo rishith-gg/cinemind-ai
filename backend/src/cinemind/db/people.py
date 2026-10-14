@@ -3,14 +3,15 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, ForeignKey, Index, LargeBinary, String
+from sqlalchemy import JSON, Boolean, Float, ForeignKey, Index, LargeBinary, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from cinemind.db.base import Base, UTCDateTime, new_id, utcnow
 
 FACE_SCAN_STATUSES = ("done", "no_faces", "no_video", "model_missing")
-# Where a track stands: grouped by similarity, placed by the user, or set aside by the user.
-TRACK_STATES = ("auto", "pinned", "ignored", "unknown")
+# Where a track stands: grouped by similarity, placed by the user, set aside by the user, or set
+# aside automatically because it was seen too briefly.
+TRACK_STATES = ("auto", "pinned", "ignored", "unknown", "brief")
 # actor = put there by the user; kept = was there when the user named or corrected the actor.
 PIN_STATES = ("actor", "kept", "ignored", "unknown")
 
@@ -165,3 +166,22 @@ class FeedbackEvent(Base):
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
 
     __table_args__ = (Index("ix_feedback_project", "project_id", "id"),)
+
+
+class ActorPairAnswer(Base):
+    """The user's answer to "are these two the same person?". Kept by track, not by actor, so it
+    still means the same after the project is grouped again: tracks the user called different
+    are never grouped together. `distance` is the average-linkage distance of the two when
+    asked, so the answers can measure where the grouping limit should sit."""
+
+    __tablename__ = "actor_pair_answers"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
+    tracks_a: Mapped[list[str]] = mapped_column(JSON)
+    tracks_b: Mapped[list[str]] = mapped_column(JSON)
+    same: Mapped[bool] = mapped_column(Boolean)
+    distance: Mapped[float] = mapped_column(Float)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+
+    __table_args__ = (Index("ix_actor_pair_answers_project", "project_id", "id"),)

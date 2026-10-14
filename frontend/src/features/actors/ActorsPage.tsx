@@ -3,19 +3,15 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import type { ActorOut, ActorsOut } from "../../api";
-import {
-  listActorsOptions,
-  listSetAsideFacesOptions,
-  mergeActorsMutation,
-  placeFaceTracksMutation,
-  regroupActorsMutation,
-} from "../../api/@tanstack/react-query.gen";
+import { listActorsOptions, mergeActorsMutation, regroupActorsMutation } from "../../api/@tanstack/react-query.gen";
 import { EmptyState, ErrorState, Loading } from "../../components/states";
 import { useCurrentProject } from "../../lib/currentProject";
 import { errorMessage } from "../../lib/errors";
 import { toast } from "../../lib/toast";
 import { formatDuration } from "../library/format";
+import { PairReview } from "./PairReview";
 import { HONEST_NOTE, plural, useRefreshPeople } from "./people";
+import { SetAside } from "./SetAside";
 
 export function ActorsPage() {
   const projectId = useCurrentProject((s) => s.id);
@@ -50,33 +46,6 @@ function ActorCard({ actor, selected, onToggle }: { actor: ActorOut; selected: b
   );
 }
 
-function SetAside({ projectId }: { projectId: string }) {
-  const refresh = useRefreshPeople();
-  const { data } = useQuery(listSetAsideFacesOptions({ path: { project_id: projectId } }));
-  const restore = useMutation({ ...placeFaceTracksMutation(), onSuccess: refresh });
-  if (!data?.length) return null;
-  return (
-    <section aria-label="Set aside" className="space-y-2">
-      <h2 className="text-sm font-semibold">Set aside by you</h2>
-      <ul className="flex flex-wrap gap-2">
-        {data.map((track) => (
-          <li key={track.id} className="w-24 text-xs text-neutral-400">
-            <img src={track.crop_url} alt="" loading="lazy" className="aspect-square w-full rounded object-cover opacity-70" />
-            <span className="block truncate">{track.state === "ignored" ? "Not a face" : "Unknown person"}</span>
-            <button
-              className="underline"
-              aria-label={`Put back the face from ${track.filename}`}
-              onClick={() => restore.mutate({ path: { project_id: projectId }, body: { track_ids: [track.id], state: "auto" } })}
-            >
-              Put back
-            </button>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
 function Summary({ data }: { data: ActorsOut }) {
   const run = (data.run ?? {}) as { engine?: string; method?: string; cluster_distance?: number; tracks?: number; corrections_not_found?: number };
   const searched = (data.scans.done ?? 0) + (data.scans.no_faces ?? 0);
@@ -85,6 +54,7 @@ function Summary({ data }: { data: ActorsOut }) {
       {plural(data.actors.length, "person", "people")} from {plural(run.tracks ?? 0, "appearance")}; {plural(data.scans.done ?? 0, "clip")} with
       usable faces out of {searched} searched.
       {run.method && ` Grouped with ${run.engine}, ${run.method}${run.cluster_distance === undefined ? "" : `, distance ${run.cluster_distance}`}.`}
+      {!!data.brief && ` ${plural(data.brief, "face")} seen only briefly set aside (see below).`}
       {!!run.corrections_not_found &&
         ` ${plural(run.corrections_not_found, "correction")} could not be matched to a face any more (kept in case the face returns).`}
     </p>
@@ -172,6 +142,7 @@ function Actors({ projectId }: { projectId: string }) {
           </button>
         </div>
       )}
+      {data && data.actors.length > 1 && <PairReview projectId={projectId} />}
       {data && data.actors.length > 0 && (
         <ul aria-label="People" className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {data.actors.map((actor) => (
@@ -179,7 +150,7 @@ function Actors({ projectId }: { projectId: string }) {
           ))}
         </ul>
       )}
-      <SetAside projectId={projectId} />
+      <SetAside projectId={projectId} people={data?.actors ?? []} />
     </section>
   );
 }

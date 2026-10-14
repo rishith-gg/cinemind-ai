@@ -65,6 +65,11 @@ class FaceConfig(BaseModel):
     track_similarity: float = 0.363
     track_overlap: float = 0.5
     track_max_gap_s: float = 2.0
+    # A track seen in fewer sampled frames than this is set aside as "seen briefly" instead of
+    # becoming a person (at 2 frames per second, 2 frames = about half a second on screen). A
+    # convention, not an evaluated limit: on the user's footage every shirt, raincoat, mask and
+    # motion-blurred face that became an actor was a one-frame track (checked by eye).
+    min_track_faces: int = 2
     # Grouping tracks into people: average-linkage cosine distance below which two groups merge.
     # Used by the agglomerative method only (HDBSCAN finds its own density levels). The default
     # was confirmed, not found, by eval/face_clusters.py on single photos (EVALUATION.md section 6).
@@ -82,6 +87,8 @@ class FaceConfig(BaseModel):
             raise ValueError("faces.cluster_distance must be between 0 and 2")
         if self.min_size_px < 8 or self.min_sharpness < 0 or self.max_turn <= 0:
             raise ValueError("faces.min_size_px, min_sharpness and max_turn must be positive")
+        if self.min_track_faces < 1:
+            raise ValueError("faces.min_track_faces must be at least 1")
         if self.track_max_gap_s <= 0:
             raise ValueError("faces.track_max_gap_s must be positive")
         return self

@@ -23,7 +23,9 @@ Test footage is synthetic and generated on demand with ffmpeg (never committed).
   the grouping with "never the same person" and "always the same person" constraints for both methods, every
   correction, corrections surviving a rescan with other settings, a correction whose face is gone, the cache
   behaviour (including going back to earlier settings), ids from another project, a cancelled last job, a proxy
-  that ends early, models that disappear after a good scan, and every "no faces" state. The grouping quality on real photos is measured by
+  that ends early, models that disappear after a good scan, every "no faces" state, faces seen too briefly being
+  set aside until placed, and "same person?" answers (no keeps two people apart through a regrouping that would
+  join them, yes merges). The grouping quality on real photos is measured by
   `eval/face_clusters.py`, not by a test. The E2E data folder has no face models on purpose.
 - Embeddings, tags, scenes: tests replace the picture and text models with a fixed fake (test code only: picture
   vectors from a frame's mean colour, text vectors from a hash) and use a test thresholds file, so they need no

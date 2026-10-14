@@ -74,7 +74,11 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
   SPEC section 12 lists all three under `PATCH`; they are separate calls so each has one clear body.
 - `POST /api/projects/{id}/face-tracks/place` `{track_ids, state, actor_id?}`: `actor` (move to `actor_id`),
   `ignored` (not a face), `unknown` (a person not worth naming), `auto` (hand back to automatic grouping).
-  `GET /api/projects/{id}/face-tracks`: the tracks currently set aside.
+  `GET /api/projects/{id}/face-tracks`: the tracks currently set aside, by the user (`ignored`, `unknown`) or
+  automatically (`brief`: seen in too few sampled frames). `ActorsOut.brief` counts the latter.
+- `GET /api/projects/{id}/actors/pairs`: "same person?" questions, closest first (`first`, `second`, `distance`),
+  with `cluster_distance` and how many were answered. `POST /api/projects/{id}/actors/pairs/answer`
+  `{first_id, second_id, same}`: yes merges the two, no keeps their tracks apart from now on; returns the new list.
 - `GET /api/face-tracks/{id}/image`: the track's face crop (JPEG).
 - Ids from another project, unknown ids, an empty name, a move without a target or a split that would leave nobody
   are 404/422 with a plain message. Cancelling a project's last queued job groups the faces found so far. The job event stream sends an `actors` event after a project was grouped.

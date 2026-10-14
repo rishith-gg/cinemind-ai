@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { browseFolder, cancelJob, createProject, createTimeline, deleteMedia, deleteProject, deleteTimeline, exportTimeline, getActor, getFaceCrop, getHealth, getJob, getKeyframe, getMedia, getMediaFaces, getMediaQuality, getMediaTranscript, getPoster, getProject, getStrip, getTimeline, getWaveform, importMedia, listActors, listJobs, listMedia, listMediaEmbeddings, listMediaShots, listMediaTags, listProjects, listProjectShots, listProjectTags, listProjectTranscripts, listScenes, listSetAsideFaces, listTimelines, listVectorIndexes, mergeActors, type Options, placeFaceTracks, processMedia, processProject, rebuildVectorIndexes, regroupActors, regroupScenes, relinkMedia, renameActor, renameScene, retryJob, reviewTag, searchTranscripts, setSceneBoundary, splitActor, streamJobEvents, streamProxy, updateProject, uploadMedia } from '../sdk.gen';
-import type { BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetActorData, GetActorError, GetActorResponse, GetFaceCropData, GetFaceCropError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaFacesData, GetMediaFacesError, GetMediaFacesResponse, GetMediaQualityData, GetMediaQualityError, GetMediaQualityResponse, GetMediaResponse, GetMediaTranscriptData, GetMediaTranscriptError, GetMediaTranscriptResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, ListActorsData, ListActorsError, ListActorsResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaEmbeddingsData, ListMediaEmbeddingsError, ListMediaEmbeddingsResponse, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListMediaTagsData, ListMediaTagsError, ListMediaTagsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListProjectTagsData, ListProjectTagsError, ListProjectTagsResponse, ListProjectTranscriptsData, ListProjectTranscriptsError, ListProjectTranscriptsResponse, ListScenesData, ListScenesError, ListScenesResponse, ListSetAsideFacesData, ListSetAsideFacesError, ListSetAsideFacesResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ListVectorIndexesData, ListVectorIndexesError, ListVectorIndexesResponse, MergeActorsData, MergeActorsError, MergeActorsResponse, PlaceFaceTracksData, PlaceFaceTracksError, PlaceFaceTracksResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RebuildVectorIndexesData, RebuildVectorIndexesError, RebuildVectorIndexesResponse, RegroupActorsData, RegroupActorsError, RegroupActorsResponse, RegroupScenesData, RegroupScenesError, RegroupScenesResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RenameActorData, RenameActorError, RenameActorResponse, RenameSceneData, RenameSceneError, RenameSceneResponse, RetryJobData, RetryJobError, RetryJobResponse, ReviewTagData, ReviewTagError, ReviewTagResponse, SearchTranscriptsData, SearchTranscriptsError, SearchTranscriptsResponse, SetSceneBoundaryData, SetSceneBoundaryError, SetSceneBoundaryResponse, SplitActorData, SplitActorError, SplitActorResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
+import { answerActorPair, browseFolder, cancelJob, createProject, createTimeline, deleteMedia, deleteProject, deleteTimeline, exportTimeline, getActor, getFaceCrop, getHealth, getJob, getKeyframe, getMedia, getMediaFaces, getMediaQuality, getMediaTranscript, getPoster, getProject, getStrip, getTimeline, getWaveform, importMedia, listActorPairs, listActors, listJobs, listMedia, listMediaEmbeddings, listMediaShots, listMediaTags, listProjects, listProjectShots, listProjectTags, listProjectTranscripts, listScenes, listSetAsideFaces, listTimelines, listVectorIndexes, mergeActors, type Options, placeFaceTracks, processMedia, processProject, rebuildVectorIndexes, regroupActors, regroupScenes, relinkMedia, renameActor, renameScene, retryJob, reviewTag, searchTranscripts, setSceneBoundary, splitActor, streamJobEvents, streamProxy, updateProject, uploadMedia } from '../sdk.gen';
+import type { AnswerActorPairData, AnswerActorPairError, AnswerActorPairResponse, BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetActorData, GetActorError, GetActorResponse, GetFaceCropData, GetFaceCropError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaFacesData, GetMediaFacesError, GetMediaFacesResponse, GetMediaQualityData, GetMediaQualityError, GetMediaQualityResponse, GetMediaResponse, GetMediaTranscriptData, GetMediaTranscriptError, GetMediaTranscriptResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, ListActorPairsData, ListActorPairsError, ListActorPairsResponse, ListActorsData, ListActorsError, ListActorsResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaEmbeddingsData, ListMediaEmbeddingsError, ListMediaEmbeddingsResponse, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListMediaTagsData, ListMediaTagsError, ListMediaTagsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListProjectTagsData, ListProjectTagsError, ListProjectTagsResponse, ListProjectTranscriptsData, ListProjectTranscriptsError, ListProjectTranscriptsResponse, ListScenesData, ListScenesError, ListScenesResponse, ListSetAsideFacesData, ListSetAsideFacesError, ListSetAsideFacesResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ListVectorIndexesData, ListVectorIndexesError, ListVectorIndexesResponse, MergeActorsData, MergeActorsError, MergeActorsResponse, PlaceFaceTracksData, PlaceFaceTracksError, PlaceFaceTracksResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RebuildVectorIndexesData, RebuildVectorIndexesError, RebuildVectorIndexesResponse, RegroupActorsData, RegroupActorsError, RegroupActorsResponse, RegroupScenesData, RegroupScenesError, RegroupScenesResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RenameActorData, RenameActorError, RenameActorResponse, RenameSceneData, RenameSceneError, RenameSceneResponse, RetryJobData, RetryJobError, RetryJobResponse, ReviewTagData, ReviewTagError, ReviewTagResponse, SearchTranscriptsData, SearchTranscriptsError, SearchTranscriptsResponse, SetSceneBoundaryData, SetSceneBoundaryError, SetSceneBoundaryResponse, SplitActorData, SplitActorError, SplitActorResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -731,7 +731,8 @@ export const listSetAsideFacesQueryKey = (options: Options<ListSetAsideFacesData
 /**
  * List Set Aside
  *
- * Faces the user set aside: marked "not a face" (ignored) or "unknown person".
+ * Faces not with any person: marked "not a face" (ignored) or "unknown person" by the user,
+ * or seen too briefly to group (brief).
  */
 export const listSetAsideFacesOptions = (options: Options<ListSetAsideFacesData>) => queryOptions<ListSetAsideFacesResponse, ListSetAsideFacesError, ListSetAsideFacesResponse, ReturnType<typeof listSetAsideFacesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -876,6 +877,45 @@ export const getFaceCropOptions = (options: Options<GetFaceCropData>) => queryOp
     },
     queryKey: getFaceCropQueryKey(options)
 });
+
+export const listActorPairsQueryKey = (options: Options<ListActorPairsData>) => createQueryKey('listActorPairs', options);
+
+/**
+ * List Actor Pairs
+ *
+ * People whose faces look most alike, closest first: questions for the user.
+ */
+export const listActorPairsOptions = (options: Options<ListActorPairsData>) => queryOptions<ListActorPairsResponse, ListActorPairsError, ListActorPairsResponse, ReturnType<typeof listActorPairsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listActorPairs({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listActorPairsQueryKey(options)
+});
+
+/**
+ * Answer Actor Pair
+ *
+ * Same person: merge the two. Different people: keep them apart in every later grouping.
+ */
+export const answerActorPairMutation = (options?: Partial<Options<AnswerActorPairData>>): UseMutationOptions<AnswerActorPairResponse, AnswerActorPairError, Options<AnswerActorPairData>> => {
+    const mutationOptions: UseMutationOptions<AnswerActorPairResponse, AnswerActorPairError, Options<AnswerActorPairData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await answerActorPair({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export const listScenesQueryKey = (options: Options<ListScenesData>) => createQueryKey('listScenes', options);
 

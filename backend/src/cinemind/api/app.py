@@ -15,6 +15,7 @@ from starlette.types import Scope
 
 from cinemind import __version__
 from cinemind.api import (
+    actor_pairs,
     actors,
     analysis,
     fs,
@@ -95,6 +96,7 @@ def create_app(
     app.include_router(timelines.router)
     app.include_router(transcripts.router)
     app.include_router(actors.router)
+    app.include_router(actor_pairs.router)
     app.include_router(analysis.router)
 
     @app.get(

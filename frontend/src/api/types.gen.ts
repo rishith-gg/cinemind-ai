@@ -111,6 +111,60 @@ export type ActorOut = {
 };
 
 /**
+ * ActorPairAnswerIn
+ */
+export type ActorPairAnswerIn = {
+    /**
+     * First Id
+     */
+    first_id: string;
+    /**
+     * Second Id
+     */
+    second_id: string;
+    /**
+     * Same
+     */
+    same: boolean;
+};
+
+/**
+ * ActorPairOut
+ *
+ * Two people the grouping kept apart although their faces look alike.
+ */
+export type ActorPairOut = {
+    first: ActorOut;
+    second: ActorOut;
+    /**
+     * Distance
+     */
+    distance: number;
+};
+
+/**
+ * ActorPairsOut
+ */
+export type ActorPairsOut = {
+    /**
+     * Pairs
+     */
+    pairs: Array<ActorPairOut>;
+    /**
+     * Cluster Distance
+     */
+    cluster_distance: number | null;
+    /**
+     * Answered
+     */
+    answered: number;
+    /**
+     * Answered Same
+     */
+    answered_same: number;
+};
+
+/**
  * ActorRename
  */
 export type ActorRename = {
@@ -136,6 +190,10 @@ export type ActorsOut = {
      * Unknown
      */
     unknown: number;
+    /**
+     * Brief
+     */
+    brief: number;
     /**
      * Scans
      */
@@ -281,7 +339,7 @@ export type EmbeddingStatusOut = {
     /**
      * Status
      */
-    status: 'pending' | 'done' | 'no_video' | 'no_speech' | 'no_transcript' | 'model_missing' | 'stale';
+    status: 'pending' | 'done' | 'no_video' | 'no_speech' | 'no_transcript' | 'model_missing';
     /**
      * Model
      */
@@ -353,7 +411,7 @@ export type FaceTrackOut = {
     /**
      * State
      */
-    state: 'auto' | 'pinned' | 'ignored' | 'unknown';
+    state: 'auto' | 'pinned' | 'ignored' | 'unknown' | 'brief';
     /**
      * Assignment
      */
@@ -899,7 +957,7 @@ export type MediaTagsOut = {
     /**
      * Status
      */
-    status: 'pending' | 'done' | 'no_video' | 'no_speech' | 'no_transcript' | 'model_missing' | 'stale';
+    status: 'pending' | 'done' | 'no_video' | 'no_speech' | 'no_transcript' | 'model_missing';
     /**
      * Model
      */
@@ -4035,6 +4093,98 @@ export type GetFaceCropResponses = {
      */
     200: unknown;
 };
+
+export type ListActorPairsData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/actors/pairs';
+};
+
+export type ListActorPairsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListActorPairsError = ListActorPairsErrors[keyof ListActorPairsErrors];
+
+export type ListActorPairsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ActorPairsOut;
+};
+
+export type ListActorPairsResponse = ListActorPairsResponses[keyof ListActorPairsResponses];
+
+export type AnswerActorPairData = {
+    body: ActorPairAnswerIn;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/actors/pairs/answer';
+};
+
+export type AnswerActorPairErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type AnswerActorPairError = AnswerActorPairErrors[keyof AnswerActorPairErrors];
+
+export type AnswerActorPairResponses = {
+    /**
+     * Successful Response
+     */
+    200: ActorPairsOut;
+};
+
+export type AnswerActorPairResponse = AnswerActorPairResponses[keyof AnswerActorPairResponses];
 
 export type ListScenesData = {
     body?: never;

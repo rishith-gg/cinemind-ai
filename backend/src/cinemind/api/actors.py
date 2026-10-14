@@ -35,7 +35,7 @@ router = APIRouter(tags=["actors"])
 _MODEL_MISSING = f"The face models are not downloaded. {PULL_HINT}"
 
 
-def _actor(session: Session, actor_id: str) -> Actor:
+def actor_of(session: Session, actor_id: str) -> Actor:
     actor = session.get(Actor, actor_id)
     if actor is None:
         raise NotFoundError("That person no longer exists. Reload the page.")
@@ -80,7 +80,7 @@ def _track_out(track: FaceTrack, filename: str, names: dict[str, str]) -> FaceTr
     )
 
 
-def _actor_out(actor: Actor, tracks: list[FaceTrack]) -> ActorOut:
+def actor_out(actor: Actor, tracks: list[FaceTrack]) -> ActorOut:
     best = max(tracks, key=lambda t: (t.face_count, t.id), default=None)
     return ActorOut(
         id=actor.id,
@@ -103,14 +103,14 @@ def _names(session: Session, project_id: str) -> dict[str, str]:
 
 def _overview(session: Session, project_id: str) -> ActorsOut:
     by_actor: dict[str, list[FaceTrack]] = {}
-    aside = {"ignored": 0, "unknown": 0}
+    aside = {"ignored": 0, "unknown": 0, "brief": 0}
     for track, _ in _tracks(session, project_id):
         if track.actor_id is not None:
             by_actor.setdefault(track.actor_id, []).append(track)
         elif track.state in aside:
             aside[track.state] += 1
     people = session.scalars(select(Actor).where(Actor.project_id == project_id))
-    listed = [_actor_out(actor, by_actor[actor.id]) for actor in people if actor.id in by_actor]
+    listed = [actor_out(actor, by_actor[actor.id]) for actor in people if actor.id in by_actor]
     scans: dict[str, int] = {
         status: count
         for status, count in session.execute(
@@ -134,6 +134,7 @@ def _overview(session: Session, project_id: str) -> ActorsOut:
         actors=sorted(listed, key=lambda a: (-a.faces, a.number)),
         ignored=aside["ignored"],
         unknown=aside["unknown"],
+        brief=aside["brief"],
         scans=scans,
         message=message,
         run=run.details if run else None,
@@ -144,7 +145,7 @@ def _overview(session: Session, project_id: str) -> ActorsOut:
 def _detail(session: Session, actor: Actor) -> ActorDetail:
     names = {actor.id: actor.name}
     rows = _tracks(session, actor.project_id, actor_id=actor.id)
-    summary = _actor_out(actor, [track for track, _ in rows])
+    summary = actor_out(actor, [track for track, _ in rows])
     track_list = [_track_out(track, name, names) for track, name in rows]
     return ActorDetail(**summary.model_dump(), track_list=track_list)
 
@@ -182,10 +183,11 @@ def regroup_actors(project_id: str, session: SessionDep, settings: SettingsDep) 
     operation_id="listSetAsideFaces",
 )
 def list_set_aside(project_id: str, session: SessionDep) -> list[FaceTrackOut]:
-    """Faces the user set aside: marked "not a face" (ignored) or "unknown person"."""
+    """Faces not with any person: marked "not a face" (ignored) or "unknown person" by the user,
+    or seen too briefly to group (brief)."""
     get_project(session, project_id)
     rows = _tracks(session, project_id)
-    return [_track_out(t, n, {}) for t, n in rows if t.state in ("ignored", "unknown")]
+    return [_track_out(t, n, {}) for t, n in rows if t.state in ("ignored", "unknown", "brief")]
 
 
 @router.post(
@@ -199,7 +201,7 @@ def place_tracks(
 ) -> ActorsOut:
     """Move faces to another person, set them aside, or hand them back to automatic grouping."""
     get_project(session, project_id)
-    actor = _actor(session, body.actor_id) if body.state == "actor" and body.actor_id else None
+    actor = actor_of(session, body.actor_id) if body.state == "actor" and body.actor_id else None
     corrections.place(session, settings, project_id, body.track_ids, body.state, actor)
     session.commit()
     return _overview(session, project_id)
@@ -212,7 +214,7 @@ def place_tracks(
     operation_id="getActor",
 )
 def get_actor(actor_id: str, session: SessionDep) -> ActorDetail:
-    return _detail(session, _actor(session, actor_id))
+    return _detail(session, actor_of(session, actor_id))
 
 
 @router.patch(
@@ -224,7 +226,7 @@ def get_actor(actor_id: str, session: SessionDep) -> ActorDetail:
 def rename_actor(
     actor_id: str, body: ActorRename, session: SessionDep, settings: SettingsDep
 ) -> ActorDetail:
-    actor = _actor(session, actor_id)
+    actor = actor_of(session, actor_id)
     corrections.rename(session, settings, actor, body.name)
     session.commit()
     return _detail(session, actor)
@@ -240,8 +242,8 @@ def merge_actors(
     actor_id: str, body: ActorMerge, session: SessionDep, settings: SettingsDep
 ) -> ActorDetail:
     """Merge the listed people into this one."""
-    actor = _actor(session, actor_id)
-    others = [_actor(session, other) for other in body.actor_ids]
+    actor = actor_of(session, actor_id)
+    others = [actor_of(session, other) for other in body.actor_ids]
     if any(other.project_id != actor.project_id for other in others):
         raise NotFoundError("Those people are not in the same project.")
     corrections.merge(session, settings, actor, others)
@@ -259,7 +261,7 @@ def split_actor(
     actor_id: str, body: TrackSelection, session: SessionDep, settings: SettingsDep
 ) -> ActorDetail:
     """Move the chosen faces of this person to a new person, which is returned."""
-    created = corrections.split(session, settings, _actor(session, actor_id), body.track_ids)
+    created = corrections.split(session, settings, actor_of(session, actor_id), body.track_ids)
     session.commit()
     return _detail(session, created)
 

@@ -62,6 +62,9 @@ const FACES = {
   tracks: [track("t1", "a1"), track("t3", "a2", "pinned", 6), track("t9", null, "ignored"), track("t8", null, "auto")],
 };
 
+const NO_PAIRS = { pairs: [], cluster_distance: 0.6, answered: 0, answered_same: 0 };
+const PAIRS = { ...NO_PAIRS, pairs: [{ first: actor("a1", "Actor 001", false, 4), second: actor("a3", "Actor 003", false, 1), distance: 0.64 }] };
+
 interface Call {
   method: string;
   path: string;
@@ -78,6 +81,7 @@ function backend(overrides: Record<string, unknown> = {}) {
     for (const [end, answer] of Object.entries(overrides)) {
       if (path.endsWith(end)) return answer instanceof Response ? answer.clone() : Response.json(answer);
     }
+    if (path.endsWith("/pairs")) return Response.json(NO_PAIRS);
     if (path.endsWith("/split")) return Response.json({ ...DETAIL, id: "a9", name: "Actor 009" });
     if (path.endsWith("/merge") || path.startsWith("/api/actors/")) return Response.json(req.method === "PATCH" ? { ...DETAIL, name: "Ravi" } : DETAIL);
     if (path.endsWith("/face-tracks")) return Response.json([track("t9", null, "ignored")]);
@@ -278,3 +282,40 @@ it("does not show a distance for a method that has none", async () => {
   expect(status).not.toHaveTextContent("distance");
 });
 
+
+it("asks whether two look-alike people are the same person, and sends the answer", async () => {
+  const calls = backend({ "/pairs": PAIRS, "/pairs/answer": { ...NO_PAIRS, answered: 1 } });
+  wrap(<ActorsPage />);
+  const review = within(await screen.findByRole("region", { name: "Same person?" }));
+  expect(review.getByText(/Face distance 0.64 \(grouped together below 0.6\)/)).toBeInTheDocument();
+  expect(review.getByAltText("Face of Actor 003")).toBeInTheDocument();
+  await userEvent.click(review.getByRole("button", { name: "Different people" }));
+  await waitFor(() =>
+    expect(calls).toEqual([{ method: "POST", path: "/api/projects/p1/actors/pairs/answer", body: { first_id: "a1", second_id: "a3", same: false } }]),
+  );
+  expect(toasts()).toContain("Kept apart from now on.");
+});
+
+it("skips a question the user is not sure about", async () => {
+  backend({ "/pairs": PAIRS });
+  wrap(<ActorsPage />);
+  const review = within(await screen.findByRole("region", { name: "Same person?" }));
+  await userEvent.click(review.getByRole("button", { name: "Not sure, skip" }));
+  expect(screen.queryByRole("region", { name: "Same person?" })).not.toBeInTheDocument();
+});
+
+it("lists faces seen only briefly apart, and lets the user add one to a person or reject it", async () => {
+  const brief = { ...track("t7", null, "brief", 3, "seen in only 1 sampled frame (a person needs 2); set aside automatically"), face_count: 1 };
+  const calls = backend({ "/face-tracks": [track("t9", null, "ignored"), brief], "/actors": { ...OVERVIEW, brief: 1 } });
+  wrap(<ActorsPage />);
+  expect(await screen.findByText(/1 face seen only briefly set aside/)).toBeInTheDocument();
+  expect(screen.getByText("Seen briefly: 1 face set aside automatically")).toBeInTheDocument();
+  await userEvent.selectOptions(screen.getByLabelText("Add the face from picnic.mov to a person"), "a2");
+  await userEvent.click(screen.getByRole("button", { name: "Not a face: picnic.mov" }));
+  await waitFor(() =>
+    expect(calls).toEqual([
+      { method: "POST", path: "/api/projects/p1/face-tracks/place", body: { track_ids: ["t7"], state: "actor", actor_id: "a2" } },
+      { method: "POST", path: "/api/projects/p1/face-tracks/place", body: { track_ids: ["t7"], state: "ignored" } },
+    ]),
+  );
+});

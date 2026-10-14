@@ -328,3 +328,101 @@ def test_hdbscan_grouping_keeps_corrections_and_does_not_claim_a_distance(
     listed = [t for a in again["actors"] for t in detail_of(client, a["id"])["track_list"]]
     auto = [t for t in listed if t["state"] == "auto"]
     assert auto and all("cluster_distance" not in t["assignment"] for t in auto)
+
+
+def test_faces_seen_too_briefly_are_set_aside_until_the_user_places_them(
+    client: TestClient,
+    pid: str,
+    api_settings: Settings,
+    footage: Path,
+    fake: FakeFaces,
+    factory: sessionmaker[Session],
+) -> None:
+    two_clips(client, pid, api_settings, footage)
+    one, two = actors_of(client, pid)["actors"]
+    flash = detail_of(client, one["id"])["track_list"][0]["id"]
+    with factory() as session:  # as if the face had been found in one sampled frame only
+        track = session.get(FaceTrack, flash)
+        assert track is not None
+        track.face_count = 1
+        session.commit()
+    after = client.post(f"/api/projects/{pid}/actors/regroup").json()
+    assert after["brief"] == 1 and after["run"]["tracks_seen_briefly"] == 1
+    assert after["run"]["min_track_faces"] == 2
+    aside = client.get(f"/api/projects/{pid}/face-tracks").json()
+    assert [(t["id"], t["state"], t["actor_id"]) for t in aside] == [(flash, "brief", None)]
+    assert "seen in only 1 sampled frame" in aside[0]["assignment"]["how"]
+
+    # The user knows better: placed with a person, it stays there however brief it was.
+    body = {"track_ids": [flash], "state": "actor", "actor_id": two["id"]}
+    placed = client.post(f"/api/projects/{pid}/face-tracks/place", json=body).json()
+    assert placed["brief"] == 0
+    again = client.post(f"/api/projects/{pid}/actors/regroup").json()
+    assert again["brief"] == 0 and flash in {
+        t["id"] for t in detail_of(client, two["id"])["track_list"]
+    }
+
+    # A setting of 1 keeps every face.
+    api_settings.faces = FaceConfig(min_track_faces=1)
+    assert (
+        client.post(f"/api/projects/{pid}/actors/regroup").json()["run"]["tracks_seen_briefly"] == 0
+    )
+
+
+def test_same_person_questions_merge_on_yes_and_keep_apart_on_no(
+    client: TestClient,
+    pid: str,
+    api_settings: Settings,
+    footage: Path,
+    fake: FakeFaces,
+    factory: sessionmaker[Session],
+) -> None:
+    # Person 2 shows up in a third clip looking a little different from person 0: grouped as a
+    # person of its own (a stand-in for one actor split in two).
+    two_clips(client, pid, api_settings, footage)
+    fake.people = [(0.1, person(0, wobble=3.0))]  # cosine 1/sqrt(10) to person 0
+    import_clip(client, pid, footage / "b_prores.mov")
+    drain(api_settings)
+    people = actors_of(client, pid)["actors"]
+    assert len(people) == 3
+    pairs = client.get(f"/api/projects/{pid}/actors/pairs").json()
+    assert pairs["answered"] == 0 and pairs["cluster_distance"] == 0.6
+    # Persons 0 and 1 share every frame: never asked. The closest pair comes first.
+    asked = [{p["first"]["id"], p["second"]["id"]} for p in pairs["pairs"]]
+    zero, one = (a["id"] for a in people[:2])
+    assert {zero, one} not in asked
+    first = pairs["pairs"][0]
+    assert first["distance"] == pytest.approx(1 - 10**-0.5, abs=0.01)
+    assert [p["distance"] for p in pairs["pairs"]] == sorted(p["distance"] for p in pairs["pairs"])
+
+    def answer(a: str, b: str, same: bool) -> Any:
+        body = {"first_id": a, "second_id": b, "same": same}
+        return client.post(f"/api/projects/{pid}/actors/pairs/answer", json=body)
+
+    # "No": not asked again, and kept apart by a regrouping whose limit would join them.
+    a, b = first["first"]["id"], first["second"]["id"]
+    after = answer(a, b, False).json()
+    assert after["answered"] == 1 and after["answered_same"] == 0
+    assert {a, b} not in [{p["first"]["id"], p["second"]["id"]} for p in after["pairs"]]
+    api_settings.faces = FaceConfig(cluster_distance=0.9)
+    regrouped = client.post(f"/api/projects/{pid}/actors/regroup").json()
+    owners = {t["actor_id"] for x in (a, b) for t in faces_of_actor(client, x)}
+    assert len(owners) == 2 and len(regrouped["actors"]) == 3
+
+    # "Yes" on the remaining pair merges it; the bigger person stays.
+    api_settings.faces = FaceConfig()
+    rest = client.get(f"/api/projects/{pid}/actors/pairs").json()["pairs"]
+    c, d = rest[0]["first"]["id"], rest[0]["second"]["id"]
+    merged = answer(c, d, True).json()
+    assert merged["answered"] == 2 and merged["answered_same"] == 1
+    assert len(actors_of(client, pid)["actors"]) == 2
+    assert answer(c, c, True).status_code in (404, 422)
+    assert answer(a, "nope", False).status_code == 404
+    with factory() as session:
+        kinds = [e.kind for e in session.query(FeedbackEvent).order_by(FeedbackEvent.id)]
+    assert kinds.count("actor_pair") == 2 and "actor_merge" in kinds
+
+
+def faces_of_actor(client: TestClient, actor_id: str) -> list[dict[str, Any]]:
+    res = client.get(f"/api/actors/{actor_id}")
+    return res.json()["track_list"] if res.status_code == 200 else []

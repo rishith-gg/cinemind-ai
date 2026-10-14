@@ -195,6 +195,17 @@ ours.
   frame are never grouped (their distance is set so large that no average falls under the threshold). HDBSCAN can
   still join such a pair through a chain of others; a group where that happened is regrouped with the
   agglomerative method.
+- *Faces seen briefly.* A track with fewer faces than `min_track_faces` (2, i.e. found in a single sampled frame at
+  2 frames per second) is not grouped: it gets the state `brief`, no actor, and is listed apart on the Actors page
+  ("Seen briefly"), where the user can add it to a person or mark it "not a face". A convention, not an evaluated
+  limit: on the user's footage every shirt, raincoat, mask and motion-blurred face that had become an actor was a
+  one-frame track (checked by eye, D-082). A user correction outranks it.
+- *"Same person?" questions.* The Actors page asks about the pairs of people whose faces look most alike: average
+  linkage over their tracks (mean of 1 - cosine), closest first, at most 12, never two people seen in the same frame
+  and never a pair already answered "different". "Same" merges them (into the named one, else the one with more
+  faces; an ordinary merge correction). "Different" is stored by track (`actor_pair_answers`) and keeps those
+  tracks apart in every later grouping, unless a later correction puts them with one person. Each answer stores
+  the distance the pair had, which `eval/actor_pairs.py` turns into a measurement of the grouping limit (D-083).
 - *Names and identity.* A new group becomes "Actor 001", "Actor 002", ... (the lowest number not in use). A group
   keeps the actor most of its faces belonged to before, also across a rescan of a clip, so numbers and names stay
   put when the project is grouped again. Actors are local to the

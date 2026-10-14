@@ -23,7 +23,15 @@ from cinemind.core import face_config
 from cinemind.core.config import Settings
 from cinemind.db.base import utcnow
 from cinemind.db.models import MediaAsset
-from cinemind.db.people import Actor, ActorRun, Face, FacePin, FaceScan, FaceTrack
+from cinemind.db.people import (
+    Actor,
+    ActorPairAnswer,
+    ActorRun,
+    Face,
+    FacePin,
+    FaceScan,
+    FaceTrack,
+)
 from cinemind.pipeline.face_scan import overlap
 
 # A pin finds its face again if one was seen within this time of it, overlapping this much.
@@ -35,6 +43,8 @@ PIN_COVERAGE = 0.5
 # Pin states. `actor` = the user put this face with the actor; `kept` = it was with the actor
 # when the user named or corrected that actor, and stays there; the other two set it aside.
 PLACED, KEPT = "actor", "kept"
+# Track state for faces seen too briefly to group (`[faces] min_track_faces`); not a user pin.
+BRIEF = "brief"
 Vote = tuple[str, str | None]  # (pin state, actor id)
 
 
@@ -102,7 +112,9 @@ def _votes(session: Session, project_id: str, tracks: list[FaceTrack]) -> dict[s
     return decided
 
 
-def _apart(session: Session, project_id: str, position: dict[str, int]) -> set[tuple[int, int]]:
+def co_occurring(
+    session: Session, project_id: str, position: dict[str, int]
+) -> set[tuple[int, int]]:
     """Pairs of tracks that have a face in the same frame of the same clip."""
     query = (
         select(Face.media_id, Face.frame, Face.track_id)
@@ -117,6 +129,27 @@ def _apart(session: Session, project_id: str, position: dict[str, int]) -> set[t
     for members in frames.values():
         for i, a in enumerate(members):
             pairs.update((min(a, b), max(a, b)) for b in members[i + 1 :] if a != b)
+    return pairs
+
+
+def answers_apart(session: Session, project_id: str) -> list[ActorPairAnswer]:
+    """The user's "different people" answers, oldest first."""
+    query = (
+        select(ActorPairAnswer)
+        .where(ActorPairAnswer.project_id == project_id, ActorPairAnswer.same.is_(False))
+        .order_by(ActorPairAnswer.id)
+    )
+    return list(session.scalars(query))
+
+
+def kept_apart(session: Session, project_id: str, position: dict[str, int]) -> set[tuple[int, int]]:
+    """Index pairs (into the tracks `position` numbers) that the user's "different people"
+    answers keep apart. Tracks that no longer exist (the clip was scanned again) are skipped."""
+    pairs: set[tuple[int, int]] = set()
+    for answer in answers_apart(session, project_id):
+        found_a = [position[t] for t in answer.tracks_a if t in position]
+        found_b = [position[t] for t in answer.tracks_b if t in position]
+        pairs.update((min(a, b), max(a, b)) for a in found_a for b in found_b if a != b)
     return pairs
 
 
@@ -160,6 +193,11 @@ def _labels(
         vectors, cfg.cluster_distance, cfg.cluster_method, apart, together, weights
     )
     return labels, vectors
+
+
+def how_brief(faces: int, needed: int) -> str:
+    frames = "1 sampled frame" if faces == 1 else f"{faces} sampled frames"
+    return f"seen in only {frames} (a person needs {needed}); set aside automatically"
 
 
 def how(pin_state: str | None) -> str:
@@ -206,8 +244,10 @@ def basis(
         .where(MediaAsset.project_id == project_id)
         .order_by(FaceScan.media_id)
     ).all()
-    basis: list[Any] = [cfg.cluster_method, cfg.cluster_distance, [list(row) for row in scans]]
+    basis: list[Any] = [cfg.cluster_method, cfg.cluster_distance, cfg.min_track_faces]
+    basis.append([list(row) for row in scans])
     basis.append(sorted([track, vote[0], vote[1] or ""] for track, vote in votes.items()))
+    basis.append([answer.id for answer in answers_apart(session, project_id)])
     return hashlib.sha256(json.dumps(basis).encode()).hexdigest(), votes, unmatched
 
 
@@ -239,17 +279,29 @@ def regroup(session: Session, settings: Settings, project_id: str, force: bool =
         used["cluster_distance"] = cfg.cluster_distance
 
     active: list[FaceTrack] = []
+    brief = 0
     for track in tracks:
         state = votes.get(track.id, ("auto", None))[0]
         if state in ("ignored", "unknown"):
             track.actor_id, track.state = None, state
             track.assignment = {"how": "set aside by you"}
+        elif track.id not in votes and track.face_count < cfg.min_track_faces:
+            track.actor_id, track.state = None, BRIEF
+            track.assignment = {"how": how_brief(track.face_count, cfg.min_track_faces)}
+            brief += 1
         else:
             active.append(track)
     pinned = [votes[t.id][1] if t.id in votes else None for t in active]
     labels: list[int] = []
     if active:
-        apart = _apart(session, project_id, {t.id: i for i, t in enumerate(active)})
+        position = {t.id: i for i, t in enumerate(active)}
+        apart = co_occurring(session, project_id, position)
+        # A "different" answer gives way to a later correction that put both with one person.
+        apart |= {
+            (i, j)
+            for i, j in kept_apart(session, project_id, position)
+            if pinned[i] is None or pinned[i] != pinned[j]
+        }
         labels, vectors = _labels(active, pinned, apart, cfg)
         similarity = face_cluster.centroid_similarity(vectors, labels)
         chosen = _actors_for(session, project_id, active, pinned, labels)
@@ -269,6 +321,8 @@ def regroup(session: Session, settings: Settings, project_id: str, force: bool =
         **used,
         "tracks": len(tracks),
         "tracks_grouped": len(active),
+        "tracks_seen_briefly": brief,
+        "min_track_faces": cfg.min_track_faces,
         "actors": len(set(labels)),
         "tracks_placed_by_you": sum(votes[t.id][0] == PLACED for t in active if t.id in votes),
         "corrections_not_found": unmatched,
