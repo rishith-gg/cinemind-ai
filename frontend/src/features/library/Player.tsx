@@ -7,13 +7,8 @@ import { ShotStrip } from "../shots/ShotStrip";
 import { PeoplePanel } from "../actors/PeoplePanel";
 import { TagsPanel } from "../tags/TagsPanel";
 import { TranscriptPanel } from "../transcripts/TranscriptPanel";
-import { handlePlayerKey, type PlayerState } from "./playerKeys";
+import { handlePlayerKey, isTyping, type PlayerState } from "./playerKeys";
 import { Waveform } from "./Waveform";
-
-function isTyping(target: EventTarget | null): boolean {
-  const el = target as HTMLElement | null;
-  return !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable);
-}
 
 /** Proxy player with editor shortcuts (Space/K/L/J, arrows = frame step, I/O marks), a
  * thumbnail strip (click to seek), the shot strip, the waveform and the transcript following
@@ -97,7 +92,7 @@ export function Player({ media }: { media: MediaOut }) {
       {media.probed && !!media.width && <TagsPanel mediaId={media.id} time={time} onSeek={seekTo} />}
       {media.probed && <TranscriptPanel mediaId={media.id} time={time} onSeek={seekTo} />}
       <p className="text-xs text-neutral-500">
-        Keys: Space/K play·pause · L play (again = faster) · J back 1 s · ←/→ one frame (Shift: 1 s) · I/O mark
+        Keys: Space/K play·pause · L play (again = faster) · J back 1 s · ←/→ one frame (Shift: 1 s) · I/O mark · P/N previous·next clip
       </p>
     </div>
   );

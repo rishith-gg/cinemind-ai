@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-import type { MediaOut } from "../../api";
 import { Link } from "react-router";
 
 import { listMediaOptions, listMediaQueryKey, processProjectMutation } from "../../api/@tanstack/react-query.gen";
@@ -10,6 +9,7 @@ import { useCurrentProject } from "../../lib/currentProject";
 import { errorMessage } from "../../lib/errors";
 import { toast } from "../../lib/toast";
 import { ImportPanel } from "./ImportPanel";
+import { FILTERS, type FilterKey, shownClips, SORTS, type SortKey, useLibraryView } from "./libraryView";
 import { MediaCard } from "./MediaCard";
 
 export function LibraryPage() {
@@ -27,22 +27,8 @@ export function LibraryPage() {
   return <Library projectId={projectId} />;
 }
 
-const FILTERS = {
-  all: { label: "All clips", keep: () => true },
-  flagged: { label: "With QC flags", keep: (m: MediaOut) => m.qc_flags.length > 0 },
-  low: { label: "Low technical score", keep: (m: MediaOut) => m.low_quality },
-  clean: { label: "Scored, no QC flags", keep: (m: MediaOut) => m.quality_score != null && !m.low_quality && m.qc_flags.length === 0 },
-} as const;
-const SORTS = {
-  newest: { label: "Newest first", compare: () => 0 },
-  worst: { label: "Technical score: lowest first", compare: (a: MediaOut, b: MediaOut) => (a.quality_score ?? 2) - (b.quality_score ?? 2) },
-  best: { label: "Technical score: highest first", compare: (a: MediaOut, b: MediaOut) => (b.quality_score ?? -1) - (a.quality_score ?? -1) },
-  name: { label: "Name", compare: (a: MediaOut, b: MediaOut) => a.filename.localeCompare(b.filename, undefined, { numeric: true }) },
-} as const;
-
 function Library({ projectId }: { projectId: string }) {
-  const [filter, setFilter] = useState<keyof typeof FILTERS>("all");
-  const [sort, setSort] = useState<keyof typeof SORTS>("newest");
+  const { filter, sort, setFilter, setSort } = useLibraryView();
   const qc = useQueryClient();
   const [importing, setImporting] = useState(false);
   const { data, error, isPending, refetch } = useQuery(listMediaOptions({ path: { project_id: projectId } }));
@@ -55,7 +41,7 @@ function Library({ projectId }: { projectId: string }) {
     },
   });
 
-  const shown = (data ?? []).filter(FILTERS[filter].keep).sort(SORTS[sort].compare);
+  const shown = shownClips(data ?? [], filter, sort);
 
   return (
     <section className="space-y-4">
@@ -92,7 +78,7 @@ function Library({ projectId }: { projectId: string }) {
             <select
               className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1"
               value={filter}
-              onChange={(e) => setFilter(e.target.value as keyof typeof FILTERS)}
+              onChange={(e) => setFilter(e.target.value as FilterKey)}
             >
               {Object.entries(FILTERS).map(([key, f]) => (
                 <option key={key} value={key}>
@@ -106,7 +92,7 @@ function Library({ projectId }: { projectId: string }) {
             <select
               className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1"
               value={sort}
-              onChange={(e) => setSort(e.target.value as keyof typeof SORTS)}
+              onChange={(e) => setSort(e.target.value as SortKey)}
             >
               {Object.entries(SORTS).map(([key, s]) => (
                 <option key={key} value={key}>

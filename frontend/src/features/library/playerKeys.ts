@@ -1,5 +1,11 @@
 const SPEEDS = [1, 2, 4];
 
+/** True while the user types in a field, so single-letter shortcuts stay out of the way. */
+export function isTyping(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  return !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable);
+}
+
 export interface PlayerState {
   speedIndex: number;
 }

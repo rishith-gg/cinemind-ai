@@ -11,6 +11,7 @@ import { ErrorState, Loading } from "../../components/states";
 import { errorMessage } from "../../lib/errors";
 import { toast } from "../../lib/toast";
 import { QualityPanel } from "../quality/QualityPanel";
+import { ClipNav } from "./ClipNav";
 import { mediaStatus } from "./format";
 import { StatusBadge } from "./MediaCard";
 import { MetadataPanel } from "./MetadataPanel";
@@ -57,7 +58,8 @@ export function ClipPage() {
           </Link>
           <h1 className="truncate text-xl font-semibold">{data.filename}</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <ClipNav projectId={data.project_id} mediaId={data.id} />
           <StatusBadge media={data} />
           <button className="rounded bg-neutral-800 px-3 py-1.5 text-sm" onClick={() => reprocess.mutate({ path: { media_id: data.id } })}>
             Reprocess
@@ -86,7 +88,7 @@ export function ClipPage() {
       )}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         {data.has_proxy ? (
-          <Player media={data} />
+          <Player key={data.id} media={data} />
         ) : (
           <p className="rounded border border-dashed border-neutral-700 p-8 text-center text-sm text-neutral-400">
             {status === "failed" ? "No playable proxy was created." : "The proxy is still being created. This page updates by itself."}
