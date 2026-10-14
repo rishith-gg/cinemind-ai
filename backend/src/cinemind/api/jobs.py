@@ -14,7 +14,7 @@ from cinemind.api.deps import FactoryDep, SessionDep, SettingsDep
 from cinemind.api.schemas import ErrorResponse, JobOut
 from cinemind.db.models import Job, JobEvent
 from cinemind.jobs import queue
-from cinemind.pipeline import actors
+from cinemind.pipeline import project_refresh
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 _ERR: dict[int | str, dict[str, Any]] = {
@@ -100,8 +100,8 @@ def cancel_job(job_id: str, session: SessionDep, settings: SettingsDep) -> JobOu
     job = queue.request_cancel(session, job_id)
     if job.status == "cancelled" and job.project_id is not None:
         # A job cancelled while queued never reaches the worker; if it was the project's last
-        # one, the faces found by the jobs before it are grouped here.
-        actors.regroup_if_idle(session, settings, job.project_id)
+        # one, what the jobs before it found is grouped here (actors, scenes, indexes).
+        project_refresh.refresh_if_idle(session, settings, job.project_id)
     return JobOut.model_validate(job)
 
 

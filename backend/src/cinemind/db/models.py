@@ -169,12 +169,19 @@ class Shot(Base):
     fps_den: Mapped[int]
     # Rule 6: detector, threshold, minimum length and library version that produced this shot.
     detection: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    # Set by the scene grouping (`pipeline/scenes.py`); None until the project was grouped.
+    scene_id: Mapped[str | None] = mapped_column(
+        ForeignKey("scenes.id", ondelete="SET NULL"), nullable=True
+    )
 
     keyframes: Mapped[list["Keyframe"]] = relationship(
         order_by="Keyframe.slot", cascade="all, delete-orphan", passive_deletes=True
     )
 
-    __table_args__ = (Index("ix_shots_media", "media_id", "index"),)
+    __table_args__ = (
+        Index("ix_shots_media", "media_id", "index"),
+        Index("ix_shots_scene", "scene_id"),
+    )
 
 
 class Keyframe(Base):
@@ -368,5 +375,7 @@ class TranscriptWord(Base):
     __table_args__ = (Index("ix_transcript_words_segment", "segment_id", "index"),)
 
 
-# Faces and actors live in their own module; importing it here registers their tables.
+# Faces and actors, and the Phase 8 analysis tables, live in their own modules; importing them
+# here registers their tables.
+from cinemind.db import analysis as analysis  # noqa: E402
 from cinemind.db import people as people  # noqa: E402

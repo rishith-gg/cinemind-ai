@@ -1,0 +1,305 @@
+{
+  "models": {
+    "clip-vit-b32@1a25a446712b+v1": {
+      "date": "2026-10-14",
+      "source": "eval/results/tag_calibration_clip-vit-b32_2026-10-14.json",
+      "tags": {
+        "beach": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 50,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "bedroom": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 25,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "classroom": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 50,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "day": {
+          "dataset": "codan",
+          "enabled": true,
+          "positives_heldout": 1250,
+          "precision": 0.9203,
+          "precision_ci95": [
+            0.904,
+            0.934
+          ],
+          "reason": null,
+          "recall": 0.9232,
+          "shown_heldout": 1254,
+          "threshold": 0.5
+        },
+        "field": {
+          "dataset": "places365",
+          "enabled": true,
+          "positives_heldout": 125,
+          "precision": 1.0,
+          "precision_ci95": [
+            0.806,
+            1.0
+          ],
+          "reason": null,
+          "recall": 0.128,
+          "shown_heldout": 16,
+          "threshold": 0.983
+        },
+        "forest": {
+          "dataset": "places365",
+          "enabled": true,
+          "positives_heldout": 125,
+          "precision": 0.9273,
+          "precision_ci95": [
+            0.827,
+            0.971
+          ],
+          "reason": null,
+          "recall": 0.408,
+          "shown_heldout": 55,
+          "threshold": 0.8369
+        },
+        "highway": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 25,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "indoor": {
+          "dataset": "places365",
+          "enabled": true,
+          "positives_heldout": 4025,
+          "precision": 0.903,
+          "precision_ci95": [
+            0.893,
+            0.912
+          ],
+          "reason": null,
+          "recall": 0.8701,
+          "shown_heldout": 3878,
+          "threshold": 0.5879
+        },
+        "kitchen": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 50,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "living_room": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 25,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "mountain": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 75,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "night": {
+          "dataset": "codan",
+          "enabled": true,
+          "positives_heldout": 1250,
+          "precision": 0.923,
+          "precision_ci95": [
+            0.907,
+            0.936
+          ],
+          "reason": null,
+          "recall": 0.92,
+          "shown_heldout": 1246,
+          "threshold": 0.5
+        },
+        "office": {
+          "dataset": "places365",
+          "enabled": true,
+          "positives_heldout": 75,
+          "precision": 0.9655,
+          "precision_ci95": [
+            0.828,
+            0.994
+          ],
+          "reason": null,
+          "recall": 0.3733,
+          "shown_heldout": 29,
+          "threshold": 0.8963
+        },
+        "outdoor": {
+          "dataset": "places365",
+          "enabled": true,
+          "positives_heldout": 5100,
+          "precision": 0.9053,
+          "precision_ci95": [
+            0.897,
+            0.913
+          ],
+          "reason": null,
+          "recall": 0.9096,
+          "shown_heldout": 5124,
+          "threshold": 0.5
+        },
+        "pool": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 50,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "restaurant": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 125,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "river_lake": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 75,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "sea": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 25,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "stage": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 50,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "street": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 100,
+          "precision": 0.8462,
+          "precision_ci95": [
+            0.578,
+            0.957
+          ],
+          "reason": "held-out precision 0.846 < 0.85",
+          "recall": 0.11,
+          "shown_heldout": 13,
+          "threshold": 0.9912
+        },
+        "temple": {
+          "dataset": "places365",
+          "enabled": true,
+          "positives_heldout": 50,
+          "precision": 0.9444,
+          "precision_ci95": [
+            0.742,
+            0.99
+          ],
+          "reason": null,
+          "recall": 0.34,
+          "shown_heldout": 18,
+          "threshold": 0.9878
+        },
+        "underwater": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 25,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        },
+        "vehicle": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 100,
+          "precision": 0.8252,
+          "precision_ci95": [
+            0.741,
+            0.887
+          ],
+          "reason": "held-out precision 0.825 < 0.85",
+          "recall": 0.85,
+          "shown_heldout": 103,
+          "threshold": 0.6554
+        },
+        "waterfall": {
+          "dataset": "places365",
+          "enabled": false,
+          "positives_heldout": 25,
+          "precision": null,
+          "precision_ci95": null,
+          "reason": "never reached 0.9 precision on the tuning half",
+          "recall": null,
+          "shown_heldout": null,
+          "threshold": null
+        }
+      },
+      "target_precision": 0.9
+    }
+  }
+}

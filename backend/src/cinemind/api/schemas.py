@@ -185,6 +185,7 @@ class ShotOut(BaseModel):
     fps_den: int
     detection: dict[str, Any]
     keyframes: list[KeyframeOut]
+    scene_id: str | None = None
 
 
 class ProjectShotOut(ShotOut):

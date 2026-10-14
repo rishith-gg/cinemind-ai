@@ -203,6 +203,20 @@ export type AudioQualityOut = {
 };
 
 /**
+ * BoundaryIn
+ */
+export type BoundaryIn = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Decision
+     */
+    decision: 'split' | 'join' | 'auto';
+};
+
+/**
  * Check
  */
 export type Check = {
@@ -254,6 +268,32 @@ export type DoctorReport = {
      * Selected Tier
      */
     selected_tier: string;
+};
+
+/**
+ * EmbeddingStatusOut
+ */
+export type EmbeddingStatusOut = {
+    /**
+     * Kind
+     */
+    kind: 'visual' | 'text';
+    /**
+     * Status
+     */
+    status: 'pending' | 'done' | 'no_video' | 'no_speech' | 'no_transcript' | 'model_missing' | 'stale';
+    /**
+     * Model
+     */
+    model: string | null;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Message
+     */
+    message: string | null;
 };
 
 /**
@@ -853,6 +893,36 @@ export type MediaOut = {
 };
 
 /**
+ * MediaTagsOut
+ */
+export type MediaTagsOut = {
+    /**
+     * Status
+     */
+    status: 'pending' | 'done' | 'no_video' | 'no_speech' | 'no_transcript' | 'model_missing' | 'stale';
+    /**
+     * Model
+     */
+    model: string | null;
+    /**
+     * Message
+     */
+    message: string | null;
+    /**
+     * Calibrated
+     */
+    calibrated: string | null;
+    /**
+     * Calibration Source
+     */
+    calibration_source: string | null;
+    /**
+     * Shots
+     */
+    shots: Array<ShotTagsOut>;
+};
+
+/**
  * ProjectCreate
  */
 export type ProjectCreate = {
@@ -942,6 +1012,10 @@ export type ProjectShotOut = {
      * Keyframes
      */
     keyframes: Array<KeyframeOut>;
+    /**
+     * Scene Id
+     */
+    scene_id?: string | null;
     /**
      * Filename
      */
@@ -1046,6 +1120,155 @@ export type RelinkRequest = {
 };
 
 /**
+ * SceneOut
+ */
+export type SceneOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Named
+     */
+    named: boolean;
+    /**
+     * Shot Count
+     */
+    shot_count: number;
+    /**
+     * Duration S
+     */
+    duration_s: number;
+    /**
+     * Shots
+     */
+    shots: Array<SceneShotOut>;
+};
+
+/**
+ * SceneRename
+ */
+export type SceneRename = {
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * SceneSettingsOut
+ */
+export type SceneSettingsOut = {
+    /**
+     * Join Similarity
+     */
+    join_similarity: number;
+    /**
+     * Visual Weight
+     */
+    visual_weight: number;
+    /**
+     * Color Weight
+     */
+    color_weight: number;
+};
+
+/**
+ * SceneShotOut
+ */
+export type SceneShotOut = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Keyframe Id
+     */
+    keyframe_id: string | null;
+    /**
+     * Visual
+     */
+    visual: number | null;
+    /**
+     * Color
+     */
+    color: number | null;
+    /**
+     * Combined
+     */
+    combined: number | null;
+    /**
+     * Decision
+     */
+    decision: string;
+    /**
+     * Edit
+     */
+    edit: 'split' | 'join' | null;
+};
+
+/**
+ * ScenesOut
+ */
+export type ScenesOut = {
+    /**
+     * Scenes
+     */
+    scenes: Array<SceneOut>;
+    /**
+     * Ungrouped
+     */
+    ungrouped: Array<SceneShotOut>;
+    /**
+     * Grouped At
+     */
+    grouped_at: string | null;
+    /**
+     * Details
+     */
+    details: {
+        [key: string]: unknown;
+    };
+    settings: SceneSettingsOut;
+    /**
+     * Model Missing
+     */
+    model_missing: boolean;
+    /**
+     * Message
+     */
+    message: string | null;
+};
+
+/**
  * ShotOut
  */
 export type ShotOut = {
@@ -1095,6 +1318,10 @@ export type ShotOut = {
      * Keyframes
      */
     keyframes: Array<KeyframeOut>;
+    /**
+     * Scene Id
+     */
+    scene_id?: string | null;
 };
 
 /**
@@ -1157,6 +1384,124 @@ export type ShotQualityOut = {
      * Score
      */
     score: number;
+};
+
+/**
+ * ShotTagsOut
+ */
+export type ShotTagsOut = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Tags
+     */
+    tags: Array<TagOut>;
+};
+
+/**
+ * TagCountOut
+ */
+export type TagCountOut = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Label
+     */
+    label: string;
+    /**
+     * Group
+     */
+    group: string;
+    /**
+     * Shots
+     */
+    shots: number;
+};
+
+/**
+ * TagOut
+ */
+export type TagOut = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Label
+     */
+    label: string;
+    /**
+     * Group
+     */
+    group: string;
+    /**
+     * Group Label
+     */
+    group_label: string;
+    /**
+     * Source
+     */
+    source: 'model' | 'faces' | 'transcript';
+    /**
+     * Score
+     */
+    score: number | null;
+    /**
+     * Threshold
+     */
+    threshold: number | null;
+    /**
+     * Status
+     */
+    status: 'shown' | 'below' | 'disabled' | 'not_evaluated';
+    /**
+     * Review
+     */
+    review: 'approved' | 'rejected' | null;
+    /**
+     * Visible
+     */
+    visible: boolean;
+    /**
+     * Details
+     */
+    details: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * TagReviewIn
+ */
+export type TagReviewIn = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Decision
+     */
+    decision: 'approved' | 'rejected' | 'none';
 };
 
 /**
@@ -1696,6 +2041,40 @@ export type ValidationError = {
     ctx?: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * VectorIndexOut
+ */
+export type VectorIndexOut = {
+    /**
+     * Kind
+     */
+    kind: string;
+    /**
+     * Model
+     */
+    model: string;
+    /**
+     * Backend
+     */
+    backend: string;
+    /**
+     * Dim
+     */
+    dim: number;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Built At
+     */
+    built_at: string;
+    /**
+     * Up To Date
+     */
+    up_to_date: boolean;
 };
 
 export type ListProjectsData = {
@@ -3656,6 +4035,469 @@ export type GetFaceCropResponses = {
      */
     200: unknown;
 };
+
+export type ListScenesData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/scenes';
+};
+
+export type ListScenesErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListScenesError = ListScenesErrors[keyof ListScenesErrors];
+
+export type ListScenesResponses = {
+    /**
+     * Successful Response
+     */
+    200: ScenesOut;
+};
+
+export type ListScenesResponse = ListScenesResponses[keyof ListScenesResponses];
+
+export type RegroupScenesData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/scenes/regroup';
+};
+
+export type RegroupScenesErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type RegroupScenesError = RegroupScenesErrors[keyof RegroupScenesErrors];
+
+export type RegroupScenesResponses = {
+    /**
+     * Successful Response
+     */
+    200: ScenesOut;
+};
+
+export type RegroupScenesResponse = RegroupScenesResponses[keyof RegroupScenesResponses];
+
+export type SetSceneBoundaryData = {
+    body: BoundaryIn;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/scenes/boundaries';
+};
+
+export type SetSceneBoundaryErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type SetSceneBoundaryError = SetSceneBoundaryErrors[keyof SetSceneBoundaryErrors];
+
+export type SetSceneBoundaryResponses = {
+    /**
+     * Successful Response
+     */
+    200: ScenesOut;
+};
+
+export type SetSceneBoundaryResponse = SetSceneBoundaryResponses[keyof SetSceneBoundaryResponses];
+
+export type RenameSceneData = {
+    body: SceneRename;
+    path: {
+        /**
+         * Scene Id
+         */
+        scene_id: string;
+    };
+    query?: never;
+    url: '/api/scenes/{scene_id}';
+};
+
+export type RenameSceneErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type RenameSceneError = RenameSceneErrors[keyof RenameSceneErrors];
+
+export type RenameSceneResponses = {
+    /**
+     * Successful Response
+     */
+    200: ScenesOut;
+};
+
+export type RenameSceneResponse = RenameSceneResponses[keyof RenameSceneResponses];
+
+export type ListMediaTagsData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/tags';
+};
+
+export type ListMediaTagsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListMediaTagsError = ListMediaTagsErrors[keyof ListMediaTagsErrors];
+
+export type ListMediaTagsResponses = {
+    /**
+     * Successful Response
+     */
+    200: MediaTagsOut;
+};
+
+export type ListMediaTagsResponse = ListMediaTagsResponses[keyof ListMediaTagsResponses];
+
+export type ReviewTagData = {
+    body: TagReviewIn;
+    path?: never;
+    query?: never;
+    url: '/api/tags/review';
+};
+
+export type ReviewTagErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ReviewTagError = ReviewTagErrors[keyof ReviewTagErrors];
+
+export type ReviewTagResponses = {
+    /**
+     * Successful Response
+     */
+    200: MediaTagsOut;
+};
+
+export type ReviewTagResponse = ReviewTagResponses[keyof ReviewTagResponses];
+
+export type ListProjectTagsData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/tags';
+};
+
+export type ListProjectTagsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListProjectTagsError = ListProjectTagsErrors[keyof ListProjectTagsErrors];
+
+export type ListProjectTagsResponses = {
+    /**
+     * Response Listprojecttags
+     *
+     * Successful Response
+     */
+    200: Array<TagCountOut>;
+};
+
+export type ListProjectTagsResponse = ListProjectTagsResponses[keyof ListProjectTagsResponses];
+
+export type ListMediaEmbeddingsData = {
+    body?: never;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/embeddings';
+};
+
+export type ListMediaEmbeddingsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListMediaEmbeddingsError = ListMediaEmbeddingsErrors[keyof ListMediaEmbeddingsErrors];
+
+export type ListMediaEmbeddingsResponses = {
+    /**
+     * Response Listmediaembeddings
+     *
+     * Successful Response
+     */
+    200: Array<EmbeddingStatusOut>;
+};
+
+export type ListMediaEmbeddingsResponse = ListMediaEmbeddingsResponses[keyof ListMediaEmbeddingsResponses];
+
+export type ListVectorIndexesData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/index';
+};
+
+export type ListVectorIndexesErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListVectorIndexesError = ListVectorIndexesErrors[keyof ListVectorIndexesErrors];
+
+export type ListVectorIndexesResponses = {
+    /**
+     * Response Listvectorindexes
+     *
+     * Successful Response
+     */
+    200: Array<VectorIndexOut>;
+};
+
+export type ListVectorIndexesResponse = ListVectorIndexesResponses[keyof ListVectorIndexesResponses];
+
+export type RebuildVectorIndexesData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/index/rebuild';
+};
+
+export type RebuildVectorIndexesErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type RebuildVectorIndexesError = RebuildVectorIndexesErrors[keyof RebuildVectorIndexesErrors];
+
+export type RebuildVectorIndexesResponses = {
+    /**
+     * Response Rebuildvectorindexes
+     *
+     * Successful Response
+     */
+    200: Array<VectorIndexOut>;
+};
+
+export type RebuildVectorIndexesResponse = RebuildVectorIndexesResponses[keyof RebuildVectorIndexesResponses];
 
 export type GetHealthData = {
     body?: never;

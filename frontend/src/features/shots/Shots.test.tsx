@@ -60,23 +60,95 @@ it("says so when a clip has no shots yet", async () => {
   expect(await screen.findByText("Shots have not been detected yet.")).toBeInTheDocument();
 });
 
-it("lists the project's shots with links that open the clip at the shot", async () => {
+const sceneShot = (index: number, start_s: number, end_s: number, extra: Record<string, unknown> = {}) => ({
+  shot_id: `s${index}`,
+  media_id: "m1",
+  filename: "cuts.mp4",
+  index,
+  start_s,
+  end_s,
+  keyframe_id: `k${index}`,
+  visual: index ? 0.91 : null,
+  color: index ? 0.62 : null,
+  combined: index ? 0.82 : null,
+  decision: index ? "similar (0.82 \u2265 0.8)" : "first shot",
+  edit: null,
+  ...extra,
+});
+const scenes = (overrides: Record<string, unknown> = {}) => ({
+  scenes: [
+    { id: "c1", index: 0, name: "Scene 001", named: false, shot_count: 2, duration_s: 3.52, shots: [sceneShot(0, 0, 2), sceneShot(1, 2, 3.52)] },
+    {
+      id: "c2",
+      index: 1,
+      name: "Scene 002",
+      named: false,
+      shot_count: 1,
+      duration_s: 4.48,
+      shots: [sceneShot(2, 3.52, 8, { combined: 0.4, decision: "split by you", edit: "split" })],
+    },
+  ],
+  ungrouped: [],
+  grouped_at: "2026-10-14T10:00:00Z",
+  details: { shots: 3 },
+  settings: { join_similarity: 0.8, visual_weight: 0.7, color_weight: 0.3 },
+  model_missing: false,
+  message: null,
+  ...overrides,
+});
+
+it("groups shots into scenes, says why, and links each shot to its place in the clip", async () => {
   useCurrentProject.setState({ id: "p1" });
-  vi.stubGlobal("fetch", vi.fn(async () => Response.json(SHOTS.map((s) => ({ ...s, filename: "cuts.mp4" })))));
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json(scenes())));
   wrap(<ShotsPage />);
   const link = await screen.findByRole("link", { name: "Open cuts.mp4, shot 2" });
   expect(link).toHaveAttribute("href", "/library/m1?t=2");
-  expect(screen.getByText(/3 shots in 1 clip\./)).toBeInTheDocument();
+  expect(screen.getByText(/3 shots in 1 clip, 2 scenes\./)).toBeInTheDocument();
+  expect(screen.getByText(/joined at a similarity of 0.8 or more. That limit is a convention/)).toBeInTheDocument();
+  expect(screen.getByText("similar (0.82 \u2265 0.8) · picture 0.91 · colour 0.62")).toBeInTheDocument();
+  expect(screen.getByText("Starts here: split by you")).toBeInTheDocument();
 });
 
-it("asks for a project, and explains an empty shot list", async () => {
+it("splits, joins and renames scenes and shows the list the server returns", async () => {
+  useCurrentProject.setState({ id: "p1" });
+  const calls: { method: string; url: string; body: unknown }[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (req: Request) => {
+      const body: unknown = req.method === "GET" ? null : await req.json();
+      calls.push({ method: req.method, url: req.url, body });
+      if (req.method === "PATCH") return Response.json(scenes({ scenes: [{ ...scenes().scenes[0], name: "Walk home", named: true }] }));
+      return Response.json(scenes());
+    }),
+  );
+  wrap(<ShotsPage />);
+  await userEvent.click(await screen.findByRole("button", { name: "Start a new scene at cuts.mp4, shot 2" }));
+  expect(calls.at(-1)).toMatchObject({ method: "PUT", body: { shot_id: "s1", decision: "split" } });
+  await userEvent.click(screen.getByRole("button", { name: "Join with the scene before" }));
+  expect(calls.at(-1)).toMatchObject({ method: "PUT", body: { shot_id: "s2", decision: "join" } });
+  await userEvent.click(screen.getAllByRole("button", { name: "Undo your edit" })[0]!);
+  expect(calls.at(-1)).toMatchObject({ method: "PUT", body: { shot_id: "s2", decision: "auto" } });
+  const name = screen.getByRole("textbox", { name: "Name of Scene 001" });
+  await userEvent.clear(name);
+  await userEvent.type(name, "Walk home");
+  await userEvent.click(screen.getAllByRole("button", { name: "Save name" })[0]!);
+  expect(calls.at(-1)).toMatchObject({ method: "PATCH", url: expect.stringContaining("/api/scenes/c1"), body: { name: "Walk home" } });
+  expect(await screen.findByRole("article", { name: "Walk home" })).toBeInTheDocument();
+});
+
+it("asks for a project, explains an empty list and a missing model", async () => {
   const { unmount } = wrap(<ShotsPage />);
   expect(screen.getByText("No project selected")).toBeInTheDocument();
   unmount();
   useCurrentProject.setState({ id: "p1" });
-  vi.stubGlobal("fetch", vi.fn(async () => Response.json([])));
-  wrap(<ShotsPage />);
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json(scenes({ scenes: [] }))));
+  const second = wrap(<ShotsPage />);
   expect(await screen.findByText("No shots yet")).toBeInTheDocument();
+  second.unmount();
+  const message = "The picture model 'clip-vit-b32' is not downloaded, so shots cannot be compared.";
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json(scenes({ model_missing: true, message }))));
+  wrap(<ShotsPage />);
+  expect(await screen.findByRole("alert")).toHaveTextContent(message);
 });
 
 it("formats positions and frame rates", () => {

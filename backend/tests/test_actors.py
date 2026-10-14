@@ -13,7 +13,7 @@ from cinemind.core.face_config import FaceConfig
 from cinemind.db.people import FacePin, FaceTrack, FeedbackEvent
 from cinemind.jobs import queue
 from cinemind.jobs.runner import run_job
-from cinemind.jobs.worker import _group_actors  # pyright: ignore[reportPrivateUsage]
+from cinemind.jobs.worker import _after_ingest  # pyright: ignore[reportPrivateUsage]
 from cinemind.pipeline import actors
 from face_helpers import FakeFaces, actors_of, detail_of, faces_of, import_clip, person, two_clips
 from helpers import drain
@@ -261,7 +261,7 @@ def test_a_correction_does_not_hide_faces_that_still_wait_to_be_grouped(
     job = queue.claim_next(factory)
     assert job is not None
     run_job(factory, api_settings, job)
-    _group_actors(factory, api_settings, job)  # the third clip still waits: not grouped yet
+    _after_ingest(factory, api_settings, job)  # the third clip still waits: not grouped yet
     assert [t["actor_id"] for t in faces_of(client, second)["tracks"]] == [None, None]
 
     # A correction made meanwhile must not make the project look up to date ...

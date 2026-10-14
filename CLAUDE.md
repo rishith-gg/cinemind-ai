@@ -47,7 +47,8 @@ Run from the repo root. `just` is not used; `scripts/tasks.py` is the cross-plat
 - Setup: `uv sync` then `cd frontend && pnpm install`
 - Worker alone (normally started by `serve`; `serve --no-worker` to skip): `uv run cinemind worker`
 - Environment check: `uv run cinemind doctor` (add `--json` for machine output)
-- Speech and face models (once, needs internet; processing never downloads): `uv run cinemind models pull` (`models pull faces` for the face models alone; `models list` shows what is on disk; kept in `data/models/`)
+- Speech, face, picture and text models (once, needs internet; processing never downloads): `uv run cinemind models pull` (`models pull faces|visual|text` or a model name for one; `models list` shows what is on disk; kept in `data/models/`)
+- Tag thresholds (evaluation photos once with `uv run python eval/tag_calibration.py fetch`): `uv run python eval/tag_calibration.py run --install`
 - Run (single command, API + built UI): `T build-ui` once, then `uv run cinemind serve` -> http://127.0.0.1:8000
 - Dev: `T dev-api` (backend, auto-reload) and `T dev-ui` (Vite on :5173, proxies /api to :8000)
 - Regenerate the TS API client after any API change: `T gen-api` (writes `frontend/openapi.json` + `frontend/src/api/`, commit both)

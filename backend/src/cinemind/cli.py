@@ -22,7 +22,9 @@ from cinemind.db.migrate import upgrade_head
 
 app = typer.Typer(help="CineMind AI: local-first pre-editing assistant.", no_args_is_help=True)
 
-models_app = typer.Typer(help="Speech and face models: list, download.", no_args_is_help=True)
+models_app = typer.Typer(
+    help="Speech, face, picture and text models: list, download.", no_args_is_help=True
+)
 app.add_typer(models_app, name="models")
 
 _STYLE = {"ok": "green", "missing": "red", "warn": "yellow"}
@@ -120,7 +122,7 @@ def export_openapi(
 
 @models_app.command("list")
 def models_list() -> None:
-    """Show the speech models the app knows and which are downloaded."""
+    """Show the models the app knows and which are downloaded."""
     from cinemind.ai import transcriber
 
     settings = get_settings()
@@ -142,6 +144,21 @@ def models_list() -> None:
         status = "[green]downloaded[/]" if on_disk else "not downloaded"
         faces.add_row(spec.filename, f"{spec.size_kb / 1024:.1f} MB", status)
     console.print(faces)
+    from cinemind.ai import embedder
+    from cinemind.core.embed_config import TEXT_MODELS, VISUAL_MODELS
+
+    chosen = {embedder.choose_visual(settings).key, embedder.choose_text(settings).key}
+    embed = Table(title="Picture and text models (pull with `cinemind models pull <name>`)")
+    for col in ("model", "kind", "download", "licence", "status", "in use"):
+        embed.add_column(col)
+    for kind, known in (("picture", VISUAL_MODELS), ("text", TEXT_MODELS)):
+        for key, spec in known.items():
+            status = (
+                "[green]downloaded[/]" if spec.ready(settings.models_path) else "not downloaded"
+            )
+            in_use = "yes" if key in chosen else ""
+            embed.add_row(key, kind, f"{spec.size_mb} MB", spec.licence, status, in_use)
+    console.print(embed)
 
 
 @models_app.command("pull")
@@ -149,14 +166,15 @@ def models_pull(
     name: Annotated[
         str | None,
         typer.Argument(
-            help="A speech model name, or 'faces'. Default: the speech model the app will "
-            "use and the face models."
+            help="A speech model name, 'faces', 'visual', 'text', or a picture/text model name. "
+            "Default: every model the app will use (speech, faces, picture, text)."
         ),
     ] = None,
     yes: Annotated[bool, typer.Option("--yes", help="Do not ask before a large download.")] = False,
 ) -> None:
     """Download models once (needs internet). Processing itself never downloads."""
-    from cinemind.ai import faces, transcriber
+    from cinemind.ai import embedder, faces, transcriber
+    from cinemind.core.embed_config import TEXT_MODELS, VISUAL_MODELS, EmbedModel
     from cinemind.core.errors import DomainError
 
     settings = get_settings()
@@ -174,19 +192,33 @@ def models_pull(
             )
             raise typer.Exit(1) from exc
 
-    if name != "faces":
+    def ask(label: str, size_mb: int) -> None:
+        if size_mb > ASK_ABOVE_MB and not yes:
+            typer.confirm(f"{label} is a {size_mb} MB download. Continue?", abort=True)
+
+    def pull_embed(spec: EmbedModel) -> None:
+        if spec.ready(settings.models_path):
+            typer.echo(f"'{spec.key}' is already downloaded: {spec.path(settings.models_path)}")
+            return
+        ask(f"'{spec.key}'", spec.size_mb)
+        label = f"model '{spec.key}' ({spec.size_mb} MB, {spec.licence}) from {spec.repo}"
+        fetch(label, lambda: embedder.pull(spec, settings.models_path))
+        typer.echo(f"Done: {spec.path(settings.models_path)}")
+
+    embed_names = {"visual", "text", *VISUAL_MODELS, *TEXT_MODELS}
+    if name is None or name not in {"faces", *embed_names}:
         try:
             choice = transcriber.choose_model(settings, name)
         except DomainError as exc:
-            typer.echo(f"{exc.message} Or 'faces' for the face models.", err=True)
+            known = "'faces', 'visual', 'text', " + ", ".join(
+                sorted(embed_names - {"visual", "text"})
+            )
+            typer.echo(f"{exc.message} Or one of {known}.", err=True)
             raise typer.Exit(2) from exc
         if choice.ready:
             typer.echo(f"'{choice.name}' is already downloaded: {choice.path}")
         else:
-            if choice.size_mb > ASK_ABOVE_MB and not yes:
-                typer.confirm(
-                    f"'{choice.name}' is a {choice.size_mb} MB download. Continue?", abort=True
-                )
+            ask(f"'{choice.name}'", choice.size_mb)
             label = f"speech model '{choice.name}' ({choice.size_mb} MB) from {choice.repo}"
             fetch(label, lambda: transcriber.pull(choice))
             typer.echo(f"Done: {choice.path}")
@@ -199,3 +231,11 @@ def models_pull(
             label = f"face models YuNet and SFace ({size_mb:.0f} MB) from the OpenCV model zoo"
             fetch(label, lambda: faces.pull(settings.models_path))
             typer.echo(f"Done: {folder}")
+    if name in (None, "visual"):
+        pull_embed(embedder.choose_visual(settings))
+    if name in (None, "text"):
+        pull_embed(embedder.choose_text(settings))
+    if name in VISUAL_MODELS:
+        pull_embed(VISUAL_MODELS[name])
+    if name in TEXT_MODELS:
+        pull_embed(TEXT_MODELS[name])

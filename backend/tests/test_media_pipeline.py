@@ -114,7 +114,7 @@ def test_ingest_produces_proxy_thumbs_waveform(
         job = s.get(Job, job_id)
         asset = s.get(MediaAsset, asset_id)
         assert job and asset and job.status == "succeeded"
-        assert [st.status for st in job.stages] == ["succeeded"] * 10
+        assert [st.status for st in job.stages] == ["succeeded"] * 13
         assert asset.probed and asset.video_codec == "prores" and asset.duration_s
         root = settings.project_dir(project)
         assert asset.proxy_path and asset.poster_path and asset.strip_path and asset.waveform_path
@@ -179,8 +179,9 @@ def test_rerun_uses_cache_and_recreates_deleted_artifacts(
     run_job(factory, settings, job_id)
     with factory() as s:
         job = s.get(Job, job_id)
-        # The last stage (transcribe) has no model in tests, so it is tried again, not cached.
-        assert job and [st.status for st in job.stages] == ["cached"] * 8 + ["succeeded"] * 2
+        # The model stages (transcribe, faces, embed_visual, embed_text, tags) have no models in
+        # tests, so they are tried again, not cached.
+        assert job and [st.status for st in job.stages] == ["cached"] * 8 + ["succeeded"] * 5
 
     proxy_file = settings.project_dir(project) / asset.proxy_path
     proxy_file.unlink()  # cached result must not be trusted when the file is gone
@@ -239,7 +240,7 @@ def test_deleted_thumbnails_and_waveform_are_regenerated(
         job = s.get(Job, job_id)
         assert job and [st.status for st in job.stages] == [
             "cached", "cached", "succeeded", "succeeded", "cached", "cached", "cached", "cached",
-            "succeeded", "succeeded",
+            "succeeded", "succeeded", "succeeded", "succeeded", "succeeded",
         ]  # fmt: skip
     assert (root / asset.strip_path).is_file() and (root / asset.waveform_path).is_file()
 

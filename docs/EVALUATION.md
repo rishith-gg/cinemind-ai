@@ -183,3 +183,82 @@ the crops of the 14 largest groups, not measurements:
 A measured figure for this footage needs labels: correct the groups on the Actors page (the corrections are the
 labels), or put face crops into one folder per person and run `eval/face_clusters.py run <folder>`. Not done yet.
 
+
+## 8. Tag thresholds: precision on labelled public photos (Phase 8)
+Script: `uv run python eval/tag_calibration.py fetch`, then `uv run python eval/tag_calibration.py run --install`
+Output: `eval/results/tag_calibration_clip-vit-b32_2026-10-14.txt` and `.json`; thresholds installed into
+`backend/src/cinemind/ai/tag_thresholds.json`. OpenCLIP ViT-B/32 (LAION-2B, revision 1a25a446712b), vocabulary v1,
+the app's own scoring code. M1, MPS; embedding the 23,250 photos took 294 to 438 s (three runs on the same photos while the script was
+fixed; the figures below are from the last, with the rules described here).
+
+Data: Places365 validation set, all 50 photos of each of the 365 categories (18,250; indoor/outdoor label per
+category from the authors), and the CODaN test sets (2,500 day photos from COCO/ImageNet, 2,500 low-light photos
+from ExDark). Each set is split in two halves (every other photo per category); the threshold is the lowest score at
+which the tuning half reaches 0.9 precision, but never under 0.5 for a two-way tag (indoor/outdoor, day/night: the
+shares add up to 1, so a lower threshold could show both tags on one picture; the first run did exactly that on at
+least 3 of the user's shots). Every figure below is from the other half. A tag is switched off below
+0.85 held-out precision or with fewer than 10 held-out photos above the threshold.
+
+| Tag | Set | Threshold | Shown (held-out) | Precision | 95% CI | Recall | Positives | State |
+|---|---|---|---|---|---|---|---|---|
+| indoor | Places365 | 0.588 | 3878 | 0.903 | 0.89–0.91 | 0.870 | 4025 | on |
+| outdoor | Places365 | 0.500 | 5124 | 0.905 | 0.90–0.91 | 0.910 | 5100 | on |
+| day | CODaN | 0.500 | 1254 | 0.920 | 0.90–0.93 | 0.923 | 1250 | on |
+| night / low light | CODaN | 0.500 | 1246 | 0.923 | 0.91–0.94 | 0.920 | 1250 | on |
+| forest | Places365 | 0.837 | 55 | 0.927 | 0.83–0.97 | 0.408 | 125 | on |
+| field | Places365 | 0.983 | 16 | 1.000 | 0.81–1.00 | 0.128 | 125 | on |
+| temple | Places365 | 0.988 | 18 | 0.944 | 0.74–0.99 | 0.340 | 50 | on |
+| office | Places365 | 0.896 | 29 | 0.966 | 0.83–0.99 | 0.373 | 75 | on |
+| street | Places365 | 0.991 | 13 | 0.846 | 0.58–0.96 | 0.110 | 100 | off (precision under 0.85) |
+| inside a vehicle | Places365 | 0.655 | 103 | 0.825 | 0.74–0.89 | 0.850 | 100 | off (precision under 0.85) |
+
+Off because the tuning half never reached 0.9 precision at any threshold (held-out average precision in brackets):
+beach or coast (0.31), open sea (0.15), underwater (0.78), waterfall (0.73), river or lake (0.38), swimming pool
+(0.69), mountain (0.53), highway (0.46), kitchen (0.59), bedroom (0.34), living room (0.28), restaurant or café
+(0.38), classroom (0.59), stage (0.31). Not evaluated (no open labelled set, never shown): close-up, medium, wide.
+For reference, the same model's 365-way Places365 top-1 accuracy on the held-out half was 0.424.
+
+What this does and does not say:
+- Precision depends on how common a tag is. A place tag is true for 1 to 5 of 365 categories here (a few photos in a
+  thousand); on footage shot at such a place it is far more common and precision would be higher, on footage with
+  none of it lower. Indoor/outdoor and day/night are close to balanced here.
+- In the app a shot shows a tag when more than half of its keyframes pass the threshold (on a tie, when their mean does); each keyframe decision is the
+  one measured here, the shot-level rule itself is not evaluated.
+- Places365 are web photos with per-category indoor/outdoor labels (some debatable); CODaN "night" photos are
+  low-light crops of objects, indoor ones included, so the tag is named "night / low light". Neither is phone video.
+- High thresholds on the small place tags (0.98 for field and temple) mean few shots will ever show them (recall
+  0.13 and 0.34 here).
+- Precision on the user's own footage can be measured from their approve/reject reviews with
+  `eval/tag_feedback.py`; there are no reviews yet.
+
+## 9. Embeddings, tags and scenes run on the user's footage (not an accuracy figure)
+Script: `uv run python eval/embed_run_summary.py data`
+Output: `eval/results/embed_run_summary_2026-10-14.txt`. OpenCLIP ViT-B/32 and MiniLM-L6 on the M1's GPU (MPS).
+Figures below are from the first run, before the tag thresholds were installed; the tags shown after installing
+them are listed at the end of this section.
+
+21 clips (473.4 s), no failed job. Since the Phase 7 run, two of the clips turned out to be edited reels with real
+cuts (17 and 29 shots), so there are 71 shots. 145 keyframes got a picture vector and a colour histogram; 50
+transcript segments in 8 clips got a text vector (13 clips have no speech).
+- Time: `embed_visual` 34.6 s in total, of which 30.5 s for the first clip (loading the model from the external SSD
+  and the first GPU run); every later clip took 0.07 to 0.25 s. `embed_text` 5.8 s (4.7 s for the first clip with
+  speech, model loading). `tags` 2.2 s (1.9 s for the first clip: the 1,137 vocabulary texts (42 tag descriptions and 365 categories, each in 3 phrasings) are encoded once per
+  worker process). One run each; not a benchmark.
+- Counted tags shown: "1 clear face" on 25 shots, "Speech" on 5.
+- Scenes: 68 scenes from 71 shots. The combined similarity of neighbouring shots ranged from 0.27 to 0.92 (median
+  about 0.55); 3 of 70 pairs reached the 0.8 convention. By eye, not measured: the two edited reels are travel
+  montages that cut between waterfalls, a jeep, forest paths and faces every one or two seconds, so most
+  boundaries there are real changes of place; shots of the same place often had a picture similarity of 0.75 to
+  0.80 but a colour similarity of only 0.1 to 0.4, which keeps the combined value under 0.8. The single-take phone
+  clips are mostly different places. Whether 0.8 is too strict cannot be said without labelled scenes.
+
+A measured figure needs labels: correct the scenes on the Shots and scenes page (splits and joins are the labels).
+
+After installing the thresholds of section 8 and processing again (cached results only, no model run; output
+`eval/results/embed_run_summary_2026-10-14_thresholds.txt`): tags shown on the 71 shots: Daylight 68, Outdoor 54,
+Indoor 15, Night / low light 3, Forest 3, plus the counted "1 clear face" 25 and "Speech" 5; no shot shows both tags
+of a two-way group. Observation from looking at the keyframes of the night, indoor and forest shots, not a
+measurement: the three forest shots are forest tracks and trees; most indoor shots are rooms or close-ups of puja
+decorations, a few are debatable (decorations in a doorway, two people by a plant); two of the three "night / low
+light" shots are dark scenes, the third (a jeep on a forest track in overcast light) looks wrong. Precision on this
+footage needs the user's approve/reject reviews (`eval/tag_feedback.py`).

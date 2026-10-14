@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetActorData, GetActorErrors, GetActorResponses, GetFaceCropData, GetFaceCropErrors, GetFaceCropResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaFacesData, GetMediaFacesErrors, GetMediaFacesResponses, GetMediaQualityData, GetMediaQualityErrors, GetMediaQualityResponses, GetMediaResponses, GetMediaTranscriptData, GetMediaTranscriptErrors, GetMediaTranscriptResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListActorsData, ListActorsErrors, ListActorsResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListProjectTranscriptsData, ListProjectTranscriptsErrors, ListProjectTranscriptsResponses, ListSetAsideFacesData, ListSetAsideFacesErrors, ListSetAsideFacesResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, MergeActorsData, MergeActorsErrors, MergeActorsResponses, PlaceFaceTracksData, PlaceFaceTracksErrors, PlaceFaceTracksResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RegroupActorsData, RegroupActorsErrors, RegroupActorsResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RenameActorData, RenameActorErrors, RenameActorResponses, RetryJobData, RetryJobErrors, RetryJobResponses, SearchTranscriptsData, SearchTranscriptsErrors, SearchTranscriptsResponses, SplitActorData, SplitActorErrors, SplitActorResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
+import type { BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetActorData, GetActorErrors, GetActorResponses, GetFaceCropData, GetFaceCropErrors, GetFaceCropResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaFacesData, GetMediaFacesErrors, GetMediaFacesResponses, GetMediaQualityData, GetMediaQualityErrors, GetMediaQualityResponses, GetMediaResponses, GetMediaTranscriptData, GetMediaTranscriptErrors, GetMediaTranscriptResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListActorsData, ListActorsErrors, ListActorsResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaEmbeddingsData, ListMediaEmbeddingsErrors, ListMediaEmbeddingsResponses, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListMediaTagsData, ListMediaTagsErrors, ListMediaTagsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListProjectTagsData, ListProjectTagsErrors, ListProjectTagsResponses, ListProjectTranscriptsData, ListProjectTranscriptsErrors, ListProjectTranscriptsResponses, ListScenesData, ListScenesErrors, ListScenesResponses, ListSetAsideFacesData, ListSetAsideFacesErrors, ListSetAsideFacesResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, ListVectorIndexesData, ListVectorIndexesErrors, ListVectorIndexesResponses, MergeActorsData, MergeActorsErrors, MergeActorsResponses, PlaceFaceTracksData, PlaceFaceTracksErrors, PlaceFaceTracksResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RebuildVectorIndexesData, RebuildVectorIndexesErrors, RebuildVectorIndexesResponses, RegroupActorsData, RegroupActorsErrors, RegroupActorsResponses, RegroupScenesData, RegroupScenesErrors, RegroupScenesResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RenameActorData, RenameActorErrors, RenameActorResponses, RenameSceneData, RenameSceneErrors, RenameSceneResponses, RetryJobData, RetryJobErrors, RetryJobResponses, ReviewTagData, ReviewTagErrors, ReviewTagResponses, SearchTranscriptsData, SearchTranscriptsErrors, SearchTranscriptsResponses, SetSceneBoundaryData, SetSceneBoundaryErrors, SetSceneBoundaryResponses, SplitActorData, SplitActorErrors, SplitActorResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -359,6 +359,85 @@ export const getMediaFaces = <ThrowOnError extends boolean = false>(options: Opt
  * Get Face Crop
  */
 export const getFaceCrop = <ThrowOnError extends boolean = false>(options: Options<GetFaceCropData, ThrowOnError>): RequestResult<GetFaceCropResponses, GetFaceCropErrors, ThrowOnError> => (options.client ?? client).get<GetFaceCropResponses, GetFaceCropErrors, ThrowOnError>({ url: '/api/face-tracks/{track_id}/image', ...options });
+
+/**
+ * List Scenes
+ */
+export const listScenes = <ThrowOnError extends boolean = false>(options: Options<ListScenesData, ThrowOnError>): RequestResult<ListScenesResponses, ListScenesErrors, ThrowOnError> => (options.client ?? client).get<ListScenesResponses, ListScenesErrors, ThrowOnError>({ url: '/api/projects/{project_id}/scenes', ...options });
+
+/**
+ * Regroup Scenes
+ */
+export const regroupScenes = <ThrowOnError extends boolean = false>(options: Options<RegroupScenesData, ThrowOnError>): RequestResult<RegroupScenesResponses, RegroupScenesErrors, ThrowOnError> => (options.client ?? client).post<RegroupScenesResponses, RegroupScenesErrors, ThrowOnError>({ url: '/api/projects/{project_id}/scenes/regroup', ...options });
+
+/**
+ * Set Scene Boundary
+ *
+ * Before a shot: start a scene (`split`), keep it with the shot before (`join`), or let
+ * the similarity decide again (`auto`).
+ */
+export const setSceneBoundary = <ThrowOnError extends boolean = false>(options: Options<SetSceneBoundaryData, ThrowOnError>): RequestResult<SetSceneBoundaryResponses, SetSceneBoundaryErrors, ThrowOnError> => (options.client ?? client).put<SetSceneBoundaryResponses, SetSceneBoundaryErrors, ThrowOnError>({
+    url: '/api/projects/{project_id}/scenes/boundaries',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Rename Scene
+ */
+export const renameScene = <ThrowOnError extends boolean = false>(options: Options<RenameSceneData, ThrowOnError>): RequestResult<RenameSceneResponses, RenameSceneErrors, ThrowOnError> => (options.client ?? client).patch<RenameSceneResponses, RenameSceneErrors, ThrowOnError>({
+    url: '/api/scenes/{scene_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List Media Tags
+ */
+export const listMediaTags = <ThrowOnError extends boolean = false>(options: Options<ListMediaTagsData, ThrowOnError>): RequestResult<ListMediaTagsResponses, ListMediaTagsErrors, ThrowOnError> => (options.client ?? client).get<ListMediaTagsResponses, ListMediaTagsErrors, ThrowOnError>({ url: '/api/media/{media_id}/tags', ...options });
+
+/**
+ * Review Tag
+ */
+export const reviewTag = <ThrowOnError extends boolean = false>(options: Options<ReviewTagData, ThrowOnError>): RequestResult<ReviewTagResponses, ReviewTagErrors, ThrowOnError> => (options.client ?? client).put<ReviewTagResponses, ReviewTagErrors, ThrowOnError>({
+    url: '/api/tags/review',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List Project Tags
+ *
+ * Tags shown somewhere in the project (approved, or above the threshold and not
+ * rejected), with the number of shots each is shown on.
+ */
+export const listProjectTags = <ThrowOnError extends boolean = false>(options: Options<ListProjectTagsData, ThrowOnError>): RequestResult<ListProjectTagsResponses, ListProjectTagsErrors, ThrowOnError> => (options.client ?? client).get<ListProjectTagsResponses, ListProjectTagsErrors, ThrowOnError>({ url: '/api/projects/{project_id}/tags', ...options });
+
+/**
+ * List Media Embeddings
+ */
+export const listMediaEmbeddings = <ThrowOnError extends boolean = false>(options: Options<ListMediaEmbeddingsData, ThrowOnError>): RequestResult<ListMediaEmbeddingsResponses, ListMediaEmbeddingsErrors, ThrowOnError> => (options.client ?? client).get<ListMediaEmbeddingsResponses, ListMediaEmbeddingsErrors, ThrowOnError>({ url: '/api/media/{media_id}/embeddings', ...options });
+
+/**
+ * List Vector Indexes
+ */
+export const listVectorIndexes = <ThrowOnError extends boolean = false>(options: Options<ListVectorIndexesData, ThrowOnError>): RequestResult<ListVectorIndexesResponses, ListVectorIndexesErrors, ThrowOnError> => (options.client ?? client).get<ListVectorIndexesResponses, ListVectorIndexesErrors, ThrowOnError>({ url: '/api/projects/{project_id}/index', ...options });
+
+/**
+ * Rebuild Vector Indexes
+ *
+ * Rebuild every vector index of the project from the database.
+ */
+export const rebuildVectorIndexes = <ThrowOnError extends boolean = false>(options: Options<RebuildVectorIndexesData, ThrowOnError>): RequestResult<RebuildVectorIndexesResponses, RebuildVectorIndexesErrors, ThrowOnError> => (options.client ?? client).post<RebuildVectorIndexesResponses, RebuildVectorIndexesErrors, ThrowOnError>({ url: '/api/projects/{project_id}/index/rebuild', ...options });
 
 /**
  * Health

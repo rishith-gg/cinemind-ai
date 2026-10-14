@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-10-10_
+_Last updated: 2026-10-14_
 
 ## Project context
 - Deadline / demo date: TBD (not provided)
@@ -18,7 +18,7 @@ _Last updated: 2026-10-10_
 - [x] Phase 5: Quality + audio QC (thresholds calibrated on synthetic degradations of real frames, see EVALUATION.md)
 - [x] Phase 6: Transcription (WER measured on a public English sample; the user's own clips are not labelled yet)
 - [x] Phase 7: Faces and actors (purity/ARI measured on a public face set; the user's own footage has no identity labels yet)
-- [ ] Phase 8: Embeddings, tags, scenes
+- [x] Phase 8: Embeddings, tags, scenes (tag thresholds evaluated on public labelled photos; scene limit is a convention, not evaluated)
 - [ ] Phase 9: Hybrid search
 - [ ] Phase 10: Ranking, selects, explainability
 - [ ] Phase 11: Rough cut engine + timeline UI
@@ -27,17 +27,23 @@ _Last updated: 2026-10-10_
 - [ ] Phase 14: Polish, packaging, demo
 
 ## Current state
-Phase 7 is complete. Each clip is searched for faces on this machine (OpenCV YuNet + SFace, 2 frames per second);
-usable faces are followed through their shot and the tracks of the whole project are grouped into actors
-("Actor 001", ...). The Actors page shows the people; a person can be renamed, merged, split, and single appearances
-moved, marked "not a face" or "unknown person". Corrections change only what was chosen, are stored as pins, and
-come back when the project is grouped or scanned again. The clip page lists the people in the clip. The face models
-are downloaded once with `uv run cinemind models pull` (done here: 37 MB in `data/models/faces/`); processing never
-downloads. Details: AI_PIPELINE.md "Faces and actors". Numbers: EVALUATION.md sections 6 and 7.
+Phase 8 is complete. Every keyframe gets a picture vector (OpenCLIP ViT-B/32 on this lite machine; SigLIP on the
+larger tiers) and a colour histogram, every transcript segment a text vector (MiniLM, English); all vectors live in
+the database and the per-project vector index files are rebuilt from them (exact numpy search on macOS, FAISS
+elsewhere, D-079). Shots get tag suggestions: indoor/outdoor, day/night (low light), shot size and 20 place tags from
+a zero-shot vocabulary, plus counted "clear faces" and "speech" tags. A model tag is shown only above a threshold set
+and checked on labelled public photos (EVALUATION.md section 8): indoor, outdoor, day, night, forest, field, temple
+and office are on; 14 place tags were switched off as too often wrong; shot size has no labelled data and is never
+shown. The user can approve or reject any tag. Neighbouring shots are grouped into scenes by picture and colour
+similarity (a convention: 0.8); the Shots and scenes page shows why every boundary is where it is and lets the user
+split, join and rename scenes; edits survive regrouping. Models: `uv run cinemind models pull` (done here:
+clip-vit-b32 578 MB, minilm-l6 87 MB, siglip-base 779 MB for testing). Details: AI_PIPELINE.md "Embeddings", "Tags",
+"Scenes", "Vector index". Numbers: EVALUATION.md sections 8 and 9.
 
+Phase 7 (faces and actors) is described in AI_PIPELINE.md "Faces and actors" and EVALUATION.md sections 6 and 7.
 Phase 6 (transcription) is described in AI_PIPELINE.md "Transcription" and EVALUATION.md sections 4 and 5.
 
-Next step: Phase 8 (embeddings, tags, scenes). It needs model downloads (ask above 2 GB).
+Next step: Phase 9 (hybrid search: keyword + text vectors + picture vectors, fused).
 
 Export path for the rest of the project (decided in Phase 4): FCP7 XML into DaVinci Resolve.
 
@@ -59,6 +65,20 @@ file was re-read with OTIO: same cuts, gapless.
 None.
 
 ## Open issues / notes
+- Phase 8, needs the user: (1) review tags on a few clips (approve / reject); `eval/tag_feedback.py` turns that into
+  precision on this footage; (2) correct the scenes of one edited reel on the Shots and scenes page, so the scene
+  limit (0.8, a convention) can be measured instead of guessed; (3) confirm the spoken languages (the text model is
+  English by default; `[embed] text_model = "multilingual-minilm-l12"` for Hindi/Kannada).
+- Phase 8 limitations: tag thresholds come from web photos (Places365) and low-light object crops (CODaN), not video;
+  precision depends on how common a tag is. The shot rule (more than half of the keyframes) is not evaluated. Shot
+  size is never shown (no open labelled set; CineScale is by request). On this footage 71 shots became 68 scenes:
+  the two edited reels are montages, and same-place shots score about 0.75 to 0.80 on pictures but 0.1 to 0.4 on
+  colour. Scenes compare neighbours only, in file-name order, not capture time. Sideways phone clips are embedded
+  sideways. SigLIP so400m (quality tier, 3.4 GB) was never downloaded or run here; siglip-base was smoke-tested only
+  (no thresholds for it, so its model tags stay hidden until `eval/tag_calibration.py run --model siglip-base
+  --install`). Peak memory with Whisper, CLIP and MiniLM loaded in one worker was not measured. Left open from review:
+  `api/media.py` is still 406 lines; the doctor repeats the model choice of `embedder`; a truncated model file shows
+  a generic error instead of "download again"; deleting old embedding folders happens before the commit.
 - Phase 7, needs the user: (1) look at the Actors page and say whether the groups are usable; correcting them there
   (merge, split, move) also produces the labels a purity figure for this footage needs; (2) say whether keeping
   YuNet + SFace on every tier is acceptable or InsightFace should be added (D-061).

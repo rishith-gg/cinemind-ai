@@ -17,6 +17,10 @@ const REFRESHED = new Set([
   "getActor",
   "listSetAsideFaces",
   "getMediaFaces",
+  "listScenes",
+  "listMediaTags",
+  "listProjectTags",
+  "listVectorIndexes",
 ]);
 
 export interface JobEvent {
@@ -67,7 +71,7 @@ export function useJobEvents(onEvent?: (e: JobEvent) => void): { connected: bool
       scheduleMediaRefresh();
       handler.current?.(e);
     };
-    const types = ["queued", "started", "stage", "progress", "cancel_requested", "succeeded", "failed", "cancelled", "actors"];
+    const types = ["queued", "started", "stage", "progress", "cancel_requested", "succeeded", "failed", "cancelled", "actors", "scenes"];
     types.forEach((t) => source.addEventListener(t, handle));
     return () => {
       source.close();

@@ -25,6 +25,17 @@ Test footage is synthetic and generated on demand with ffmpeg (never committed).
   behaviour (including going back to earlier settings), ids from another project, a cancelled last job, a proxy
   that ends early, models that disappear after a good scan, and every "no faces" state. The grouping quality on real photos is measured by
   `eval/face_clusters.py`, not by a test. The E2E data folder has no face models on purpose.
+- Embeddings, tags, scenes: tests replace the picture and text models with a fixed fake (test code only: picture
+  vectors from a frame's mean colour, text vectors from a hash) and use a test thresholds file, so they need no
+  download. They check vector rows per keyframe and segment, every tag status (`shown`, `below`, `disabled`,
+  `not_evaluated`), new thresholds taking effect without a model run, reviews surviving reprocessing, the
+  "no models" path, the index rebuilt from the database after its file was deleted and after a clip was removed,
+  FAISS and numpy giving the same neighbours, scene grouping with its numbers, split / join / auto / rename kept
+  through regrouping, and the image preparation against both preprocessing styles. One test (`-m model`, skipped
+  without the downloaded models) runs the real CLIP and MiniLM: a red and a blue picture must match "red" and
+  "blue" prompts, and two paraphrases must be closer than an unrelated sentence. Tag precision on labelled photos is
+  measured by `eval/tag_calibration.py`, not by a test. The E2E data folder has no picture or text models: the E2E
+  test edits scenes by hand and checks the "not downloaded" message on the clip page.
 - Timecode: drop-frame conversion is checked against known values and round-tripped frame by frame across minute and
   ten-minute boundaries.
 

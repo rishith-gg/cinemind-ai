@@ -1,12 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
-import type { ProjectShotOut } from "../../api";
-import { listProjectShotsOptions } from "../../api/@tanstack/react-query.gen";
+import { listScenesOptions, regroupScenesMutation } from "../../api/@tanstack/react-query.gen";
 import { EmptyState, ErrorState, Loading } from "../../components/states";
 import { useCurrentProject } from "../../lib/currentProject";
 import { errorMessage } from "../../lib/errors";
-import { formatTime } from "../library/format";
+import { toast } from "../../lib/toast";
+import { SceneBlock, ShotCard } from "./SceneBlock";
+import { useSetScenes } from "./scenes";
 
 export function ShotsPage() {
   const projectId = useCurrentProject((s) => s.id);
@@ -16,63 +17,80 @@ export function ShotsPage() {
         <Link className="underline" to="/projects">
           Create or open a project
         </Link>{" "}
-        to see its shots.
+        to see its shots and scenes.
       </EmptyState>
     );
   }
-  return <Shots projectId={projectId} />;
+  return <Scenes projectId={projectId} />;
 }
 
-function ShotCard({ shot }: { shot: ProjectShotOut }) {
-  const key = shot.keyframes[Math.floor(shot.keyframes.length / 2)];
-  const label = `${shot.filename}, shot ${shot.index + 1}`;
-  return (
-    <li className="overflow-hidden rounded border border-neutral-800 bg-neutral-900">
-      <Link to={`/library/${shot.media_id}?t=${shot.start_s}`} aria-label={`Open ${label}`} className="block hover:bg-neutral-800/60">
-        <div className="flex aspect-video items-center justify-center bg-black text-xs text-neutral-500">
-          {key ? (
-            <img src={`/api/keyframes/${key.id}/image`} alt="" className="h-full w-full object-cover" loading="lazy" />
-          ) : (
-            <span>No keyframe</span>
-          )}
-        </div>
-        <div className="p-2">
-          <p className="truncate text-xs font-medium" title={shot.filename}>
-            {shot.filename} · {shot.index + 1}
-          </p>
-          <p className="font-mono text-xs text-neutral-400">
-            {formatTime(shot.start_s)} – {formatTime(shot.end_s)}
-          </p>
-        </div>
-      </Link>
-    </li>
-  );
-}
-
-function Shots({ projectId }: { projectId: string }) {
-  const { data, error, isPending, refetch } = useQuery(listProjectShotsOptions({ path: { project_id: projectId } }));
-  const clips = new Set(data?.map((s) => s.media_id)).size;
+function Scenes({ projectId }: { projectId: string }) {
+  const { data, error, isPending, refetch } = useQuery(listScenesOptions({ path: { project_id: projectId } }));
+  const setScenes = useSetScenes(projectId);
+  const regroup = useMutation({
+    ...regroupScenesMutation(),
+    onSuccess: (fresh) => {
+      setScenes(fresh);
+      toast.success("Grouped again. Your splits, joins and names were kept.");
+    },
+  });
+  const shots = (data?.scenes.reduce((n, s) => n + s.shot_count, 0) ?? 0) + (data?.ungrouped.length ?? 0);
+  const clips = new Set([...(data?.scenes.flatMap((s) => s.shots) ?? []), ...(data?.ungrouped ?? [])].map((s) => s.media_id)).size;
+  const cfg = data?.settings;
   return (
     <section className="space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold">Shots</h1>
-        <p className="text-sm text-neutral-400">
-          A shot is a continuous run of frames between two cuts, found automatically.
-          {!!data?.length && ` ${data.length} shots in ${clips} ${clips === 1 ? "clip" : "clips"}.`} Grouping shots into
-          scenes arrives in Phase 8.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="max-w-3xl">
+          <h1 className="text-xl font-semibold">Shots and scenes</h1>
+          <p className="text-sm text-neutral-400">
+            A shot is a continuous run of frames between two cuts. A scene is a run of neighbouring shots (clips in file-name
+            order) that look alike: picture vectors and colour, weighted {cfg?.visual_weight ?? 0.7} / {cfg?.color_weight ?? 0.3},
+            joined at a similarity of {cfg?.join_similarity ?? 0.8} or more. That limit is a convention, not a measured value, so
+            scenes are suggestions: split, join and rename them; your edits stay when the project is grouped again.
+            {shots > 0 && ` ${shots} shots in ${clips} ${clips === 1 ? "clip" : "clips"}, ${data?.scenes.length ?? 0} scenes.`}
+          </p>
+        </div>
+        {shots > 0 && (
+          <button
+            className="rounded border border-neutral-700 px-3 py-1.5 text-sm hover:bg-neutral-800"
+            disabled={regroup.isPending}
+            onClick={() => regroup.mutate({ path: { project_id: projectId } })}
+          >
+            Group again
+          </button>
+        )}
       </div>
-      {isPending && <Loading label="Loading shots…" />}
+      {isPending && <Loading label="Loading scenes…" />}
       {error && <ErrorState message={errorMessage(error)} onRetry={() => void refetch()} />}
-      {data?.length === 0 && (
+      {data?.message && (
+        <p role="alert" className="rounded border border-amber-800 bg-amber-950 p-3 text-sm">
+          {data.message}
+        </p>
+      )}
+      {data && shots === 0 && (
         <EmptyState title="No shots yet">
           Shots appear here once footage in the <Link className="underline" to="/library">Library</Link> has finished
           processing.
         </EmptyState>
       )}
-      <ul className="grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-3">
-        {data?.map((s) => <ShotCard key={s.id} shot={s} />)}
-      </ul>
+      <div className="flex flex-wrap items-start gap-3">
+        {data?.scenes.map((scene, i) => (
+          <SceneBlock key={scene.id} projectId={projectId} scene={scene} first={i === 0} />
+        ))}
+      </div>
+      {!!data?.ungrouped.length && (
+        <div className="space-y-2">
+          <h2 className="text-sm font-semibold">Not grouped yet</h2>
+          <p className="text-xs text-neutral-400">
+            These shots arrived after the last grouping. Scenes are grouped again when processing is done, or press Group again.
+          </p>
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-3">
+            {data.ungrouped.map((s) => (
+              <ShotCard key={s.shot_id} shot={s} />
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }

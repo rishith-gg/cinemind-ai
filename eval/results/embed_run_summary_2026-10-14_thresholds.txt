@@ -1,0 +1,168 @@
+data directory: data
+embeddings text: 8 clips done (minilm-l6), 50 vectors
+embeddings text: 13 clips no_speech (minilm-l6), 0 vectors
+embeddings visual: 21 clips done (clip-vit-b32), 145 vectors
+  rows color     hsv-hist-8x4x4     145 x 128
+  rows keyframe  clip-vit-b32       145 x 512
+  rows segment   minilm-l6           50 x 384
+stage embed_visual: 34.6 s over 21 clips (473.4 s of footage; last succeeded run per clip, cached runs included)
+stage embed_text: 5.8 s over 21 clips (473.4 s of footage; last succeeded run per clip, cached runs included)
+stage tags: 2.2 s over 21 clips (473.4 s of footage; last succeeded run per clip, cached runs included)
+tags by status (shots):
+  below          425
+  disabled       1136
+  not_evaluated  213
+  shown          173
+tags shown (approved, or above the threshold and not rejected), shots per tag:
+  Daylight               68
+  Outdoor                54
+  1 clear face           25
+  Indoor                 15
+  Speech                 5
+  Forest                 3
+  Night / low light      3
+shots: 71
+scene grouping (2026-10-14 11:50:40.870727): {"edits": 0, "model": "clip-vit-b32", "order": "clips by file name, then shots in source order", "scenes": 68, "settings": {"color_weight": 0.3, "join_similarity": 0.8, "visual_weight": 0.7}, "shots": 71, "shots_without_vectors": 0}
+scenes (shots, seconds, name):
+    1    17.1  Scene 001
+    1     7.9  Scene 002
+    1     7.6  Scene 003
+    1    13.0  Scene 004
+    2     4.4  Scene 005
+    1     2.2  Scene 006
+    1     2.2  Scene 007
+    1     2.2  Scene 008
+    1     2.4  Scene 009
+    1     1.3  Scene 010
+    1     1.7  Scene 011
+    1     3.6  Scene 012
+    1     4.6  Scene 013
+    1     2.2  Scene 014
+    2    11.4  Scene 015
+    1     3.7  Scene 016
+    1     3.1  Scene 017
+    2    14.6  Scene 018
+    1     0.7  Scene 019
+    1     0.5  Scene 020
+    1     1.1  Scene 021
+    1     0.5  Scene 022
+    1     0.6  Scene 023
+    1     2.7  Scene 024
+    1     2.7  Scene 025
+    1     1.7  Scene 026
+    1     0.7  Scene 027
+    1     2.0  Scene 028
+    1     1.6  Scene 029
+    1     0.6  Scene 030
+    1     1.1  Scene 031
+    1     1.1  Scene 032
+    1     1.1  Scene 033
+    1     1.1  Scene 034
+    1     1.1  Scene 035
+    1     2.7  Scene 036
+    1     2.8  Scene 037
+    1     2.0  Scene 038
+    1     2.3  Scene 039
+    1     2.2  Scene 040
+    1     2.2  Scene 041
+    1     2.1  Scene 042
+    1     1.7  Scene 043
+    1     1.4  Scene 044
+    1     0.6  Scene 045
+    1     0.5  Scene 046
+    1     1.0  Scene 047
+    1     2.1  Scene 048
+    1     3.1  Scene 049
+    1     0.8  Scene 050
+    1    12.8  Scene 051
+    1     8.0  Scene 052
+    1     3.0  Scene 053
+    1    52.8  Scene 054
+    1    20.7  Scene 055
+    1    90.1  Scene 056
+    1     6.2  Scene 057
+    1    11.8  Scene 058
+    1     7.4  Scene 059
+    1    18.6  Scene 060
+    1    17.3  Scene 061
+    1     5.3  Scene 062
+    1    47.2  Scene 063
+    1     6.7  Scene 064
+    1     5.8  Scene 065
+    1     5.7  Scene 066
+    1     0.6  Scene 067
+    1     0.1  Scene 068
+neighbour similarities (combined) and decisions:
+       -  first shot
+   0.365  different (0.36 < 0.8)
+   0.446  different (0.45 < 0.8)
+   0.271  different (0.27 < 0.8)
+   0.274  different (0.27 < 0.8)
+   0.807  similar (0.81 ≥ 0.8)
+   0.533  different (0.53 < 0.8)
+   0.686  different (0.69 < 0.8)
+   0.799  different (0.80 < 0.8)
+   0.618  different (0.62 < 0.8)
+   0.616  different (0.62 < 0.8)
+   0.480  different (0.48 < 0.8)
+   0.619  different (0.62 < 0.8)
+   0.752  different (0.75 < 0.8)
+   0.745  different (0.75 < 0.8)
+   0.566  different (0.57 < 0.8)
+   0.836  similar (0.84 ≥ 0.8)
+   0.751  different (0.75 < 0.8)
+   0.654  different (0.65 < 0.8)
+   0.766  different (0.77 < 0.8)
+   0.915  similar (0.92 ≥ 0.8)
+   0.403  different (0.40 < 0.8)
+   0.396  different (0.40 < 0.8)
+   0.405  different (0.40 < 0.8)
+   0.422  different (0.42 < 0.8)
+   0.461  different (0.46 < 0.8)
+   0.501  different (0.50 < 0.8)
+   0.628  different (0.63 < 0.8)
+   0.555  different (0.56 < 0.8)
+   0.458  different (0.46 < 0.8)
+   0.648  different (0.65 < 0.8)
+   0.499  different (0.50 < 0.8)
+   0.684  different (0.68 < 0.8)
+   0.523  different (0.52 < 0.8)
+   0.318  different (0.32 < 0.8)
+   0.351  different (0.35 < 0.8)
+   0.603  different (0.60 < 0.8)
+   0.707  different (0.71 < 0.8)
+   0.345  different (0.34 < 0.8)
+   0.367  different (0.37 < 0.8)
+   0.454  different (0.45 < 0.8)
+   0.581  different (0.58 < 0.8)
+   0.466  different (0.47 < 0.8)
+   0.438  different (0.44 < 0.8)
+   0.582  different (0.58 < 0.8)
+   0.568  different (0.57 < 0.8)
+   0.584  different (0.58 < 0.8)
+   0.453  different (0.45 < 0.8)
+   0.579  different (0.58 < 0.8)
+   0.266  different (0.27 < 0.8)
+   0.391  different (0.39 < 0.8)
+   0.690  different (0.69 < 0.8)
+   0.609  different (0.61 < 0.8)
+   0.491  different (0.49 < 0.8)
+   0.477  different (0.48 < 0.8)
+   0.535  different (0.53 < 0.8)
+   0.474  different (0.47 < 0.8)
+   0.777  different (0.78 < 0.8)
+   0.660  different (0.66 < 0.8)
+   0.773  different (0.77 < 0.8)
+   0.717  different (0.72 < 0.8)
+   0.629  different (0.63 < 0.8)
+   0.450  different (0.45 < 0.8)
+   0.569  different (0.57 < 0.8)
+   0.550  different (0.55 < 0.8)
+   0.554  different (0.55 < 0.8)
+   0.330  different (0.33 < 0.8)
+   0.770  different (0.77 < 0.8)
+   0.435  different (0.43 < 0.8)
+   0.420  different (0.42 < 0.8)
+   0.792  different (0.79 < 0.8)
+index keyframe clip-vit-b32: numpy, 145 vectors
+index segment minilm-l6: numpy, 50 vectors

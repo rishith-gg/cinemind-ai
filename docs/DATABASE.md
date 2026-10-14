@@ -58,3 +58,21 @@ Models live in `db/people.py` (imported by `db/models.py`).
 | `actor_runs` | one row per project: `digest` (hash of what the grouping depends on: scan digests, pins, method, distance; an unchanged project is not grouped again), `details` (engine, method, distance, counts), `clustered_at`. |
 | `feedback_events` | append-only log of corrections: `kind` (`actor_rename`, `actor_merge`, `actor_split`, `face_place`) and `payload`. Not read by the app yet; kept for the ranking phase. |
 
+
+## Phase 8 tables (migration 0009)
+Models live in `db/analysis.py` (imported by `db/models.py`). SPEC section 7 names a `vector_refs` table holding
+pointers into the index files; here the vectors themselves are stored (`embeddings`), so the index files under
+`index/` are derived data that can always be rebuilt from the database (roadmap acceptance), and positions in an
+index file are mapped back to rows by a `.ids.json` file written next to it.
+
+| Table | Purpose |
+|---|---|
+| `embedding_sets` | one row per clip and kind (`visual`, `text`) once the stage ran: `status` (`done`, `no_video`, `no_speech`, `no_transcript`, `model_missing`), `model`, `revision`, `count`, `digest` (hash of the stage result plus the keyframe or segment ids it points at; unchanged = rows left alone), `details` (engine, device, dimension, reason). |
+| `embeddings` | one vector per row: `kind` (`keyframe` = picture model, `color` = HSV histogram, `segment` = transcript text model), `ref_id` (keyframe id or segment id), `shot_id` (keyframes and colours), `model`, `dim`, `vector` (float32 bytes; unit length except histograms, which sum to 1). No foreign key on `ref_id`: keyframe rows are rewritten on every run with the same ids. Cascades from the clip and the shot. |
+| `tags` | one row per shot and tag, rewritten on every run: `group` (`setting`, `time`, `shot_size`, `place`, `faces`, `speech`), `name`, `label`, `source` (`model`, `faces`, `transcript`), `score` (mean over the shot's keyframes), `threshold` (the evaluated one, if any), `status` (`shown`, `below`, `disabled`, `not_evaluated`), `details` (model, revision, vocabulary version, keyframe scores, the evaluation behind the threshold, top Places365 categories for place tags, the rule for counted tags). |
+| `tag_reviews` | the user's decision on a tag of a shot: `shot_id` (no foreign key, so it outlives a re-detection that keeps the shot's frames), `name`, `decision` (`approved`, `rejected`). Also logged in `feedback_events` (`tag_review`, with the score, threshold and status the app had suggested). |
+| `scenes` | rebuilt by every grouping: `id` (hash of project and first shot), `index`, `name` ("Scene 001" or the user's), `named`, `shot_count`, `duration_s`, `details.steps` (per shot: similarity to the shot before, both signals, the decision in words). |
+| `shots.scene_id` | the scene a shot belongs to (null until grouped). |
+| `scene_edits` | the user's edits by shot id: `split` (a scene starts here), `join` (stays with the shot before), `name` (`value` = name of the scene holding this shot). Logged in `feedback_events` (`scene_boundary`, `scene_rename`). |
+| `scene_runs` | one row per project: `digest` (shots, visual embedding digests, edits, settings; unchanged = not grouped again), `details` (model, settings, order, counts), `grouped_at`. |
+| `vector_indexes` | one row per index file: `project_id`, `kind` (`keyframe`, `segment`), `model`, `backend` (`faiss`, `numpy`), `dim`, `count`, `digest` (hash of the rows it holds; a different digest = out of date), `path`, `built_at`. |

@@ -32,7 +32,7 @@ from cinemind.core.errors import (
 )
 from cinemind.core.paths import resolve_in_roots, validate_project_id
 from cinemind.db.models import Job, JobEvent, MediaAsset, Project, QcFlag, Transcript
-from cinemind.pipeline import actors, importer
+from cinemind.pipeline import importer, project_refresh
 from cinemind.pipeline.hashing import content_hash
 
 log = logging.getLogger(__name__)
@@ -297,8 +297,8 @@ def delete_media(media_id: str, session: SessionDep, settings: SettingsDep) -> N
     session.execute(delete(JobEvent).where(JobEvent.job_id.in_([j.id for j in jobs])))
     session.delete(asset)
     session.flush()
-    actors.regroup(session, settings, asset.project_id)  # its faces left their actors
     session.commit()
+    project_refresh.refresh(session, settings, asset.project_id)  # actors, scenes, indexes
     importer.delete_asset_files(settings, asset)  # only once the rows are really gone
 
 

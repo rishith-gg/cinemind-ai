@@ -1,0 +1,337 @@
+{
+  "model": "clip-vit-b32",
+  "revision": "1a25a446712ba5ee05982a381eed697ef9b435cf",
+  "calibration_key": "clip-vit-b32@1a25a446712b+v1",
+  "vocabulary_version": "1",
+  "date": "2026-10-14",
+  "target_precision": 0.9,
+  "enable_min": 0.85,
+  "min_shown": 10,
+  "photos": {
+    "places365": 18250,
+    "codan": 5000
+  },
+  "per_class": 50,
+  "places365_top1_heldout": 0.4241,
+  "embed_seconds": 294.0,
+  "engine": "transformers-5.19.0+torch-2.14.1",
+  "device": "mps",
+  "machine": "Darwin arm64, Apple M1, 8.0 GB RAM, GPU mps",
+  "not_evaluated": [
+    "close_up",
+    "medium",
+    "wide"
+  ],
+  "tags": {
+    "indoor": {
+      "dataset": "places365",
+      "positives_tuning": 4025,
+      "positives_heldout": 4025,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.9469,
+      "threshold": 0.5879,
+      "shown_heldout": 3878,
+      "precision": 0.903,
+      "precision_ci95": [
+        0.893,
+        0.912
+      ],
+      "recall": 0.8701,
+      "enabled": true,
+      "reason": null
+    },
+    "outdoor": {
+      "dataset": "places365",
+      "positives_tuning": 5100,
+      "positives_heldout": 5100,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.9451,
+      "threshold": 0.5,
+      "shown_heldout": 5124,
+      "precision": 0.9053,
+      "precision_ci95": [
+        0.897,
+        0.913
+      ],
+      "recall": 0.9096,
+      "enabled": true,
+      "reason": null
+    },
+    "day": {
+      "dataset": "codan",
+      "positives_tuning": 1250,
+      "positives_heldout": 1250,
+      "photos_heldout": 2500,
+      "average_precision_heldout": 0.9706,
+      "threshold": 0.5,
+      "shown_heldout": 1254,
+      "precision": 0.9203,
+      "precision_ci95": [
+        0.904,
+        0.934
+      ],
+      "recall": 0.9232,
+      "enabled": true,
+      "reason": null
+    },
+    "night": {
+      "dataset": "codan",
+      "positives_tuning": 1250,
+      "positives_heldout": 1250,
+      "photos_heldout": 2500,
+      "average_precision_heldout": 0.9781,
+      "threshold": 0.5,
+      "shown_heldout": 1246,
+      "precision": 0.923,
+      "precision_ci95": [
+        0.907,
+        0.936
+      ],
+      "recall": 0.92,
+      "enabled": true,
+      "reason": null
+    },
+    "beach": {
+      "dataset": "places365",
+      "positives_tuning": 50,
+      "positives_heldout": 50,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.313,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "sea": {
+      "dataset": "places365",
+      "positives_tuning": 25,
+      "positives_heldout": 25,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.1541,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "underwater": {
+      "dataset": "places365",
+      "positives_tuning": 25,
+      "positives_heldout": 25,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.7805,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "waterfall": {
+      "dataset": "places365",
+      "positives_tuning": 25,
+      "positives_heldout": 25,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.73,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "river_lake": {
+      "dataset": "places365",
+      "positives_tuning": 75,
+      "positives_heldout": 75,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.3842,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "pool": {
+      "dataset": "places365",
+      "positives_tuning": 50,
+      "positives_heldout": 50,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.6894,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "forest": {
+      "dataset": "places365",
+      "positives_tuning": 125,
+      "positives_heldout": 125,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.7454,
+      "threshold": 0.8369,
+      "shown_heldout": 55,
+      "precision": 0.9273,
+      "precision_ci95": [
+        0.827,
+        0.971
+      ],
+      "recall": 0.408,
+      "enabled": true,
+      "reason": null
+    },
+    "mountain": {
+      "dataset": "places365",
+      "positives_tuning": 75,
+      "positives_heldout": 75,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.5258,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "field": {
+      "dataset": "places365",
+      "positives_tuning": 125,
+      "positives_heldout": 125,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.6435,
+      "threshold": 0.983,
+      "shown_heldout": 16,
+      "precision": 1.0,
+      "precision_ci95": [
+        0.806,
+        1.0
+      ],
+      "recall": 0.128,
+      "enabled": true,
+      "reason": null
+    },
+    "street": {
+      "dataset": "places365",
+      "positives_tuning": 100,
+      "positives_heldout": 100,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.5266,
+      "threshold": 0.9912,
+      "shown_heldout": 13,
+      "precision": 0.8462,
+      "precision_ci95": [
+        0.578,
+        0.957
+      ],
+      "recall": 0.11,
+      "enabled": false,
+      "reason": "held-out precision 0.846 < 0.85"
+    },
+    "highway": {
+      "dataset": "places365",
+      "positives_tuning": 25,
+      "positives_heldout": 25,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.4558,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "vehicle": {
+      "dataset": "places365",
+      "positives_tuning": 100,
+      "positives_heldout": 100,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.9219,
+      "threshold": 0.6554,
+      "shown_heldout": 103,
+      "precision": 0.8252,
+      "precision_ci95": [
+        0.741,
+        0.887
+      ],
+      "recall": 0.85,
+      "enabled": false,
+      "reason": "held-out precision 0.825 < 0.85"
+    },
+    "temple": {
+      "dataset": "places365",
+      "positives_tuning": 50,
+      "positives_heldout": 50,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.7902,
+      "threshold": 0.9878,
+      "shown_heldout": 18,
+      "precision": 0.9444,
+      "precision_ci95": [
+        0.742,
+        0.99
+      ],
+      "recall": 0.34,
+      "enabled": true,
+      "reason": null
+    },
+    "kitchen": {
+      "dataset": "places365",
+      "positives_tuning": 50,
+      "positives_heldout": 50,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.5861,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "bedroom": {
+      "dataset": "places365",
+      "positives_tuning": 25,
+      "positives_heldout": 25,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.3421,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "living_room": {
+      "dataset": "places365",
+      "positives_tuning": 25,
+      "positives_heldout": 25,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.2843,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "restaurant": {
+      "dataset": "places365",
+      "positives_tuning": 125,
+      "positives_heldout": 125,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.3819,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "office": {
+      "dataset": "places365",
+      "positives_tuning": 75,
+      "positives_heldout": 75,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.6806,
+      "threshold": 0.8963,
+      "shown_heldout": 29,
+      "precision": 0.9655,
+      "precision_ci95": [
+        0.828,
+        0.994
+      ],
+      "recall": 0.3733,
+      "enabled": true,
+      "reason": null
+    },
+    "classroom": {
+      "dataset": "places365",
+      "positives_tuning": 50,
+      "positives_heldout": 50,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.5884,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    },
+    "stage": {
+      "dataset": "places365",
+      "positives_tuning": 50,
+      "positives_heldout": 50,
+      "photos_heldout": 9125,
+      "average_precision_heldout": 0.3096,
+      "threshold": null,
+      "enabled": false,
+      "reason": "never reached 0.9 precision on the tuning half"
+    }
+  }
+}

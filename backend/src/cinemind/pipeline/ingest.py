@@ -1,6 +1,7 @@
 """The `ingest` chain: validate -> proxy -> thumbnails -> waveform -> shots -> keyframes
--> quality -> audio_qc -> transcribe (SPEC sections 4 and 5; the later ones live in
-`shot_stages.py`, `quality_stages.py` and `transcribe_stages.py`).
+-> quality -> audio_qc -> transcribe -> faces -> embed_visual -> embed_text -> tags (SPEC
+sections 4 and 5; the later ones live in `shot_stages.py`, `quality_stages.py`,
+`transcribe_stages.py`, `face_stages.py`, `embed_stages.py` and `tag_stage.py`).
 
 Stages return plain dicts (cached in `stage_results`); the `persist_*` functions copy them onto
 the media asset row. Artifact paths are stored relative to the project directory.
@@ -17,6 +18,7 @@ from sqlalchemy.orm import Session
 from cinemind.core.errors import LowDiskSpaceError, SourceMissingError
 from cinemind.jobs.registry import Stage, StageContext, register_chain
 from cinemind.pipeline import ffmpeg
+from cinemind.pipeline.embed_stages import EMBED_STAGES
 from cinemind.pipeline.face_stages import FACE_STAGES
 from cinemind.pipeline.ffmpeg import make_proxy, make_thumbnails, waveform_peaks
 from cinemind.pipeline.ffprobe import probe
@@ -253,5 +255,6 @@ register_chain(
         *QUALITY_STAGES,
         *TRANSCRIBE_STAGES,
         *FACE_STAGES,
+        *EMBED_STAGES,
     ],
 )

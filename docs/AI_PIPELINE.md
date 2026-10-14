@@ -17,6 +17,9 @@ score. Settings named in `code` live in `cinemind.toml` / `.env` (`core/config.p
 | 8 | audio_qc | ffmpeg `ebur128`, `silencedetect` | clipped-sample count, audio score, flags |
 | 9 | transcribe | faster-whisper (Whisper weights on CTranslate2) with its Silero voice-activity detector | model choice per hardware tier, offline model handling, stored shape, "uncertain" marking, keyword index |
 | 10 | faces | OpenCV `FaceDetectorYN` (YuNet) and `FaceRecognizerSF` (SFace) | frame sampling, the four face checks, tracking inside a shot, what is stored |
+| 11 | embed_visual | OpenCLIP ViT-B/32 or SigLIP picture tower via `transformers`; OpenCV `calcHist` | image preparation, model choice per tier, offline model handling, HSV histogram, storage |
+| 12 | embed_text | MiniLM sentence model via `transformers` | mean pooling, storage per transcript segment |
+| 13 | tags | the picture model's text tower | vocabulary, prompts, scores, evaluated thresholds, counted face and speech tags |
 
 Every stage result is cached by (media content hash, stage, parameters, tool version) and chained to the stage
 before it. Stages 7 and 8 cache MEASUREMENTS only; scores and flags are recomputed from them with the current
@@ -25,6 +28,9 @@ Stage 9 is chained to stage 1 only (the source file), so shot or quality setting
 speech model again.
 Stage 10 is chained to stage 5 (the shots). Grouping the faces of a whole project into actors is not a stage: it
 runs after a project's last queued job and after "Group again" (see "Faces and actors").
+Stage 11 is chained to the keyframes, stage 12 to the transcript, stage 13 to stage 11. Stage 13 caches raw scores
+only; which tags are shown is decided from `ai/tag_thresholds.json` every time the job runs. Scenes and the vector
+indexes are project-wide, like actors (see "Scenes" and "Vector index").
 
 ## Technical quality (stages 7 and 8)
 These are technical measurements: focus, exposure, tonal range, audio level. They say nothing about whether a shot is
@@ -233,3 +239,97 @@ ours.
 - Grouping builds a full distance table of all tracks in memory (about 0.4 GB at 7000 tracks) and is not capped;
   this project has 72. A job created before this phase and retried after a `[faces]` change can reuse a stale
   cached scan (its cache key has no face settings); "Process all" creates a new job and does not have that problem.
+
+## Embeddings (stages 11 and 12)
+Existing models (D-070), each pinned to a revision with a SHA-256 and fetched only by `cinemind models pull`:
+
+| Tier | Picture model (`[embed] visual_model`) | Text model (`[embed] text_model`) |
+|---|---|---|
+| lite | OpenCLIP ViT-B/32, LAION-2B (`clip-vit-b32`, 512 numbers) | all-MiniLM-L6-v2 (`minilm-l6`, 384, English) |
+| balanced | SigLIP base 224 (`siglip-base`, 768) | same |
+| quality | SigLIP so400m 384 (`siglip-so400m`, 1152) | same |
+
+`multilingual-minilm-l12` (50+ languages) is a setting. Device: an NVIDIA GPU if present, else Apple's GPU (MPS),
+else the CPU; an automatically chosen GPU that fails falls back to the CPU once.
+
+Ours:
+- Image preparation with OpenCV from each model's `preprocessor_config.json`: resize (shortest side, or to a fixed
+  size), centre crop, scale, normalise (D-071). Every keyframe of the clip (1 to 3 per shot, D-038) is embedded.
+- A colour histogram per keyframe: HSV, 8 x 4 x 4 bins, on the frame shrunk to 180 px high, summing to 1.
+- MiniLM: mean of the token vectors over the attention mask, then unit length.
+- Every vector is stored in `embeddings` (picture vectors and histograms per keyframe, text vectors per segment), with
+  the model name. A clip whose model is missing records `model_missing`, keeps whatever an earlier run stored, and
+  is tried again on the next run; when the model is back, the cached result restores the state. Text vectors wait
+  for a transcript (`no_transcript`) when there is none yet.
+
+## Tags (stage 13)
+Not facts: suggestions with a score, shown only when the score passes a threshold that was set and checked on
+labelled photos. Existing model: the picture model's text tower. Ours: everything below (D-073 to D-076).
+
+Vocabulary (`ai/tagger.py`, version 1):
+- `setting`: indoor, outdoor. `time`: daylight, night / low light. `shot_size`: close-up, medium, wide.
+  Each tag has two descriptions, each in three phrasings ("a photo of ...", "a video frame of ...", "a film still
+  of ..."); their vectors are averaged.
+- `place`: 20 tags (beach or coast, open sea, underwater, waterfall, river or lake, swimming pool, forest, mountain,
+  field, street, highway, inside a vehicle, temple, kitchen, bedroom, living room, restaurant or café, office,
+  classroom, stage), each standing for one to five of the 365 Places365 scene categories.
+
+Score of a tag for one keyframe, with `s(t)` = cosine between the keyframe vector and the tag's text vector and `T`
+the model's learned temperature (100 for CLIP):
+- prompt groups: `score(t) = exp(T s(t)) / sum over the tags u of its group of exp(T s(u))`
+- places: `p(c)` = the same softmax over all 365 categories; `score(tag) = sum of p(c) over the tag's categories`
+A shot's displayed score is the mean over its keyframes; the three best Places365 categories of each keyframe are
+kept for the "why". Scores are shares inside a group (0 to 1), not probabilities.
+
+Shown or not (`tags.status`): thresholds were set on single photos, so they are applied per keyframe: `shown` when
+more than half of the shot's keyframes (on a tie, their mean score) reach the threshold and the tag type is enabled in
+`ai/tag_thresholds.json`; `below` under it; `disabled` when the evaluation switched the tag type off; `not_evaluated`
+when no labelled data exists for it (shot size). Thresholds belong to one model revision and vocabulary version
+(`clip-vit-b32@1a25a446712b+v1`); another model has none until `eval/tag_calibration.py run --model ... --install`
+was run for it, so all its tags are `not_evaluated`. How the thresholds were set and how often a shown tag was right
+on the held-out photos: EVALUATION.md section 8.
+
+The user's decision outranks the threshold: approved tags are shown, rejected tags never are; decisions are kept
+by shot id when the clip is processed again and logged with the suggested score (`eval/tag_feedback.py` turns them
+into precision on the user's own footage).
+
+Counted tags (no model, no threshold; the rule is stored with the tag): "N clear faces" = most usable faces found in
+one sampled frame of the shot (faces left out by the face checks are not counted); "Speech" = transcript segments
+not marked uncertain cover at least 1 s of the shot.
+
+## Scenes (project-wide, after the last queued job)
+Ours, no model of its own (D-077). Shots in the order clips sort by file name, then source order. Each shot is
+compared with the one before it:
+
+```
+visual   = cosine(mean picture vector of shot A, of shot B)      (both unit length)
+colour   = sum over bins of min(mean histogram A, mean histogram B)
+combined = (0.7 visual + 0.3 colour) / (sum of the weights of the signals both shots have)
+           only when both shots have picture vectors (colour alone is on another scale)
+same scene  <=>  combined >= 0.8        ([scenes] visual_weight, color_weight, join_similarity)
+```
+
+The weights and 0.8 are conventions, set before running on real footage and not tuned: no labelled scenes exist. A
+shot without picture vectors starts a new scene ("no picture vectors to compare"). The user's edits outrank the
+rule: `split` (a scene starts at this shot), `join` (this shot stays with the one before), and a name kept on the
+scene's shots. Grouping runs after the last queued job, after a clip is removed, and on "Group again"; it is skipped
+when shots, picture vectors, edits and settings are unchanged. Every boundary stores both signals, the combined value
+and the decision in words; the Shots and scenes page shows them.
+
+## Vector index
+Existing library: FAISS `IndexFlatIP` (exact inner product = cosine on unit vectors), or an exact numpy search with
+the same results, behind `search/vector_index.py`'s `VectorIndex`. `[embed] index_backend = "auto"` uses numpy on
+macOS, where FAISS and torch load clashing OpenMP runtimes into one process and it aborts (D-079), and FAISS
+elsewhere. One file per project, kind (`keyframe`, `segment`) and model under
+`data/projects/<id>/index/`, plus a `.ids.json` mapping positions to keyframe or segment ids. Files are derived from
+the `embeddings` rows: rebuilt after the last queued job, when asked (`POST /api/projects/{id}/index/rebuild`), or
+before a search when the rows' digest differs from the one the file was built from. Search itself is Phase 9.
+
+### Known limits
+- Thresholds were set on web photos (Places365) and object crops in low light (CODaN), not on video frames; precision
+  on a user's footage depends on how common each tag is there. Shot size is never shown (no labelled data).
+- A keyframe that is sideways in the source (phone held sideways with rotation locked) is embedded sideways.
+- Scenes: neighbour comparison only (a shot is never compared with the one two places back); montages that cut
+  between places every second give almost one scene per shot. Clips are ordered by file name, not capture time.
+- The English text model gives poor vectors for Hindi or Kannada transcripts; the multilingual model is a setting.
+- The models stay loaded in the worker next to Whisper (weight files: 0.6 GB for CLIP B/32, 0.09 GB for MiniLM); peak memory was not measured.

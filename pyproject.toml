@@ -23,6 +23,10 @@ dependencies = [
     "scikit-learn>=1.9,<2",
     "huggingface-hub>=2.2,<3",
     "scipy>=1.15,<2",
+    "torch>=2.14,<3",
+    "transformers>=5.19,<6",
+    "faiss-cpu>=1.15,<2",
+    "sentencepiece>=0.2.2,<0.3",
 ]
 
 [project.scripts]

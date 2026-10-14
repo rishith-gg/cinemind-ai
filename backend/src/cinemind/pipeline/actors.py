@@ -15,14 +15,14 @@ from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
-from sqlalchemy import delete, func, select, text
+from sqlalchemy import delete, select, text
 from sqlalchemy.orm import Session
 
 from cinemind.ai import face_cluster
 from cinemind.core import face_config
 from cinemind.core.config import Settings
 from cinemind.db.base import utcnow
-from cinemind.db.models import Job, MediaAsset
+from cinemind.db.models import MediaAsset
 from cinemind.db.people import Actor, ActorRun, Face, FacePin, FaceScan, FaceTrack
 from cinemind.pipeline.face_scan import overlap
 
@@ -303,18 +303,3 @@ def _actors_for(
         if label not in chosen:
             chosen[label] = new_actor(session, project_id, taken).id
     return chosen
-
-
-def regroup_if_idle(session: Session, settings: Settings, project_id: str) -> bool:
-    """Called by the worker after each job: group once the project's queue is empty, so a big
-    import is grouped once at the end and not after every clip. True if it grouped."""
-    waiting = session.scalar(
-        select(func.count())
-        .select_from(Job)
-        .where(Job.project_id == project_id, Job.status.in_(("queued", "running")))
-    )
-    if waiting:
-        return False
-    regroup(session, settings, project_id)
-    session.commit()
-    return True

@@ -28,7 +28,7 @@ from cinemind.core.errors import (
     TranscriptionError,
     UnreadableMediaError,
 )
-from cinemind.core.hardware import Tier, detect_hardware, recommend_tier
+from cinemind.core.hardware import tier_in_use
 from cinemind.core.transcribe_config import (
     TIER_MODEL,
     WHISPER_MODELS,
@@ -64,17 +64,11 @@ def engine_version() -> str:
         return "unknown"
 
 
-@lru_cache
-def _auto_tier() -> Tier:
-    return recommend_tier(detect_hardware()).tier
-
-
 def choose_model(settings: Settings, name: str | None = None) -> ModelChoice:
     """The Whisper model in use: `name`, else `[transcribe] model`, else the hardware tier's."""
     name = name or settings.transcribe.model
     if name == "auto":
-        tier = _auto_tier() if settings.model_tier == "auto" else settings.model_tier
-        name = TIER_MODEL[tier]
+        name = TIER_MODEL[tier_in_use(settings.model_tier)]
     if name not in WHISPER_MODELS:
         raise InvalidInputError(
             f"Unknown speech model '{name}'. Known: {', '.join(WHISPER_MODELS)}."

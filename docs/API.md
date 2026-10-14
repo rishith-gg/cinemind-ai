@@ -81,7 +81,29 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
 - CLI: `cinemind models pull` now also fetches the face models (`models pull faces` for those alone);
   `models list`, `cinemind doctor` and `/api/system/health` report whether they are on disk.
 
-## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc, transcribe, faces
+## Implemented (Phase 8): scenes, tags, embeddings, vector indexes
+- `GET /api/projects/{id}/scenes`: the scenes in order, each with its shots (clip, time range, first keyframe, the
+  similarity to the shot before: `visual`, `color`, `combined`, the `decision` in words, the user's `edit`), shots
+  not grouped yet (`ungrouped`), the `[scenes]` settings, the last grouping's `details`, and `model_missing` with a
+  `message` when the picture model is not on disk.
+- `PUT /api/projects/{id}/scenes/boundaries` `{shot_id, decision}`: before that shot, `split` (start a scene),
+  `join` (stay with the shot before; not for the project's first shot), or `auto` (the similarity decides again).
+  `PATCH /api/scenes/{id}` `{name}`: rename (an empty name goes back to the number).
+  `POST /api/projects/{id}/scenes/regroup`: group again; edits stay. All three return the new scene list.
+- `GET /api/media/{id}/tags`: the visual embedding `status` with a plain `message`, the model, when its thresholds
+  were set and from which results file, and per shot every tag with `score`, `threshold`, `status`, the user's
+  `review`, `visible` (approved, or `shown` and not rejected) and `details` (the evaluation behind the threshold).
+- `PUT /api/tags/review` `{shot_id, name, decision}`: `approved`, `rejected` or `none` (withdraw). Returns the clip's
+  tags. `GET /api/projects/{id}/tags`: the visible tags of the project with the number of shots each is on.
+- `GET /api/media/{id}/embeddings`: state of the `visual` and `text` embeddings of a clip.
+- `GET /api/projects/{id}/index`: the vector index files (kind, model, backend, size, `up_to_date`).
+  `POST /api/projects/{id}/index/rebuild`: rebuild them all from the database.
+- The job event stream sends a `scenes` event after a project was grouped into scenes. Removing a clip regroups
+  actors and scenes and updates the indexes.
+- CLI: `cinemind models pull` now also fetches the picture and text models of the tier (`models pull visual`,
+  `models pull text`, or a model name such as `siglip-base`); `models list` and `cinemind doctor` report them.
+
+## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc, transcribe, faces, embed_visual, embed_text, tags
 - validate: ffprobe (by content, not extension): rational fps, VFR flag (avg vs nominal rate differ > 0.5 %),
   codecs, display size (rotation applied), timecode, colour tags. Corrupt or non-media files fail with a plain message.
 - proxy: H.264 (+AAC), <= `proxy_max_height` (720), constant frame rate (the source's average rate, halved above 60), `+faststart`.
@@ -102,6 +124,12 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
   crop per track and the track vectors under `faces/<media id>/`. Never downloads; without the models it records
   `model_missing` and retries on the next run. Its cache key depends on the shots and the `[faces]` settings other
   than the grouping ones, so changing `cluster_distance` regroups without decoding video.
+- embed_visual: every keyframe through the picture model (CLIP or SigLIP, `[embed] visual_model`) plus an HSV colour
+  histogram; vectors go to `embeddings`. embed_text: every transcript segment through the text model
+  (`[embed] text_model`). tags: zero-shot scores per keyframe against the tag vocabulary; which tags are shown is
+  decided when they are stored, from `ai/tag_thresholds.json`. None of the three downloads anything; without a model
+  they record `model_missing` and retry on the next run. embed_visual hangs on the keyframes, embed_text on the
+  transcript, tags on embed_visual (`Stage.upstream`).
 - Stage cache for these stages is per project and re-validated against the files on disk (`Stage.scope_project`,
   `Stage.verify`); `Stage.persist` copies results onto the media row, also on a cache hit.
 

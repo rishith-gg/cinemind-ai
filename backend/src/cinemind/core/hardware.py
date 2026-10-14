@@ -3,7 +3,8 @@
 import platform
 import shutil
 import subprocess
-from typing import Literal
+from functools import lru_cache
+from typing import Literal, cast
 
 import psutil
 from pydantic import BaseModel
@@ -105,3 +106,13 @@ def recommend_tier(hw: HardwareInfo) -> TierRecommendation:
     return TierRecommendation(
         tier="lite", reason=f"Only {hw.ram_gb} GB RAM and no CUDA GPU with 4+ GB.{extra}"
     )
+
+
+@lru_cache
+def _auto_tier() -> Tier:
+    return recommend_tier(detect_hardware()).tier
+
+
+def tier_in_use(model_tier: str) -> Tier:
+    """The tier the `model_tier` setting means: the recommended one for "auto"."""
+    return _auto_tier() if model_tier == "auto" else cast(Tier, model_tier)

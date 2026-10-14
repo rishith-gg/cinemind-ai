@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from cinemind import __version__
 from cinemind.core import face_config
 from cinemind.core.config import Settings
+from cinemind.core.embed_config import TEXT_MODELS, TIER_TEXT, TIER_VISUAL, VISUAL_MODELS
 from cinemind.core.hardware import (
     HardwareInfo,
     Tier,
@@ -173,6 +174,28 @@ def check_face_models(settings: Settings) -> Check:
     )
 
 
+def check_embed_models(settings: Settings, tier: Tier) -> Check:
+    """Picture and text models (optional: without them there are no tags, scenes or search by
+    meaning; everything else works)."""
+    visual_key = settings.embed.visual_model
+    text_key = settings.embed.text_model
+    visual = VISUAL_MODELS[TIER_VISUAL[tier] if visual_key == "auto" else visual_key]
+    text = TEXT_MODELS[TIER_TEXT[tier] if text_key == "auto" else text_key]
+    version = f"{visual.key} + {text.key}"
+    missing = [s for s in (visual, text) if not s.ready(settings.models_path)]
+    if not missing:
+        return Check(name="picture/text models", status="ok", required=False, version=version)
+    size = sum(s.size_mb for s in missing)
+    return Check(
+        name="picture/text models",
+        status="warn",
+        required=False,
+        version=version,
+        detail=f"not downloaded ({size} MB); clips are processed without tags and scenes",
+        fix="uv run cinemind models pull",
+    )
+
+
 def run_doctor(settings: Settings, disk_path: str = ".") -> DoctorReport:
     hw = detect_hardware(disk_path)
     rec = recommend_tier(hw)
@@ -183,6 +206,7 @@ def run_doctor(settings: Settings, disk_path: str = ".") -> DoctorReport:
         check_disk(hw),
         check_speech_model(settings, selected),
         check_face_models(settings),
+        check_embed_models(settings, selected),
     ]
     return DoctorReport(
         app_version=__version__,
