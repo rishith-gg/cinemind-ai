@@ -61,7 +61,7 @@ Every phase ends with the Phase Report (see CLAUDE.md). Mark phases in `docs/PRO
 **Accept:** from a 1-sentence brief, produce a timeline in < 1 min on the dev machine; exports pass round-trip; user confirms Resolve import again.
 
 ## Phase 12 — P1 differentiators (in order; each is its own mini-phase with eval)
-A. Script-to-footage alignment → B. Take detection/best take → C. Speech-aware trimming → D/E remaining items. Stop after at least three are solid and evaluated.
+A. Script-to-footage alignment → B. Take detection/best take → C. Speech-aware trimming (Phase 11 keeps whole transcript lines; C adds word- and pause-level trimming) → D/E remaining items. Stop after at least three are solid and evaluated.
 
 ## Phase 13 — Evaluation
 - Finish the dataset, labelling helpers, all `eval/` scripts, full results tables/plots, user-study protocol + analysis script, `ACADEMIC_NOTES.md`.

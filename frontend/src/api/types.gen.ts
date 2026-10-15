@@ -217,6 +217,48 @@ export type ActorsOut = {
 };
 
 /**
+ * AlternativeOut
+ */
+export type AlternativeOut = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Scene Id
+     */
+    scene_id: string | null;
+    /**
+     * Keyframe Id
+     */
+    keyframe_id: string | null;
+    /**
+     * Summary
+     */
+    summary: string;
+    /**
+     * Rank
+     */
+    rank: number | null;
+};
+
+/**
  * AudioQualityOut
  */
 export type AudioQualityOut = {
@@ -1314,6 +1356,43 @@ export type RelinkRequest = {
 };
 
 /**
+ * RoughCutCreate
+ */
+export type RoughCutCreate = {
+    /**
+     * Brief
+     */
+    brief: string;
+    /**
+     * Target S
+     */
+    target_s?: number | null;
+    /**
+     * Order
+     */
+    order?: 'chronological' | 'scene' | 'score' | null;
+    /**
+     * Actor Id
+     */
+    actor_id?: string | null;
+    /**
+     * Scene Id
+     */
+    scene_id?: string | null;
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Fps
+     */
+    fps?: [
+        number,
+        number
+    ] | null;
+};
+
+/**
  * SceneOut
  */
 export type SceneOut = {
@@ -1871,6 +1950,16 @@ export type SpeechLanguagesOut = {
 };
 
 /**
+ * SwapRequest
+ */
+export type SwapRequest = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+};
+
+/**
  * TagCountOut
  */
 export type TagCountOut = {
@@ -2089,12 +2178,38 @@ export type TimelineDetail = {
      * Items
      */
     items: Array<TimelineItemOut>;
+    /**
+     * Alternatives
+     */
+    alternatives?: Array<AlternativeOut>;
+};
+
+/**
+ * TimelineItemEdit
+ */
+export type TimelineItemEdit = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Source In S
+     */
+    source_in_s: number;
+    /**
+     * Source Out S
+     */
+    source_out_s: number;
 };
 
 /**
  * TimelineItemOut
  */
 export type TimelineItemOut = {
+    /**
+     * Id
+     */
+    id: string;
     /**
      * Position
      */
@@ -2139,6 +2254,32 @@ export type TimelineItemOut = {
      * Mixed Rate
      */
     mixed_rate: boolean;
+    /**
+     * Media Duration S
+     */
+    media_duration_s?: number | null;
+    /**
+     * Shot Start S
+     */
+    shot_start_s?: number | null;
+    /**
+     * Shot End S
+     */
+    shot_end_s?: number | null;
+    /**
+     * Scene Id
+     */
+    scene_id?: string | null;
+    /**
+     * Keyframe Id
+     */
+    keyframe_id?: string | null;
+    /**
+     * Reason
+     */
+    reason?: {
+        [key: string]: unknown;
+    } | null;
 };
 
 /**
@@ -2211,6 +2352,20 @@ export type TimelineOut = {
      * Formats
      */
     formats: Array<string>;
+};
+
+/**
+ * TimelineUpdate
+ */
+export type TimelineUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Items
+     */
+    items?: Array<TimelineItemEdit> | null;
 };
 
 /**
@@ -3741,6 +3896,52 @@ export type CreateTimelineResponses = {
 
 export type CreateTimelineResponse = CreateTimelineResponses[keyof CreateTimelineResponses];
 
+export type CreateRoughCutData = {
+    body: RoughCutCreate;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/rough-cut';
+};
+
+export type CreateRoughCutErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type CreateRoughCutError = CreateRoughCutErrors[keyof CreateRoughCutErrors];
+
+export type CreateRoughCutResponses = {
+    /**
+     * Successful Response
+     */
+    201: TimelineDetail;
+};
+
+export type CreateRoughCutResponse = CreateRoughCutResponses[keyof CreateRoughCutResponses];
+
 export type DeleteTimelineData = {
     body?: never;
     path: {
@@ -3832,6 +4033,102 @@ export type GetTimelineResponses = {
 };
 
 export type GetTimelineResponse = GetTimelineResponses[keyof GetTimelineResponses];
+
+export type UpdateTimelineData = {
+    body: TimelineUpdate;
+    path: {
+        /**
+         * Timeline Id
+         */
+        timeline_id: string;
+    };
+    query?: never;
+    url: '/api/timelines/{timeline_id}';
+};
+
+export type UpdateTimelineErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateTimelineError = UpdateTimelineErrors[keyof UpdateTimelineErrors];
+
+export type UpdateTimelineResponses = {
+    /**
+     * Successful Response
+     */
+    200: TimelineDetail;
+};
+
+export type UpdateTimelineResponse = UpdateTimelineResponses[keyof UpdateTimelineResponses];
+
+export type SwapTimelineItemData = {
+    body: SwapRequest;
+    path: {
+        /**
+         * Timeline Id
+         */
+        timeline_id: string;
+        /**
+         * Item Id
+         */
+        item_id: string;
+    };
+    query?: never;
+    url: '/api/timelines/{timeline_id}/items/{item_id}/swap';
+};
+
+export type SwapTimelineItemErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type SwapTimelineItemError = SwapTimelineItemErrors[keyof SwapTimelineItemErrors];
+
+export type SwapTimelineItemResponses = {
+    /**
+     * Successful Response
+     */
+    200: TimelineDetail;
+};
+
+export type SwapTimelineItemResponse = SwapTimelineItemResponses[keyof SwapTimelineItemResponses];
 
 export type ExportTimelineData = {
     body?: never;

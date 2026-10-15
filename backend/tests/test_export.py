@@ -20,7 +20,9 @@ from cinemind.export.sequence import (
     export_rate,
     source_start,
 )
+from cinemind.export.srt import subtitles, write_srt
 from cinemind.rough_cut.assembly import natural_key
+from cinemind.search.spoken import SpokenLine, Word
 from cinemind.utils.timecode import tc_to_frames
 from helpers import drain, import_one
 
@@ -162,8 +164,10 @@ def test_export_rate_prefers_a_plausible_nominal_rate() -> None:
 
 def _timeline(rate: F, items: list[tuple[str, float, float]], built: int = 0) -> Timeline:
     rows = [
-        SimpleNamespace(media_id=m, shot_id=None, source_in_s=a, source_out_s=b)
-        for m, a, b in items
+        SimpleNamespace(
+            id=f"item-{n}", media_id=m, shot_id=None, source_in_s=a, source_out_s=b, reason=None
+        )
+        for n, (m, a, b) in enumerate(items)
     ]
     values: dict[str, Any] = {"name": "t", "fps_num": rate.numerator, "fps_den": rate.denominator}
     values.update(kind="all_shots", params={"built_items": built or len(rows)})
@@ -357,3 +361,37 @@ def test_timeline_errors_are_friendly(client: TestClient, pid: str, cut_project:
     assert gone.status_code == 422 and "empty" in gone.json()["message"]
     assert client.delete(f"/api/timelines/{timeline}").status_code == 204
     assert client.delete(f"/api/timelines/{timeline}").status_code == 404
+
+
+def test_srt_places_words_inside_each_cut_at_their_timeline_time(seq: Sequence) -> None:
+    """Second cut of the stereo clip: source frames 100-250 at 59.94 (1.668-4.171 s), on the
+    timeline from frame 100. A line half inside keeps only its words inside; a word piece
+    shorter than 0.3 s is dropped."""
+    words = (Word(1.0, 1.5, "before"), Word(2.0, 2.5, "inside"), Word(2.5, 3.0, "too"))
+    lines = {
+        "IMG 0870 é.MOV": [
+            SpokenLine(1.0, 3.0, "before inside too", words),
+            SpokenLine(4.1, 6.0, "barely in"),  # 0.07 s inside the cut: dropped
+        ]
+    }
+    second = Sequence("s", NTSC60, 3840, 2160, cuts=[seq.cuts[1]])
+    second.cuts[0] = Cut(seq.cuts[1].source, NTSC60, 100, 150, 0)
+    found = subtitles(second, lines)
+    assert len(found) == 1
+    start, end, text = found[0]
+    offset = float(F(100) / NTSC60)
+    assert text == "inside too"
+    assert (start, end) == pytest.approx((2.0 - offset, 3.0 - offset))
+    assert write_srt(second, lines).startswith("1\n00:00:00,332 --> 00:00:01,332\ninside too\n")
+
+
+def test_a_short_whole_line_is_a_subtitle_but_a_short_clipped_piece_is_not(seq: Sequence) -> None:
+    cut = Cut(seq.cuts[0].source, NTSC60, 0, 120, 0)  # source 0 .. 2.002 s
+    short = Sequence("s", NTSC60, 3840, 2160, cuts=[cut])
+    lines = {
+        "IMG 0870 é.MOV": [
+            SpokenLine(0.5, 0.7, "Yes.", (Word(0.5, 0.7, "Yes."),)),
+            SpokenLine(1.8, 3.0, "no way", (Word(1.8, 1.95, "no"), Word(2.5, 3.0, "way"))),
+        ]
+    }
+    assert [text for _, _, text in subtitles(short, lines)] == ["Yes."]

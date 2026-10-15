@@ -9,9 +9,14 @@ import opentimelineio as otio
 from opentimelineio.opentime import RationalTime, TimeRange
 
 from cinemind.export.sequence import Sequence, source_start
+from cinemind.rough_cut import BANNER
 
 # What the timeline is, stated in the file: nothing here was chosen by a model.
-NOTES = {"all_shots": "Every detected shot in file order; nothing selected or ranked."}
+NOTES = {
+    "all_shots": "Every detected shot in file order; nothing selected or ranked.",
+    "rough_cut": f"{BANNER} Clips were chosen from a brief by search and ranking; each clip's "
+    "marker says why.",
+}
 
 
 def to_otio(seq: Sequence) -> Any:
@@ -25,6 +30,7 @@ def to_otio(seq: Sequence) -> Any:
         "height": seq.height,
         "kind": seq.kind,
         "note": f"{NOTES.get(seq.kind, seq.kind)} Source ranges are in timeline-rate frames.",
+        "banner": seq.banner,
     }
     video = otio.schema.Track(name="V1", kind=otio.schema.TrackKind.Video)
     audio = otio.schema.Track(name="A1", kind=otio.schema.TrackKind.Audio)
@@ -46,6 +52,14 @@ def to_otio(seq: Sequence) -> Any:
             )
             clip = otio.schema.Clip(name=src.name, media_reference=reference)
             clip.source_range = src_range
+            if cut.note and track is video:
+                clip.markers.append(
+                    otio.schema.Marker(
+                        name="Why this clip",
+                        marked_range=TimeRange(src_range.start_time, RationalTime(0, rate)),
+                        comment=cut.note,
+                    )
+                )
             clip.metadata["cinemind"] = {
                 "media_id": src.media_id,
                 "shot_id": cut.shot_id,

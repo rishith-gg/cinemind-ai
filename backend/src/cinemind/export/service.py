@@ -16,16 +16,20 @@ from cinemind.export.edl import write_edl
 from cinemind.export.fcp7xml import write_fcp7xml
 from cinemind.export.otio_model import write_otio
 from cinemind.export.sequence import Sequence, build_sequence
+from cinemind.export.srt import write_srt
+from cinemind.search.spoken import SpokenLine, spoken_lines
 
 log = logging.getLogger(__name__)
 
-ExportFormat = Literal["fcp7xml", "edl", "otio"]
-EXTENSIONS: dict[str, str] = {"fcp7xml": ".xml", "edl": ".edl", "otio": ".otio"}
+ExportFormat = Literal["fcp7xml", "edl", "otio", "srt"]
+EXTENSIONS: dict[str, str] = {"fcp7xml": ".xml", "edl": ".edl", "otio": ".otio", "srt": ".srt"}
 MEDIA_TYPES: dict[str, str] = {
     "fcp7xml": "application/xml",
     "edl": "text/plain",
     "otio": "application/json",
+    "srt": "application/x-subrip",
 }
+UNKNOWN_FORMAT = "Unknown export format '{}'. Use fcp7xml, edl, otio or srt."
 
 
 @dataclass(frozen=True)
@@ -41,14 +45,22 @@ def load_sequence(session: Session, timeline: Timeline) -> Sequence:
     return build_sequence(timeline, {a.id: a for a in assets})
 
 
-def render(seq: Sequence, fmt: str) -> str:
+def render(seq: Sequence, fmt: str, lines: dict[str, list[SpokenLine]] | None = None) -> str:
     if fmt == "fcp7xml":
         return write_fcp7xml(seq)
     if fmt == "edl":
         return write_edl(seq)
     if fmt == "otio":
         return write_otio(seq)
-    raise InvalidInputError(f"Unknown export format '{fmt}'. Use fcp7xml, edl or otio.")
+    if fmt == "srt":
+        text = write_srt(seq, lines or {})
+        if not text:
+            raise InvalidInputError(
+                "No transcript line falls inside this timeline's clips, so there are no "
+                "subtitles to write. Lines marked uncertain are never used."
+            )
+        return text
+    raise InvalidInputError(UNKNOWN_FORMAT.format(fmt))
 
 
 def export_dir(settings: Settings, timeline: Timeline) -> Path:
@@ -69,8 +81,13 @@ def export_timeline(
 ) -> ExportedFile:
     seq = load_sequence(session, timeline)
     if not seq.cuts:
+        if timeline.params.get("edited") and not timeline.items:
+            raise InvalidInputError(
+                "This timeline has no clips. Add clips back or build a new rough cut."
+            )
         raise InvalidInputError("This timeline is empty; its clips were removed from the project.")
-    text = render(seq, fmt)
+    lines = spoken_lines(session, {c.source.media_id for c in seq.cuts}) if fmt == "srt" else None
+    text = render(seq, fmt, lines)
     filename = f"{file_stem(timeline.name)}_{timeline.id[:8]}{EXTENSIONS[fmt]}"
     folder = export_dir(settings, timeline)
     try:

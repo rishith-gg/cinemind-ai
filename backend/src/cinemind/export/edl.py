@@ -40,4 +40,10 @@ def write_edl(seq: Sequence) -> str:
         )
         lines.append(f"* FROM CLIP NAME: {src.name}")
         lines.append(f"* SOURCE FILE: {src.path}")
+        # Comments follow an event: a comment before the first event breaks some readers
+        # (OpenTimelineIO's included), so the banner goes under event 001.
+        if seq.banner and number == 1:
+            lines.append(f"* {seq.banner}")
+        if cut.note:
+            lines.append(f"* WHY: {' '.join(cut.note.split())}")
     return "\n".join(lines) + "\n"

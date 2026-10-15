@@ -13,3 +13,10 @@ language = "auto"           # auto = detect per clip; or a code such as "en", "h
 sample_fps = 2.0            # frames per second searched for faces
 cluster_method = "agglomerative"   # agglomerative | hdbscan
 cluster_distance = 0.6      # agglomerative only; lower = stricter (more, purer groups); press "Group again" on the Actors page after changing
+
+[rough_cut]
+default_target_s = 60.0     # length when the brief names none
+min_quality = 0.5           # shots below this Technical Quality Score are left out
+max_clip_s = 6.0            # longest clip without speech
+min_clip_s = 1.5            # shorter shots are not used
+order = "chronological"     # chronological | scene | score (when the brief names none)

@@ -61,6 +61,22 @@ Test footage is synthetic and generated on demand with ffmpeg (never committed).
 - Timecode: drop-frame conversion is checked against known values and round-tripped frame by frame across minute and
   ten-minute boundaries.
 
+- Rough cut: unit tests check the brief rules (lengths in minutes, seconds, m:ss and words; orders; framing words;
+  "a" not read as a length), every trim rule (too short, around the match, near the end, a limit, whole lines and
+  closest neighbours, speech never shortened, a line past the shot edge, a very short line), the timeline size by
+  orientation, and SRT placement (words inside the cut, pieces under 0.3 s dropped). API tests on the processed
+  `cuts.mp4` project check that a brief builds a cut within the target ± 10 % in source order with a reason per
+  clip, the spoken line kept whole and the uncertain one ignored, the request overriding the brief, a brief without
+  subject using every shot except rejected and poor ones (with why), friendly errors, reorder / trim / remove /
+  rename with validation, swap bookkeeping, and the exports (banner, one marker / `* WHY:` per clip, OTIO re-read,
+  SRT with only the certain line, 422 without speech), and after review: NaN / Infinity and sub-frame clips refused,
+  other timelines' items refused, "trimmed by you", removed clips returning as suggestions, swapping back, the
+  emptied-timeline message, speech fitting a limit with fewer lines, brief phrases that are not lengths, a short whole
+  subtitle line kept. Frontend tests check the edit helpers, the brief form, the "why" panel, swap and remove
+  requests, a refused edit, a trim saved on release, and the player (an early-ending proxy cuts to the next clip,
+  Play at the end starts over, only the shown clip reports errors). The E2E test builds a cut from "10 seconds, best first",
+  trims with the keyboard (kept after reload), plays it, removes a clip and checks the exported XML.
+
 ## Manual: DaVinci Resolve import checklist (Phase 4)
 Claude cannot run Resolve. This is done by hand; write the outcome in the results table and in `docs/PROGRESS.md`.
 Tested so far: DaVinci Resolve 21.1 (free edition), macOS, FCP7 XML, on 2026-10-09 (results below).
@@ -100,3 +116,22 @@ For each timeline, and for each of the three files (start with the FCP7 XML):
 | 2026-10-09 | 21.1 free | A, B | FCP7 XML (after audio fix) | User: "everything is correct in DaVinci Resolve". | Audio no longer doubled; the earlier "reversed order" remark was not repeated. Which checklist items were looked at individually (frame check, mixed-rate in/out) was not stated. |
 | | | A | EDL | not reported | |
 | | | A | OTIO | not reported | |
+
+## Manual: rough cut import checklist (Phase 11)
+Claude cannot run Resolve; this is done by hand. On the Timeline page build a rough cut (for example "1-minute
+sequence of people walking outdoors"), then on its page download the FCP7 XML and the SRT.
+1. Import the XML as in the Phase 4 checklist (new project, timeline rate and size as shown on the page).
+   - [ ] Imports without an error; the number of clips, their order and the total length match the page.
+   - [ ] Each clip's first and last frame match its in and out point on the page (check two or three).
+   - [ ] Markers: Resolve shows one timeline marker per clip ("Clip 1", "Clip 2", ...) with the reason as its note.
+         If no markers appear, write that down: the cut itself is still usable.
+2. Import the SRT onto the timeline (File, Import, Subtitle; then drag it to the timeline start if asked).
+   - [ ] The subtitle lines appear under the clips where the words are spoken (the file counts from 00:00:00, the
+         timeline starts at 01:00:00:00; note whether Resolve lines them up by itself).
+3. Edit the cut in CineMind (move a clip, trim one, remove one), export again and re-import: the changes are there.
+
+### Results (Phase 11)
+| Date | Resolve | File | Result | Notes |
+|---|---|---|---|---|
+| | | FCP7 XML (rough cut, markers) | not yet tested | |
+| | | SRT | not yet tested | |

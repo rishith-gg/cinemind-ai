@@ -1,0 +1,8 @@
+rough cut timing, 2026-10-16, project 31c271179e7d45ec9bee76aa34f8af50
+machine: macOS-26.5.2-arm64-arm-64bit-Mach-O, Apple M1, 8 GB RAM; picture model clip-vit-b32
+settings: {'default_target_s': 60.0, 'tolerance': 0.1, 'min_quality': 0.5, 'max_clip_s': 6.0, 'min_clip_s': 1.5, 'speech_pad_s': 0.25, 'max_speech_clip_s': 15.0, 'candidates': 50, 'alternatives': 20, 'order': 'chronological'}
+
+'1-minute sequence of people walking outdoors': 28.7 s (first, loads the models); 13 clips (4 with speech), 56.1 s for a target of 60 s; 50 candidates, 17 left out; 1080x1920 at 30/1
+'30 seconds of water and the beach, best first': 0.1 s; 8 clips (1 with speech), 31.1 s for a target of 30 s; 50 candidates, 18 left out; 1080x1920 at 30/1
+'2 minutes about friends talking, by scene': 0.2 s; 23 clips (6 with speech), 108.7 s for a target of 120 s; 50 candidates, 14 left out; 1080x1920 at 30/1
+'45 seconds': 0.0 s; 10 clips (1 with speech), 41.8 s for a target of 45 s; 50 candidates, 13 left out; 1080x1920 at 30/1

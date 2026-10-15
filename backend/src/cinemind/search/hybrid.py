@@ -87,7 +87,8 @@ class Fused:
 
     @property
     def jump_s(self) -> float:
-        """Where the best evidence is: a spoken word, a line, a keyframe, else the shot start."""
+        """Where the best evidence is: a spoken word, a line, a keyframe; 0.0 when the shot is in
+        no list (callers clamp it to the shot)."""
         for name in ("keyword", "text", "visual", "labels"):
             if name in self.parts:
                 return self.parts[name][0].time_s

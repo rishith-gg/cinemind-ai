@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router";
 
-import { exportTimeline, type TimelineOut } from "../../api";
+import type { TimelineOut } from "../../api";
 import {
   createTimelineMutation,
   deleteTimelineMutation,
@@ -11,6 +11,7 @@ import {
 } from "../../api/@tanstack/react-query.gen";
 import { EmptyState, ErrorState, Loading } from "../../components/states";
 import { useCurrentProject } from "../../lib/currentProject";
+import { downloadExport, EXPORT_FORMATS } from "../../lib/download";
 import { errorMessage } from "../../lib/errors";
 import { toast } from "../../lib/toast";
 import { formatDuration, rateLabel } from "../library/format";
@@ -25,11 +26,6 @@ const RATES: [number, number][] = [
   [60000, 1001],
   [60, 1],
 ];
-const FORMATS: Record<string, string> = {
-  fcp7xml: "FCP7 XML (DaVinci Resolve)",
-  edl: "EDL",
-  otio: "OTIO",
-};
 
 export function ExportPage() {
   const projectId = useCurrentProject((s) => s.id);
@@ -46,29 +42,6 @@ export function ExportPage() {
   return <Export projectId={projectId} />;
 }
 
-/** Fetch the export and hand it to the browser as a file, so a failure (timeline deleted
- * elsewhere, format not possible, disk full) is shown instead of a broken download. */
-async function download(timelineId: string, fmt: string) {
-  try {
-    const { data, error, response } = await exportTimeline({ path: { timeline_id: timelineId, fmt }, parseAs: "blob" });
-    if (error || !(data instanceof Blob) || !response?.ok) {
-      toast.error(errorMessage(error));
-      return;
-    }
-    const header = response.headers.get("content-disposition") ?? "";
-    const encoded = /filename\*=utf-8''([^;]+)/i.exec(header)?.[1];
-    const name = encoded ? decodeURIComponent(encoded) : (/filename="([^"]+)"/i.exec(header)?.[1] ?? `timeline.${fmt}`);
-    const url = URL.createObjectURL(data);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = name;
-    link.click();
-    URL.revokeObjectURL(url);
-  } catch (e) {
-    toast.error(errorMessage(e));
-  }
-}
-
 function TimelineCard({ timeline, onDelete }: { timeline: TimelineOut; onDelete: () => void }) {
   const excluded = (timeline.params.excluded as string[] | undefined) ?? [];
   return (
@@ -78,7 +51,14 @@ function TimelineCard({ timeline, onDelete }: { timeline: TimelineOut; onDelete:
           <h3 className="font-medium">{timeline.name}</h3>
           <p className="text-sm text-neutral-400">
             {timeline.item_count} cuts · {formatDuration(timeline.duration_s)} · {rateLabel(timeline.fps_num, timeline.fps_den)}{" "}
-            fps · {timeline.width}×{timeline.height} · every shot, in file-name order
+            fps · {timeline.width}×{timeline.height} ·{" "}
+            {timeline.kind === "rough_cut" ? (
+              <Link className="underline" to={`/timeline/${timeline.id}`}>
+                AI-assisted rough cut (open in the editor)
+              </Link>
+            ) : (
+              "every shot, in file-name order"
+            )}
           </p>
         </div>
         <button className="rounded bg-neutral-800 px-3 py-1.5 text-sm hover:text-red-400" onClick={onDelete}>
@@ -104,9 +84,9 @@ function TimelineCard({ timeline, onDelete }: { timeline: TimelineOut; onDelete:
               key={f}
               type="button"
               className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium"
-              onClick={() => void download(timeline.id, f)}
+              onClick={() => void downloadExport(timeline.id, f)}
             >
-              Download {FORMATS[f] ?? f}
+              Download {EXPORT_FORMATS[f] ?? f}
             </button>
           ))}
         </div>
@@ -146,9 +126,12 @@ function Export({ projectId }: { projectId: string }) {
       <div>
         <h1 className="text-xl font-semibold">Export</h1>
         <p className="text-sm text-neutral-400">
-          Build a timeline and open it in your editor. For now there is one kind: every detected shot, in order, with
-          nothing chosen or ranked. It exists to check that timelines arrive correctly in DaVinci Resolve. The
-          AI-assisted rough cut is built in a later phase.
+          Download timelines for your editor. Build an AI-assisted rough cut from a brief on the{" "}
+          <Link className="underline" to="/timeline">
+            Timeline
+          </Link>{" "}
+          page; below you can also build a plain timeline of every detected shot, in order, with nothing chosen or
+          ranked (useful to check that timelines arrive correctly in DaVinci Resolve).
         </p>
       </div>
       <form

@@ -140,6 +140,28 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
   Responses carry `ranking_defaults` (the `[ranking]` weights) next to `ranking_weights`.
 - Scene shots (`GET /api/projects/{id}/scenes`) carry `mark` and `stars`.
 
+## Implemented (Phase 11): AI-assisted rough cut, timeline editing
+- `POST /api/projects/{id}/rough-cut` `{brief, target_s?: 1..3600, order?: chronological|scene|score, actor_id?,
+  scene_id?, name?, fps?: [num, den]}` → 201 timeline (`kind: "rough_cut"`). `params` holds the banner, the brief,
+  `understood` (how it was read), `query`, `target_s` and `target_from` (you | brief | default), `order`, filters,
+  search list sizes, weights and `[rough_cut]` settings used, `candidates`, `left_out` (`shot_id`, `filename`,
+  `start_s`, `rank`, `why`), `alternatives`, `built_s`. Nothing usable or nothing found: 422 with what to change.
+- Timeline items now carry `id`, `reason` (rank, `found_by`, `breakdown`, `matched_line`, `matched_labels`, `trim`
+  {how, detail, lines}, `jump_s`, `summary`), `media_duration_s`, `shot_start_s`, `shot_end_s`, `scene_id`,
+  `keyframe_id`; a timeline carries `alternatives` (unused suggestions, not already on it).
+- `PATCH /api/timelines/{id}` `{name?, items?: [{id, source_in_s, source_out_s}]}`: rename and/or set the whole item
+  list (new order; items left out are removed and offered again as suggestions). In/out must be finite, lie inside
+  the file and be at least one timeline frame apart; a changed clip's `reason.trim.how` becomes `"by you"` (the
+  automatic one is kept as `auto_trim`). Unknown, repeated or other timelines' ids 422.
+- Request validation errors (422) keep FastAPI's `{"detail": [...]}` shape but no longer echo the input (a NaN in a
+  body made the default handler fail with a 500).
+- `POST /api/timelines/{id}/items/{item_id}/swap` `{shot_id}`: replace a clip with a shot of the project (usually a
+  suggestion), trimmed by the rough cut rules; the old clip becomes a suggestion. A shot already on the timeline 422,
+  unknown shot 404.
+- `GET /api/timelines/{id}/export/srt`: SubRip subtitles (certain transcript words inside the cuts, times from
+  00:00:00,000); 422 when no line falls inside the cuts. FCP7 XML, EDL and OTIO of a rough cut carry a marker /
+  comment per clip and the banner.
+
 ## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc, transcribe, faces, embed_visual, embed_text, tags
 - validate: ffprobe (by content, not extension): rational fps, VFR flag (avg vs nominal rate differ > 0.5 %),
   codecs, display size (rotation applied), timecode, colour tags. Corrupt or non-media files fail with a plain message.

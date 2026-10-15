@@ -52,6 +52,13 @@ class Cut:
     duration: int
     record: int  # frames from the start of the timeline
     shot_id: str | None = None
+    note: str | None = None  # why a rough cut chose this clip; written as a marker
+    item_id: str | None = None  # the stored timeline item this cut was made from
+
+    @property
+    def src_in_s(self) -> Fraction:
+        """Source in-point in seconds from the first frame of the file."""
+        return self.src_in / self.rate
 
     @property
     def mixed_rate(self) -> bool:
@@ -65,6 +72,7 @@ class Sequence:
     width: int
     height: int
     kind: str = "all_shots"
+    banner: str | None = None  # "AI-assisted rough cut. Human review required." on rough cuts
     cuts: list[Cut] = field(default_factory=lambda: [])
     warnings: list[str] = field(default_factory=lambda: [])
 
@@ -128,6 +136,7 @@ def _some(names: list[str]) -> str:
 def build_sequence(timeline: Timeline, assets: dict[str, MediaAsset]) -> Sequence:
     rate = Fraction(timeline.fps_num, timeline.fps_den)
     seq = Sequence(timeline.name, rate, timeline.width, timeline.height, timeline.kind)
+    seq.banner = timeline.params.get("banner")
     sources: dict[str, Source] = {}
     record = 0
     past_end = 0
@@ -152,7 +161,8 @@ def build_sequence(timeline: Timeline, assets: dict[str, MediaAsset]) -> Sequenc
             continue
         src_out = min(seconds_to_frames(item.source_out_s, rate), total)
         duration = max(1, src_out - src_in)
-        seq.cuts.append(Cut(source, rate, src_in, duration, record, item.shot_id))
+        note = (item.reason or {}).get("summary")
+        seq.cuts.append(Cut(source, rate, src_in, duration, record, item.shot_id, note, item.id))
         record += duration
     built = int(timeline.params.get("built_items", 0))
     removed = built - len(timeline.items)

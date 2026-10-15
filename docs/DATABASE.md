@@ -79,3 +79,8 @@ index file are mapped back to rows by a `.ids.json` file written next to it.
 | `vector_indexes` | one row per index file: `project_id`, `kind` (`keyframe`, `segment`), `model`, `backend` (`faiss`, `numpy`), `dim`, `count`, `digest` (hash of the rows it holds; a different digest = out of date), `path`, `built_at`. |
 | `search_judgments` | relevance labels for the search evaluation: `project_id`, `media_id` (cascade), `query` (normalised), `shot_id` (no foreign key, like tag reviews), `relevant`, `judge` ("user" from the app, or the name given to `eval/search_eval.py import`), `created_at`. Unique per project, query, shot and judge. Migration 0012. |
 | `shot_marks` | the user's verdict per shot: `shot_id` (primary key, no foreign key, like tag reviews), `project_id`, `media_id` (cascade), `mark` (`select`, `reject`, null), `stars` (0..5), `updated_at`. Changes are logged in `feedback_events` (`shot_mark`). Migration 0013. |
+
+## Phase 11 (migration 0014)
+| Table | Purpose |
+|---|---|
+| `timeline_items.reason` | JSON, null for "all shots" timelines: why a rough cut chose this clip (search rank, list ranks, score breakdown, matched line or labels, trim rule, summary). `timelines.kind` is `rough_cut` for these; `timelines.params` holds the brief, how it was read, settings, left-out shots and swap suggestions. |

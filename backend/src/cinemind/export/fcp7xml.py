@@ -6,6 +6,8 @@ round-trip tests instead. One video track and one audio track, cuts only, video 
 linked. A cut gets ONE audio clip item whatever its channel count: DaVinci Resolve 21 reads each
 audio clip item as the file's whole (stereo) audio, so one item per channel doubled the sound
 (manual import test, 2026-10-09). In/out are media-relative frames on the sequence timebase.
+A rough cut adds one sequence marker per clip saying why it was chosen, and the banner as an XML
+comment.
 """
 
 from fractions import Fraction
@@ -62,10 +64,19 @@ def _file(parent: ET.Element, src: Source, file_id: str, define: bool) -> None:
 def write_fcp7xml(seq: Sequence) -> str:
     root = ET.Element("xmeml", version="5")
     sequence = ET.SubElement(root, "sequence", id="sequence-1")
+    if seq.banner:
+        root.insert(0, ET.Comment(f" {seq.banner} "))
     _text(sequence, "name", seq.name)
     _text(sequence, "duration", seq.duration)
     _rate(sequence, seq.rate)
     _timecode(sequence, seq.rate, seq.start_frame, drop=False)
+    for number, cut in enumerate(seq.cuts, start=1):
+        if cut.note:  # sequence markers: why the rough cut chose each clip
+            marker = ET.SubElement(sequence, "marker")
+            _text(marker, "name", f"Clip {number}")
+            _text(marker, "comment", cut.note)
+            _text(marker, "in", cut.record)
+            _text(marker, "out", -1)
     media = ET.SubElement(sequence, "media")
 
     video = ET.SubElement(media, "video")

@@ -94,7 +94,8 @@ it("shows a not-found state for an unknown project", async () => {
   expect(await screen.findByRole("alert")).toHaveTextContent("That project does not exist.");
 });
 
-it("labels unbuilt screens honestly", async () => {
+it("opens the Timeline page, which asks for a project first", async () => {
   renderApp("/timeline");
-  expect(await screen.findByText(/built in Phase 11/)).toBeInTheDocument();
+  expect(await screen.findByText("No project selected")).toBeInTheDocument();
+  expect(screen.getByText(/to build a rough cut/)).toBeInTheDocument();
 });

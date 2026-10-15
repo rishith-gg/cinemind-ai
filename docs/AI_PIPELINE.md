@@ -418,6 +418,55 @@ default weights (`search/ranking.py`, `[ranking]`). The fused results are ranked
 - Not built: the learned re-weighting from select / reject feedback (SPEC P1-D) is left to Phase 12 with the other
   P1 features; the feedback it needs is being logged.
 
+## AI-assisted rough cut (Phase 11)
+Existing methods: hybrid search and ranking (above). Ours: the brief rules, the selection, trim and fit rules and their
+numbers (`rough_cut/`, `[rough_cut]`, D-090 to D-094). No learned model is involved beyond the search models; the result
+is labelled "AI-assisted rough cut. Human review required." in the app and in every export.
+
+1. **Brief** (`brief.py`): rules take the first length ("2-minute", "90 seconds", "1 minute 30 seconds", "half a
+   minute", "1:30" at the start or "1:30 long"; units spelled out, at most three digits, so "the 90s", "the 1990s" and
+   "home at 9:30" are not lengths), an order ("in
+   order", "by scene", "best first") and drop framing words ("make a sequence about"); the rest is the search text.
+   How the brief was read is stored (`params.understood`) and shown. The form's length, order, person and scene
+   override the brief. No language model (the provider is `none`).
+2. **Candidates**: `ranking.run_ranked` with the search text, up to 50 shots, rejected shots out, MMR spreading
+   near-identical pictures. Without a subject: every shot the filters keep, selected and better shots first.
+3. **Filter**: Technical Quality Score under 0.5, or shot shorter than 1.5 s: left out, each with its reason
+   (`params.left_out`). A shot without a quality measurement is kept and says so.
+4. **Select, trim, fit**: in ranked order; each shot is trimmed (`trim.py`): with certain transcript lines, whole lines
+   around the matched moment plus 0.25 s (at most 15 s, or what is left of the target; fewer whole lines rather
+   than a cut line; a shot whose matched line alone is too long waits as a suggestion); without, 6 s centred on the matched
+   moment (a word, a line or the best keyframe). Clips are added while the cut stays under target + 10 %, until it
+   reaches target − 10 %; a clip without speech may be shortened to fill the end. Unused usable candidates (20) are
+   kept as swap suggestions.
+5. **Order**: source (file name, then time), scene, or rank. Timeline rate: the most common among the chosen clips;
+   size: the orientation most clips have, then its most common size.
+6. **Why**: every clip stores its rank, list ranks, score breakdown, matched line or labels, trim rule and a
+   one-line summary (`timeline_items.reason`); exports carry the summary as markers / comments.
+
+Editing (`editing.py`): one PATCH with the new item list (reorder, trim, remove), in/out finite, inside the file and at
+least one timeline frame apart; a clip whose in or out changed says "trimmed by you" (the automatic trim is kept as
+`auto_trim`); removed clips and swapped-out clips become suggestions again (only those the rough cut chose). The page
+sends edits one at a time. Exports
+add SRT subtitles from the transcript words inside each cut (uncertain lines never). The Timeline page plays the cut
+through the proxies with two video elements, the next clip loaded and seeked ahead.
+
+Measured (eval/results/rough_cut_timing_2026-10-16.txt, M1 8 GB, CLIP B/32, the user's 21 clips): 28.7 s for the first
+brief (loads the models), 0.2 s or less for the next three; every cut within 10 % of its target (56.1 s for 60, 31.1
+for 30, 108.7 for 120, 41.8 for 45). An earlier run the same day took 31.6 s and 0.2 to 1.1 s. This is time and
+length only: whether the clips suit the brief has not been judged.
+
+### Known limits (rough cut)
+- The cut is only as good as the search: on picture-only queries the fused list is a little below the picture list
+  alone (EVALUATION.md section 10), and a brief is searched as one query (no splitting into beats or scenes).
+- Montages and short shots: shots under 1.5 s are left out, so the user's edited reels lose most of their shots.
+- Speech-aware trimming works on whole Whisper lines, not words or pauses (SPEC P1-C, Phase 12); Kannada clips have no
+  text (D-084) and are trimmed as clips without speech.
+- Source order is file-name order, not capture time. No transitions (cuts only), no music, no audio levelling.
+- Whether Resolve imports the FCP7 markers and where it places an imported SRT is not confirmed (TESTING.md).
+- The player's cut from clip to clip is checked by its clock about 60 times a second, so a cut can run up to a
+  frame or two late in the preview (the exported timeline is frame-exact).
+
 ### Known limits
 - Thresholds were set on web photos (Places365) and object crops in low light (CODaN), not on video frames; precision
   on a user's footage depends on how common each tag is there. Shot size is never shown (no labelled data).

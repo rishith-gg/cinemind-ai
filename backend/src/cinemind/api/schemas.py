@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ErrorResponse(BaseModel):
@@ -192,59 +192,6 @@ class ShotOut(BaseModel):
 
 class ProjectShotOut(ShotOut):
     filename: str
-
-
-class TimelineCreate(BaseModel):
-    name: str = Field(default="All shots", min_length=1, max_length=200)
-    kind: Literal["all_shots"] = "all_shots"
-    # Timeline frame rate as [numerator, denominator]; omit to use the most common clip rate.
-    fps: tuple[int, int] | None = None
-    mixed_rates: Literal["include", "exclude"] = "include"
-
-    @field_validator("name")
-    @classmethod
-    def _clean_name(cls, value: str) -> str:
-        value = value.strip()
-        if not value or any(ord(ch) < 32 for ch in value):
-            raise ValueError("The name must contain visible characters and no control characters.")
-        return value
-
-
-class TimelineItemOut(BaseModel):
-    position: int
-    media_id: str
-    shot_id: str | None
-    filename: str
-    source_in_s: float
-    source_out_s: float
-    record_frame: int
-    duration_frames: int
-    source_fps_num: int
-    source_fps_den: int
-    mixed_rate: bool
-
-
-class TimelineOut(BaseModel):
-    id: str
-    project_id: str
-    name: str
-    kind: str
-    fps_num: int
-    fps_den: int
-    width: int
-    height: int
-    params: dict[str, Any]
-    created_at: datetime
-    item_count: int
-    duration_frames: int
-    duration_s: float
-    warnings: list[str]
-    export_dir: str
-    formats: list[str]
-
-
-class TimelineDetail(TimelineOut):
-    items: list[TimelineItemOut]
 
 
 class QcFlagOut(BaseModel):

@@ -243,6 +243,8 @@ class TimelineItem(Base):
     )
     source_in_s: Mapped[float]
     source_out_s: Mapped[float]
+    # Rough cuts (rule 6): search rank, score breakdown, how it was trimmed, and a summary.
+    reason: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
     __table_args__ = (Index("ix_timeline_items_timeline", "timeline_id", "position"),)
 

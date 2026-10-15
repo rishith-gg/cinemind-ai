@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-10-14_
+_Last updated: 2026-10-16_
 
 ## Project context
 - Deadline / demo date: TBD (not provided)
@@ -21,12 +21,27 @@ _Last updated: 2026-10-14_
 - [x] Phase 8: Embeddings, tags, scenes (tag thresholds evaluated on public labelled photos; scene limit is a convention, not evaluated)
 - [x] Phase 9: Hybrid search (ablation measured on the user's footage with judgments by Claude; the user's own judgments pending)
 - [x] Phase 10: Ranking, selects, explainability (learned re-weighting P1-D deferred to Phase 12)
-- [ ] Phase 11: Rough cut engine + timeline UI
+- [ ] Phase 11: Rough cut engine + timeline UI (built and tested; **waiting for the user's DaVinci Resolve import of a rough cut**, the last acceptance item)
 - [ ] Phase 12: P1 differentiators
 - [ ] Phase 13: Evaluation
 - [ ] Phase 14: Polish, packaging, demo
 
 ## Current state
+Phase 11 is built; its last acceptance item, the user's Resolve import of a rough cut, is open. The Timeline page
+takes a one-sentence brief (plus optional length, order, person, scene) and builds an AI-assisted rough cut: rules read
+the length and order (no language model), hybrid search + ranking give 50 candidates (rejected shots out), shots under
+quality 0.5 or shorter than 1.5 s are left out with the reason, each shot is trimmed (whole certain transcript lines
+with 0.25 s room, else 6 s around the matched moment), clips are added until the length is within 10 % of the target,
+then ordered by source, scene or rank. Every clip stores why (rank, list ranks, score breakdown, matched line, trim
+rule). The editor reorders by drag and drop (dnd-kit, also by keyboard), trims with frame-step sliders, removes,
+swaps with suggestions (same scene first), plays the cut through the proxies clip after clip (next clip pre-seeked)
+and exports FCP7 XML / EDL / OTIO with one marker per clip and the banner, plus SRT subtitles from certain lines.
+Measured on the user's footage (eval/results/rough_cut_timing_2026-10-16.txt, M1 8 GB): 28.7 s for the first brief
+(model loading), 0.2 s or less after; lengths within 10 % of the target. Time only; whether the clips suit the brief
+has not been judged. Code review fixed: NaN in an edit (500), proxies ending early looping the file, brief phrases
+read as lengths ("the 90s"), speech shots dropped instead of shortened by lines, edits racing, trims and removals not
+reflected in the "why" and the suggestions.
+
 Phase 10 is complete. Search results are ranked after fusion by a weighted sum of relevance, technical quality, the
 user's selects / stars, named person and scene matches, minus a penalty for near-identical pictures (MMR, cosine
 above 0.85); every card shows the breakdown (value × weight = contribution) and which shot it duplicates. What-if
@@ -73,7 +88,7 @@ Fixes after Phase 8, from the user's feedback (2026-10-15):
   5 Kannada clips marked as speech without text (EVALUATION.md section 5).
 - Deleted `data/phase4-verify/` (the Resolve test it served is confirmed).
 
-Next step: the user's reviews below (✓ / ✕ on search results, selects / rejects on shots), then Phase 11 (rough cut engine + timeline UI).
+Next step: the user imports a rough cut into DaVinci Resolve (TESTING.md, "rough cut import checklist"), then Phase 12 (P1 differentiators). The earlier reviews (✓ / ✕ on search results, selects / rejects) are still welcome: they also steer the rough cut.
 
 Export path for the rest of the project (decided in Phase 4): FCP7 XML into DaVinci Resolve.
 
@@ -95,6 +110,17 @@ file was re-read with OTIO: same cuts, gapless.
 None.
 
 ## Open issues / notes
+- Phase 11, needs the user: (1) build a rough cut on the Timeline page, export the FCP7 XML and the SRT, import both
+  into Resolve 21.1 and fill in TESTING.md "Results (Phase 11)" (are the markers there? where does the SRT land?);
+  (2) say whether the chosen clips suit the briefs, so the selection can be judged instead of only timed.
+- Phase 11 limitations: the cut is only as good as search (one query per brief, no beats); shots under 1.5 s are left
+  out, so edited reels lose most shots; trimming keeps whole Whisper lines (word / pause level is P1-C); source order is
+  file name, not capture time; cuts only (no transitions, music or levels); the preview's cut is checked about 60
+  times a second (can run a frame or two late; exports are frame-exact); Resolve's handling of FCP7 sequence markers
+  and of the SRT start is unconfirmed. Left open from review: a swap accepts a shot rejected after the cut was built;
+  the Timeline list has no delete button (the Export page has one); `/favicon.ico` 404s.
+- Verification runs on the user's project created and then deleted their rough cuts; the app's own data was not
+  otherwise changed (migration 0014 adds one nullable column).
 - Phase 10, needs the user: select and reject shots while browsing (Shots page or Search), and judge a few searches;
   then the ranking can be measured with selects and with the user's own sense of relevance.
 - Phase 10 limitations: default weights are conventions and cost a little nDCG on Claude's picture-only judgments;
