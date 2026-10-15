@@ -6,6 +6,7 @@ were read from the Hugging Face model index on 2026-10-10.
 """
 
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Literal, Self
 
@@ -97,4 +98,43 @@ class TranscribeConfig(BaseModel):
         language = self.language
         if language != "auto" and not (language.isalpha() and 2 <= len(language) <= 3):
             raise ValueError("transcribe.language must be 'auto' or a language code such as 'en'")
+        return self
+
+
+# More languages than this would make detection among them little better than detecting any.
+MAX_SPEECH_LANGUAGES = 8
+
+
+@lru_cache(maxsize=1)
+def whisper_languages() -> frozenset[str]:
+    """The language codes the Whisper models know (read from faster-whisper's tokenizer)."""
+    from faster_whisper.tokenizer import (  # pyright: ignore[reportMissingTypeStubs]
+        _LANGUAGE_CODES,  # pyright: ignore[reportPrivateUsage, reportUnknownVariableType]
+    )
+
+    return frozenset(str(code) for code in _LANGUAGE_CODES)
+
+
+class SpeechLanguages(BaseModel):
+    """What the user said about a project's speech (kept in the project's settings). Detection
+    picks among `languages` (empty = any language Whisper knows). Languages in `detect_only`
+    are recognised but not written down: for them the model's text was judged too poor to be
+    useful, so the clip shows that it has speech in that language and no transcript."""
+
+    languages: list[str] = []
+    detect_only: list[str] = []
+
+    @model_validator(mode="after")
+    def _known(self) -> Self:
+        known = whisper_languages()
+        unknown = [code for code in self.languages if code not in known]
+        if unknown:
+            raise ValueError(f"unknown language code(s): {', '.join(unknown)}")
+        if len(set(self.languages)) != len(self.languages):
+            raise ValueError("each language may be listed once")
+        if len(self.languages) > MAX_SPEECH_LANGUAGES:
+            raise ValueError(f"at most {MAX_SPEECH_LANGUAGES} languages")
+        if not set(self.detect_only) <= set(self.languages):
+            raise ValueError("'detect only' languages must be among the project's languages")
+        self.detect_only = [code for code in self.languages if code in self.detect_only]
         return self

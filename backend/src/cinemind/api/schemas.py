@@ -122,6 +122,8 @@ class MediaOut(BaseModel):
     # Transcript state (None until the transcribe stage ran) and the detected language.
     transcript_status: str | None
     transcript_language: str | None
+    # The speech language the user set for this clip (None = detected).
+    speech_language: str | None = None
     job: JobBrief | None
 
 
@@ -328,8 +330,9 @@ class TranscriptSegmentOut(BaseModel):
     words: list[TranscriptWordOut]
 
 
+# not_written = speech in a language the user set to "detect only".
 TranscriptStatus = Literal[
-    "pending", "done", "no_speech", "no_audio", "model_missing", "audio_unreadable"
+    "pending", "done", "no_speech", "no_audio", "model_missing", "audio_unreadable", "not_written"
 ]
 
 

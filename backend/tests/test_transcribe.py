@@ -13,7 +13,13 @@ from cinemind.cli import app as cli_app
 from cinemind.core.config import Settings
 from cinemind.core.doctor import check_speech_model
 from cinemind.core.errors import InvalidInputError, TranscriptionError, UnreadableMediaError
-from cinemind.core.transcribe_config import MODEL_FILES, TranscribeConfig, is_uncertain
+from cinemind.core.transcribe_config import (
+    MODEL_FILES,
+    SpeechLanguages,
+    TranscribeConfig,
+    is_uncertain,
+    whisper_languages,
+)
 from cinemind.db.base import make_engine
 from cinemind.search.transcript_search import match_expression, query_terms
 from helpers import drain, import_one
@@ -45,10 +51,18 @@ class FakeEngine:
     def __init__(self, segments: list[dict[str, Any]]) -> None:
         self.segments = segments
         self.calls = 0
+        self.plans: list[transcriber.LanguagePlan] = []
+        self.result: dict[str, Any] = {}  # replaces parts of the answer, e.g. "not written"
 
-    def __call__(self, _choice: Any, audio: Any, cfg: TranscribeConfig, *_: Any) -> dict[str, Any]:
+    def __call__(
+        self, _choice: Any, audio: Any, cfg: TranscribeConfig, *rest: Any
+    ) -> dict[str, Any]:
         self.calls += 1
         assert len(audio) > 0 and cfg.beam_size == 5
+        self.plans.append(rest[2] if len(rest) > 2 else transcriber.LanguagePlan())
+        if self.result.get("not_written"):
+            return {**self.result, "speech_s": 3.5, "segments": [], "device": "cpu",
+                    "compute_type": "int8", "language_detected": False}  # fmt: skip
         return {
             "language": "en" if self.segments else None,
             "language_probability": 0.42 if self.segments else None,
@@ -88,6 +102,8 @@ def _transcript(client: TestClient, media_id: str) -> dict[str, Any]:
 
 
 def _search(client: TestClient, pid: str, q: str, **params: str) -> list[dict[str, Any]]:
+    """Search, uncertain segments included unless the caller says otherwise."""
+    params.setdefault("include_uncertain", "true")
     res = client.get(f"/api/projects/{pid}/transcripts/search", params={"q": q, **params})
     assert res.status_code == 200, res.text
     return res.json()["hits"]
@@ -175,6 +191,9 @@ def test_keyword_search_finds_the_moment_a_word_is_spoken(
     media = _import(client, pid, footage / "a_h264.mp4")
     drain(api_settings)
 
+    # The segment with "forest" is marked uncertain: left out unless asked for.
+    assert _search(client, pid, "forest", include_uncertain="false") == []
+    assert len(_search(client, pid, "camera", include_uncertain="false")) == 1
     (hit,) = _search(client, pid, "forest")
     assert hit["media_id"] == media["id"] and hit["filename"] == "a_h264.mp4"
     assert (hit["start_s"], hit["jump_s"]) == (4.0, 5.5)  # 4th word of the segment at 4.0 s
@@ -502,3 +521,114 @@ def test_real_model_transcribes_synthesised_speech_and_ignores_a_tone(
     tone = transcriber.decode_audio(footage / "d_audio.wav", lambda: None)
     nothing = transcriber.transcribe(choice, tone, real.transcribe, seen.append, lambda: None)
     assert nothing["segments"] == [] and nothing["language"] is None
+
+
+# --- spoken languages --------------------------------------------------------------------------
+
+
+def test_spoken_languages_must_be_known_and_detect_only_among_them() -> None:
+    speech = SpeechLanguages(languages=["kn", "en"], detect_only=["kn"])
+    assert speech.detect_only == ["kn"]
+    assert "kn" in whisper_languages() and len(whisper_languages()) >= 99
+    for bad in (
+        {"languages": ["xx"]},
+        {"languages": ["en", "en"]},
+        {"languages": ["en"], "detect_only": ["kn"]},
+        {"languages": sorted(whisper_languages())[:9]},
+    ):
+        with pytest.raises(ValueError):
+            SpeechLanguages.model_validate(bad)
+
+
+class _Detecting(_Model):
+    """Also answers language detection, with fixed probabilities over all languages."""
+
+    def __init__(self, segments: list[_Segment], scores: list[tuple[str, float]]) -> None:
+        super().__init__(segments)
+        self.scores = scores
+
+    def detect_language(self, _audio: Any, **_: Any) -> Any:
+        return self.scores[0][0], self.scores[0][1], self.scores
+
+
+def test_wrapper_detects_among_the_projects_languages_and_skips_detect_only_ones(
+    settings: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import numpy as np
+
+    audio = np.zeros(2 * transcriber.SAMPLE_RATE, dtype=np.float32)
+    spoken = [_Segment(0.1, 0.9, "Okay.", [_Word(0.1, 0.9, " Okay.")])]
+    # Whisper's own favourite is Hindi; the project says English and Kannada are spoken.
+    model = _Detecting(spoken, [("hi", 0.37), ("en", 0.36), ("kn", 0.09), ("te", 0.11)])
+    choice = _wrapper(monkeypatch, settings, {"cpu": model}, "cpu")
+
+    def speech_s(seconds: float) -> Any:
+        def found(_audio: Any, _cfg: TranscribeConfig) -> float:
+            return seconds
+
+        return found
+
+    monkeypatch.setattr(transcriber, "_speech_s", speech_s(1.25))
+
+    def run(plan: transcriber.LanguagePlan) -> dict[str, Any]:
+        cfg = settings.transcribe
+        return transcriber.transcribe(choice, audio, cfg, lambda _f: None, lambda: None, plan)
+
+    out = run(transcriber.LanguagePlan(allowed=("en", "kn")))
+    assert model.languages == ["en"] and len(out["segments"]) == 1
+    assert out["language"] == "en" and out["language_probability"] == pytest.approx(0.8, abs=1e-3)
+    assert out["language_source"] == "project" and out["language_detected"] is True
+    assert out["language_scores"]["hi"] == 0.37
+
+    model.scores = [("kn", 0.7), ("ta", 0.14), ("en", 0.05)]
+    skipped = run(transcriber.LanguagePlan(allowed=("en", "kn"), detect_only=("kn",)))
+    assert (skipped["language"], skipped["not_written"], skipped["segments"]) == ("kn", True, [])
+    assert skipped["speech_s"] == 1.25 and model.languages == ["en"]  # not sent to the model
+
+    forced = run(transcriber.LanguagePlan(forced="en", allowed=("en", "kn"), detect_only=("kn",)))
+    assert model.languages[-1] == "en" and forced["language_source"] == "clip"
+    assert forced["language_detected"] is False
+
+    monkeypatch.setattr(transcriber, "_speech_s", speech_s(0.0))
+    silent = run(transcriber.LanguagePlan(allowed=("en", "kn")))
+    assert silent["segments"] == [] and silent["language"] is None and len(model.languages) == 2
+
+
+def test_project_languages_and_a_clips_language_reach_the_model_and_are_explained(
+    client: TestClient, pid: str, api_settings: Settings, footage: Path, engine: FakeEngine
+) -> None:
+    media = _import(client, pid, footage / "a_h264.mp4")["id"]
+    drain(api_settings)
+    assert engine.calls == 1 and engine.plans[-1] == transcriber.LanguagePlan()
+    url = f"/api/projects/{pid}/speech-languages"
+    assert client.get(url).json()["languages"] == []
+
+    body = {"languages": ["en", "kn"], "detect_only": ["kn"]}
+    saved = client.put(url, json=body).json()
+    assert saved["queued"] == 1 and "kn" in saved["available"]
+    drain(api_settings)
+    assert engine.calls == 2  # the transcript depends on the languages: done again
+    assert engine.plans[-1] == transcriber.LanguagePlan(None, ("en", "kn"), ("kn",))
+    assert client.get(url).json()["detect_only"] == ["kn"]
+    assert client.put(url, json={"languages": ["en"], "detect_only": ["kn"]}).status_code == 422
+
+    # Speech in a "detect only" language: no transcript, and the reason.
+    engine.result = {"language": "kn", "language_probability": 0.9, "not_written": True}
+    client.put(f"/api/media/{media}/speech-language", json={"language": "kn"})
+    drain(api_settings)
+    assert engine.plans[-1].forced == "kn"
+    shown = _transcript(client, media)
+    assert shown["status"] == "not_written" and shown["segments"] == []
+    assert shown["language"] == "kn" and "detect only" in shown["message"]
+    assert client.get(f"/api/media/{media}").json()["speech_language"] == "kn"
+    assert (
+        client.put(f"/api/media/{media}/speech-language", json={"language": "zz"}).status_code
+        == 422
+    )
+
+    # Back to detection: the same settings as before, so the stored transcript comes back
+    # without running the model again.
+    calls = engine.calls
+    client.put(f"/api/media/{media}/speech-language", json={"language": None})
+    drain(api_settings)
+    assert engine.calls == calls and _transcript(client, media)["status"] == "done"

@@ -118,6 +118,18 @@ Nobody has checked these words against what is said. Observations, not measureme
 - The one clip recorded as dialogue ("Timeline One.mov", 12.5 s) came out as three English sentences with none
   marked uncertain. Whether they are the words spoken has to be confirmed by the user.
 
+**Again with the spoken languages set (2026-10-15).** The user said the footage is English and Kannada; the project
+was set to English (transcribed) and Kannada (detect only, D-084). Output:
+`eval/results/transcribe_run_summary_2026-10-15.txt`. 21 clips: 6 `done` (all English), 5 `not_written` (Kannada,
+177.2 s of speech), 9 `no_speech`, 1 `no_audio`. 20 segments, 2 marked uncertain (both in one clip, hidden by
+default). Language probabilities are now the share among English and Kannada, so they are high (0.81 to 1.00) by
+construction; they say which of the two, not how sure the model is overall. The stage took 39.1 s for all 21 clips
+(was 491.2 s), because Kannada speech is no longer sent through the model. Observations, not measurements:
+- The 3 English clips from before ("Timeline One.mov", "VID_…", "A3DE…") have the same text.
+- "B6FA…" (detected Hindi before) is now English with both lines uncertain, so nothing is shown.
+- "5A9A…" was `no_speech` before (Whisper had guessed Javanese and written nothing); in English it now has 4 lines,
+  none uncertain ("We're going after them." …). Whether that speech is real has to be confirmed by the user.
+
 ## 6. Face grouping: purity, ARI, NMI, B-cubed (Phase 7)
 Script: `uv run python eval/face_clusters.py fetch` then `uv run python eval/face_clusters.py run data/eval/lfw`
 Output: `eval/results/face_clusters_lfw_2026-10-10.txt` and `.json`. M1, 8 GB, CPU.

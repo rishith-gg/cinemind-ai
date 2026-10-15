@@ -3,7 +3,8 @@
 Existing engine and models: faster-whisper (CTranslate2) running OpenAI Whisper weights, with the
 Silero voice-activity detector it ships. Ours: picking the model for the hardware tier, keeping
 downloads out of processing (a model is fetched once by `cinemind models pull` and afterwards
-only ever read from disk), and the shape of the stored result.
+only ever read from disk), choosing the language among the ones the user said are spoken, and
+the shape of the stored result.
 """
 
 # faster-whisper and CTranslate2 ship without type information.
@@ -42,6 +43,18 @@ log = logging.getLogger(__name__)
 
 SAMPLE_RATE = 16000  # what Whisper models are trained on
 PULL_HINT = "Run `uv run cinemind models pull` once (needs internet), then press Reprocess."
+
+
+@dataclass(frozen=True)
+class LanguagePlan:
+    """What the user said about the language. `forced`: this clip's language, set by hand.
+    `allowed`: the languages spoken in the project (empty = any Whisper knows); detection picks
+    the likeliest of them. `detect_only`: languages that are recognised but not written down
+    (the model writes them too poorly to be useful)."""
+
+    forced: str | None = None
+    allowed: tuple[str, ...] = ()
+    detect_only: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -149,10 +162,56 @@ def _model(choice: ModelChoice, cfg: TranscribeConfig) -> tuple[Any, str, str]:
         return _load(str(choice.path), "cpu", "int8"), "cpu", "int8"
 
 
+def _vad(cfg: TranscribeConfig) -> Any:
+    from faster_whisper.vad import VadOptions
+
+    return VadOptions(threshold=cfg.vad_threshold, min_silence_duration_ms=cfg.vad_min_silence_ms)
+
+
+def _speech_s(audio: Any, cfg: TranscribeConfig) -> float:
+    from faster_whisper.vad import get_speech_timestamps
+
+    chunks = get_speech_timestamps(audio, _vad(cfg))
+    return round(sum(c["end"] - c["start"] for c in chunks) / SAMPLE_RATE, 3)
+
+
+def _language(
+    model: Any, audio: Any, cfg: TranscribeConfig, plan: LanguagePlan
+) -> dict[str, Any] | None:
+    """The language to transcribe in and how it was chosen, or None to let Whisper detect it
+    among all languages. Detection among the project's languages runs on the speech the
+    voice-activity detector finds; `language_probability` is then the chosen language's share
+    of the probability of those languages."""
+    if plan.forced:
+        return {"language": plan.forced, "language_probability": None, "language_source": "clip"}
+    if cfg.language != "auto":
+        return {
+            "language": cfg.language,
+            "language_probability": None,
+            "language_source": "settings",
+        }
+    if not plan.allowed:
+        return None
+    if _speech_s(audio, cfg) <= 0:
+        return {"language": None, "language_probability": None, "language_source": "project"}
+    _, _, probabilities = model.detect_language(audio, vad_filter=True, vad_parameters=_vad(cfg))
+    scores = {str(code): float(p) for code, p in probabilities}
+    allowed = {code: scores.get(code, 0.0) for code in plan.allowed}
+    best = max(allowed, key=lambda code: (allowed[code], code))
+    total = sum(allowed.values())
+    return {
+        "language": best,
+        "language_probability": round(allowed[best] / total, 4) if total > 0 else None,
+        "language_source": "project",
+        "language_scores": {code: round(p, 4) for code, p in list(scores.items())[:5]},
+    }
+
+
 def _decode(
     model: Any,
     audio: Any,
     cfg: TranscribeConfig,
+    language: str | None,
     progress: Callable[[float], None],
     check_cancelled: Callable[[], None],
 ) -> tuple[list[dict[str, Any]], Any]:
@@ -160,7 +219,7 @@ def _decode(
     try:
         found, info = model.transcribe(
             audio,
-            language=None if cfg.language == "auto" else cfg.language,
+            language=language,
             beam_size=cfg.beam_size,
             word_timestamps=True,
             vad_filter=True,
@@ -202,20 +261,50 @@ def _decode(
     return segments, info
 
 
+def _run(
+    model: Any,
+    audio: Any,
+    cfg: TranscribeConfig,
+    plan: LanguagePlan,
+    progress: Callable[[float], None],
+    check_cancelled: Callable[[], None],
+) -> dict[str, Any]:
+    chosen = _language(model, audio, cfg, plan)
+    if chosen is not None and chosen["language"] is None:  # no speech at all
+        return {"language": None, "language_probability": None, "speech_s": 0.0, "segments": []}
+    if chosen is not None and chosen["language"] in plan.detect_only:
+        return {**chosen, "speech_s": _speech_s(audio, cfg), "segments": [], "not_written": True}
+    language = chosen["language"] if chosen else None
+    segments, info = _decode(model, audio, cfg, language, progress, check_cancelled)
+    detected = {
+        "language": info.language,
+        "language_probability": round(float(info.language_probability), 4),
+        "language_source": "detected",
+    }
+    return {
+        **(chosen or detected),
+        "speech_s": round(float(info.duration_after_vad), 3),
+        "segments": segments,
+    }
+
+
 def transcribe(
     choice: ModelChoice,
     audio: Any,
     cfg: TranscribeConfig,
     progress: Callable[[float], None],
     check_cancelled: Callable[[], None],
+    plan: LanguagePlan | None = None,
 ) -> dict[str, Any]:
     """Segments with word timings for 16 kHz mono audio. Speech is found by the voice-activity
     detector first, so silence and noise are not sent to the model. Times are seconds from the
-    start of the audio. `language` is None when no speech was found. A GPU picked automatically
-    that fails while decoding (missing GPU libraries, out of memory) is replaced by the CPU."""
+    start of the audio. `language` is None when no speech was found; `not_written` is set when
+    the language is one the user marked "detect only". A GPU picked automatically that fails
+    while decoding (missing GPU libraries, out of memory) is replaced by the CPU."""
+    plan = plan or LanguagePlan()
     model, device, compute = _model(choice, cfg)
     try:
-        segments, info = _decode(model, audio, cfg, progress, check_cancelled)
+        found = _run(model, audio, cfg, plan, progress, check_cancelled)
     except RuntimeError as exc:
         if device == "cpu" or cfg.device != "auto":
             log.exception("speech model failed on %s", device)
@@ -225,13 +314,12 @@ def transcribe(
         log.warning("speech model failed on %s (%s); transcribing on the CPU instead", device, exc)
         device, compute = "cpu", "int8"
         model = _load(str(choice.path), device, compute)
-        segments, info = _decode(model, audio, cfg, progress, check_cancelled)
+        found = _run(model, audio, cfg, plan, progress, check_cancelled)
+    if not found["segments"] and not found.get("not_written"):
+        found["language"] = found["language_probability"] = None
     return {
-        "language": info.language if segments else None,
-        "language_probability": round(float(info.language_probability), 4) if segments else None,
-        "language_detected": cfg.language == "auto",
-        "speech_s": round(float(info.duration_after_vad), 3),
+        **found,
+        "language_detected": found.get("language_source") in ("detected", "project"),
         "device": device,
         "compute_type": compute,
-        "segments": segments,
     }

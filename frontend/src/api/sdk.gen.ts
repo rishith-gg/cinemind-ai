@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AnswerActorPairData, AnswerActorPairErrors, AnswerActorPairResponses, BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetActorData, GetActorErrors, GetActorResponses, GetFaceCropData, GetFaceCropErrors, GetFaceCropResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaFacesData, GetMediaFacesErrors, GetMediaFacesResponses, GetMediaQualityData, GetMediaQualityErrors, GetMediaQualityResponses, GetMediaResponses, GetMediaTranscriptData, GetMediaTranscriptErrors, GetMediaTranscriptResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListActorPairsData, ListActorPairsErrors, ListActorPairsResponses, ListActorsData, ListActorsErrors, ListActorsResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaEmbeddingsData, ListMediaEmbeddingsErrors, ListMediaEmbeddingsResponses, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListMediaTagsData, ListMediaTagsErrors, ListMediaTagsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListProjectTagsData, ListProjectTagsErrors, ListProjectTagsResponses, ListProjectTranscriptsData, ListProjectTranscriptsErrors, ListProjectTranscriptsResponses, ListScenesData, ListScenesErrors, ListScenesResponses, ListSetAsideFacesData, ListSetAsideFacesErrors, ListSetAsideFacesResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, ListVectorIndexesData, ListVectorIndexesErrors, ListVectorIndexesResponses, MergeActorsData, MergeActorsErrors, MergeActorsResponses, PlaceFaceTracksData, PlaceFaceTracksErrors, PlaceFaceTracksResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RebuildVectorIndexesData, RebuildVectorIndexesErrors, RebuildVectorIndexesResponses, RegroupActorsData, RegroupActorsErrors, RegroupActorsResponses, RegroupScenesData, RegroupScenesErrors, RegroupScenesResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RenameActorData, RenameActorErrors, RenameActorResponses, RenameSceneData, RenameSceneErrors, RenameSceneResponses, RetryJobData, RetryJobErrors, RetryJobResponses, ReviewTagData, ReviewTagErrors, ReviewTagResponses, SearchTranscriptsData, SearchTranscriptsErrors, SearchTranscriptsResponses, SetSceneBoundaryData, SetSceneBoundaryErrors, SetSceneBoundaryResponses, SplitActorData, SplitActorErrors, SplitActorResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
+import type { AnswerActorPairData, AnswerActorPairErrors, AnswerActorPairResponses, BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetActorData, GetActorErrors, GetActorResponses, GetFaceCropData, GetFaceCropErrors, GetFaceCropResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaFacesData, GetMediaFacesErrors, GetMediaFacesResponses, GetMediaQualityData, GetMediaQualityErrors, GetMediaQualityResponses, GetMediaResponses, GetMediaTranscriptData, GetMediaTranscriptErrors, GetMediaTranscriptResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetSpeechLanguagesData, GetSpeechLanguagesErrors, GetSpeechLanguagesResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListActorPairsData, ListActorPairsErrors, ListActorPairsResponses, ListActorsData, ListActorsErrors, ListActorsResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaEmbeddingsData, ListMediaEmbeddingsErrors, ListMediaEmbeddingsResponses, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListMediaTagsData, ListMediaTagsErrors, ListMediaTagsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListProjectTagsData, ListProjectTagsErrors, ListProjectTagsResponses, ListProjectTranscriptsData, ListProjectTranscriptsErrors, ListProjectTranscriptsResponses, ListScenesData, ListScenesErrors, ListScenesResponses, ListSetAsideFacesData, ListSetAsideFacesErrors, ListSetAsideFacesResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, ListVectorIndexesData, ListVectorIndexesErrors, ListVectorIndexesResponses, MergeActorsData, MergeActorsErrors, MergeActorsResponses, PlaceFaceTracksData, PlaceFaceTracksErrors, PlaceFaceTracksResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RebuildVectorIndexesData, RebuildVectorIndexesErrors, RebuildVectorIndexesResponses, RegroupActorsData, RegroupActorsErrors, RegroupActorsResponses, RegroupScenesData, RegroupScenesErrors, RegroupScenesResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RenameActorData, RenameActorErrors, RenameActorResponses, RenameSceneData, RenameSceneErrors, RenameSceneResponses, RetryJobData, RetryJobErrors, RetryJobResponses, ReviewTagData, ReviewTagErrors, ReviewTagResponses, SearchTranscriptsData, SearchTranscriptsErrors, SearchTranscriptsResponses, SetClipSpeechLanguageData, SetClipSpeechLanguageErrors, SetClipSpeechLanguageResponses, SetSceneBoundaryData, SetSceneBoundaryErrors, SetSceneBoundaryResponses, SetSpeechLanguagesData, SetSpeechLanguagesErrors, SetSpeechLanguagesResponses, SplitActorData, SplitActorErrors, SplitActorResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -264,8 +264,45 @@ export const listProjectTranscripts = <ThrowOnError extends boolean = false>(opt
  *
  * Keyword search in the project's transcripts (all words must occur; each matches the start
  * of a word). Hits are ordered by BM25 and carry the time the first matching word is spoken.
+ * Segments marked uncertain are left out unless `include_uncertain`.
  */
 export const searchTranscripts = <ThrowOnError extends boolean = false>(options: Options<SearchTranscriptsData, ThrowOnError>): RequestResult<SearchTranscriptsResponses, SearchTranscriptsErrors, ThrowOnError> => (options.client ?? client).get<SearchTranscriptsResponses, SearchTranscriptsErrors, ThrowOnError>({ url: '/api/projects/{project_id}/transcripts/search', ...options });
+
+/**
+ * Get Speech Languages
+ *
+ * The languages spoken in the project's footage (empty = detect any).
+ */
+export const getSpeechLanguages = <ThrowOnError extends boolean = false>(options: Options<GetSpeechLanguagesData, ThrowOnError>): RequestResult<GetSpeechLanguagesResponses, GetSpeechLanguagesErrors, ThrowOnError> => (options.client ?? client).get<GetSpeechLanguagesResponses, GetSpeechLanguagesErrors, ThrowOnError>({ url: '/api/projects/{project_id}/speech-languages', ...options });
+
+/**
+ * Set Speech Languages
+ *
+ * Set the spoken languages and queue every clip again (only transcripts and what is made
+ * from them are redone).
+ */
+export const setSpeechLanguages = <ThrowOnError extends boolean = false>(options: Options<SetSpeechLanguagesData, ThrowOnError>): RequestResult<SetSpeechLanguagesResponses, SetSpeechLanguagesErrors, ThrowOnError> => (options.client ?? client).put<SetSpeechLanguagesResponses, SetSpeechLanguagesErrors, ThrowOnError>({
+    url: '/api/projects/{project_id}/speech-languages',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Set Clip Speech Language
+ *
+ * Set (or clear) the language of this clip's speech and transcribe it again.
+ */
+export const setClipSpeechLanguage = <ThrowOnError extends boolean = false>(options: Options<SetClipSpeechLanguageData, ThrowOnError>): RequestResult<SetClipSpeechLanguageResponses, SetClipSpeechLanguageErrors, ThrowOnError> => (options.client ?? client).put<SetClipSpeechLanguageResponses, SetClipSpeechLanguageErrors, ThrowOnError>({
+    url: '/api/media/{media_id}/speech-language',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * List Actors

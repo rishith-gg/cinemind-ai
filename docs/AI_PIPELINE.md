@@ -130,9 +130,19 @@ Word times come from the model's cross-attention alignment (`word_timestamps`). 
   Whisper's own acceptance limits: it retries such a segment at higher temperatures and keeps the last attempt even
   if that fails too. The language is marked a guess when its probability is under 0.5 (Whisper's own
   `language_detection_threshold`). These limits are conventions taken from the model; we have not evaluated them.
-  Uncertain text is kept, shown dimmed and labelled, and still searchable.
+  Uncertain text is kept and stored, but hidden on the clip page until the user asks for it ("Show them") and left
+  out of keyword search unless `include_uncertain` (D-084).
+- *Spoken languages* (per project, set on the Transcripts page; D-084). When the user lists the languages of the
+  footage, the language of each clip is detected among those only: faster-whisper's `detect_language` runs on the
+  speech the voice-activity detector keeps, and the listed language with the highest probability wins; the stored
+  probability is its share among the listed ones, and the model's top five over all languages are kept in
+  `details.language_scores`. A listed language can be "detect only": its clips get the state `not_written` with the
+  seconds of speech and no text, and are not sent through the model. A clip's language can also be set by hand
+  (clip page), which outranks detection. The project's languages and a clip's language are part of the cache key
+  only when set, so projects without them keep their caches.
 - *States.* `done`, `no_speech` (the detector or the model found nothing), `no_audio`, `model_missing`,
-  `audio_unreadable` (the picture results are kept). Each has a plain message in the API and the UI.
+  `audio_unreadable` (the picture results are kept), `not_written` (speech in a "detect only" language). Each has a
+  plain message in the API and the UI.
 
 **Keyword search.** Segment text is indexed in an SQLite FTS5 table (tokenizer `unicode61`, diacritics removed,
 combining marks kept inside words so Hindi or Kannada words are not cut at their vowel signs).
@@ -150,7 +160,9 @@ This is the keyword part of search only; semantic and visual search come in Phas
 - Hard audio is slow: every retry decodes the segment again (seconds of audio can take a minute on the CPU).
 - One language per clip, detected from the beginning. Mixed-language clips are transcribed as the first language.
 - The `small` model is weak on many languages other than English; a larger model needs more memory than the lite
-  tier has.
+  tier has. On the user's Kannada clips it wrote no usable Kannada at all: forced to Kannada it gave broken script or
+  English sentences, forced to English it gave fluent English that was not said (checked by eye on four clips,
+  2026-10-15). Kannada is therefore "detect only" in the user's project.
 - Times are relative to the start of the audio stream; a stream that starts late in the file is not compensated.
 - The whole audio is held in memory: about 230 MB per hour while transcribing, about 350 MB per hour for a moment
   while it is decoded (by reading the code, not measured).

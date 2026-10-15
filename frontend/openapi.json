@@ -2581,7 +2581,7 @@
           "transcripts"
         ],
         "summary": "Search Transcripts",
-        "description": "Keyword search in the project's transcripts (all words must occur; each matches the start\nof a word). Hits are ordered by BM25 and carry the time the first matching word is spoken.",
+        "description": "Keyword search in the project's transcripts (all words must occur; each matches the start\nof a word). Hits are ordered by BM25 and carry the time the first matching word is spoken.\nSegments marked uncertain are left out unless `include_uncertain`.",
         "operationId": "searchTranscripts",
         "parameters": [
           {
@@ -2632,6 +2632,16 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "include_uncertain",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Uncertain"
+            }
           }
         ],
         "responses": {
@@ -2641,6 +2651,273 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TranscriptSearchOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/speech-languages": {
+      "get": {
+        "tags": [
+          "transcripts"
+        ],
+        "summary": "Get Speech Languages",
+        "description": "The languages spoken in the project's footage (empty = detect any).",
+        "operationId": "getSpeechLanguages",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpeechLanguagesOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "transcripts"
+        ],
+        "summary": "Set Speech Languages",
+        "description": "Set the spoken languages and queue every clip again (only transcripts and what is made\nfrom them are redone).",
+        "operationId": "setSpeechLanguages",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpeechLanguages"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpeechLanguagesOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
+    "/api/media/{media_id}/speech-language": {
+      "put": {
+        "tags": [
+          "transcripts"
+        ],
+        "summary": "Set Clip Speech Language",
+        "description": "Set (or clear) the language of this clip's speech and transcribe it again.",
+        "operationId": "setClipSpeechLanguage",
+        "parameters": [
+          {
+            "name": "media_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Media Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClipLanguage"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClipLanguageOut"
                 }
               }
             }
@@ -5115,6 +5392,51 @@
         ],
         "title": "Check"
       },
+      "ClipLanguage": {
+        "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          }
+        },
+        "type": "object",
+        "required": [
+          "language"
+        ],
+        "title": "ClipLanguage"
+      },
+      "ClipLanguageOut": {
+        "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "queued": {
+            "type": "boolean",
+            "title": "Queued"
+          }
+        },
+        "type": "object",
+        "required": [
+          "language",
+          "queued"
+        ],
+        "title": "ClipLanguageOut"
+      },
       "DoctorReport": {
         "properties": {
           "app_version": {
@@ -6262,6 +6584,17 @@
             ],
             "title": "Transcript Language"
           },
+          "speech_language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speech Language"
+          },
           "job": {
             "anyOf": [
               {
@@ -7148,6 +7481,69 @@
         ],
         "title": "ShotTagsOut"
       },
+      "SpeechLanguages": {
+        "properties": {
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Languages",
+            "default": []
+          },
+          "detect_only": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Detect Only",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "SpeechLanguages",
+        "description": "What the user said about a project's speech (kept in the project's settings). Detection\npicks among `languages` (empty = any language Whisper knows). Languages in `detect_only`\nare recognised but not written down: for them the model's text was judged too poor to be\nuseful, so the clip shows that it has speech in that language and no transcript."
+      },
+      "SpeechLanguagesOut": {
+        "properties": {
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Languages",
+            "default": []
+          },
+          "detect_only": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Detect Only",
+            "default": []
+          },
+          "available": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Available"
+          },
+          "queued": {
+            "type": "integer",
+            "title": "Queued",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "languages",
+          "detect_only",
+          "available",
+          "queued"
+        ],
+        "title": "SpeechLanguagesOut"
+      },
       "TagCountOut": {
         "properties": {
           "name": {
@@ -7803,7 +8199,8 @@
               "no_speech",
               "no_audio",
               "model_missing",
-              "audio_unreadable"
+              "audio_unreadable",
+              "not_written"
             ],
             "title": "Status"
           },
@@ -8024,7 +8421,8 @@
               "no_speech",
               "no_audio",
               "model_missing",
-              "audio_unreadable"
+              "audio_unreadable",
+              "not_written"
             ],
             "title": "Status"
           },

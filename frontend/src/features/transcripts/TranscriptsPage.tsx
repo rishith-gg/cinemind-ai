@@ -8,6 +8,7 @@ import { useCurrentProject } from "../../lib/currentProject";
 import { errorMessage } from "../../lib/errors";
 import { formatDuration, formatTime } from "../library/format";
 import { languageName, STATUS_LABEL, UNCERTAIN_HINT } from "./labels";
+import { SpokenLanguages } from "./SpokenLanguages";
 
 export function TranscriptsPage() {
   const projectId = useCurrentProject((s) => s.id);
@@ -24,15 +25,17 @@ export function TranscriptsPage() {
   return <Transcripts projectId={projectId} />;
 }
 
-function Results({ projectId, query }: { projectId: string; query: string }) {
-  const { data, error, isPending } = useQuery(searchTranscriptsOptions({ path: { project_id: projectId }, query: { q: query } }));
+function Results({ projectId, query, unsure }: { projectId: string; query: string; unsure: boolean }) {
+  const { data, error, isPending } = useQuery(
+    searchTranscriptsOptions({ path: { project_id: projectId }, query: { q: query, include_uncertain: unsure } }),
+  );
   if (isPending) return <Loading label="Searching…" />;
   if (error) return <ErrorState message={errorMessage(error)} />;
   if (data.hits.length === 0) {
     return (
       <p role="status" className="text-sm text-neutral-400">
         No transcript contains {data.terms.length > 1 ? "all of " : ""}“{data.terms.join(" ")}”. Words are matched from their
-        beginning, in the language they were transcribed in.
+        beginning, in the language they were transcribed in.{!unsure && " Lines the speech model was unsure about are left out."}
       </p>
     );
   }
@@ -78,12 +81,14 @@ function Results({ projectId, query }: { projectId: string; query: string }) {
 function Transcripts({ projectId }: { projectId: string }) {
   const [params, setParams] = useSearchParams();
   const query = params.get("q")?.trim() ?? "";
+  const unsure = params.get("unsure") === "1";
   const [draft, setDraft] = useState(query);
   const { data, error, isPending, refetch } = useQuery(listProjectTranscriptsOptions({ path: { project_id: projectId } }));
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    setParams(draft.trim() ? { q: draft.trim() } : {});
+    setParams(draft.trim() ? { q: draft.trim(), ...(unsure ? { unsure: "1" } : {}) } : {});
   };
+  const setUnsure = (on: boolean) => setParams({ ...(query ? { q: query } : {}), ...(on ? { unsure: "1" } : {}) });
   const missing = data?.find((c) => c.status === "model_missing");
   return (
     <section className="space-y-4">
@@ -106,12 +111,17 @@ function Transcripts({ projectId }: { projectId: string }) {
         />
         <button className="rounded bg-blue-600 px-3 py-1.5 text-sm">Search</button>
       </form>
-      {query && <Results projectId={projectId} query={query} />}
+      <label className="flex items-center gap-1 text-xs text-neutral-400">
+        <input type="checkbox" checked={unsure} onChange={(e) => setUnsure(e.target.checked)} /> Include lines the speech model was
+        unsure about
+      </label>
+      {query && <Results projectId={projectId} query={query} unsure={unsure} />}
       {missing && (
         <p role="alert" className="rounded border border-amber-800 bg-amber-950 p-3 text-sm">
           {missing.message}
         </p>
       )}
+      <SpokenLanguages projectId={projectId} />
       {isPending && <Loading label="Loading transcripts…" />}
       {error && <ErrorState message={errorMessage(error)} onRetry={() => void refetch()} />}
       {data?.length === 0 && (
@@ -147,7 +157,7 @@ function Transcripts({ projectId }: { projectId: string }) {
                 </td>
                 <td>{clip.language ? languageName(clip.language) : "–"}</td>
                 <td className="font-mono text-xs">
-                  {clip.status === "done" ? `${formatDuration(clip.speech_s)} of ${formatDuration(clip.duration_s)}` : "–"}
+                  {clip.status === "done" || clip.status === "not_written" ? `${formatDuration(clip.speech_s)} of ${formatDuration(clip.duration_s)}` : "–"}
                 </td>
                 <td>{clip.words || "–"}</td>
               </tr>

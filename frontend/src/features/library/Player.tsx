@@ -90,7 +90,7 @@ export function Player({ media }: { media: MediaOut }) {
       {media.has_waveform && <Waveform mediaId={media.id} video={video} />}
       {media.probed && !!media.width && <PeoplePanel mediaId={media.id} onSeek={seekTo} />}
       {media.probed && !!media.width && <TagsPanel mediaId={media.id} time={time} onSeek={seekTo} />}
-      {media.probed && <TranscriptPanel mediaId={media.id} time={time} onSeek={seekTo} />}
+      {media.probed && <TranscriptPanel mediaId={media.id} projectId={media.project_id} clipLanguage={media.speech_language ?? null} time={time} onSeek={seekTo} />}
       <p className="text-xs text-neutral-500">
         Keys: Space/K play·pause · L play (again = faster) · J back 1 s · ←/→ one frame (Shift: 1 s) · I/O mark · P/N previous·next clip
       </p>

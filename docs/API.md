@@ -52,6 +52,13 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
   engine and settings, and the segments with their words (start, end, probability). `uncertain` and
   `language_uncertain` are explained in AI_PIPELINE.md; the limits are returned in `thresholds`.
 - `GET /api/projects/{id}/transcripts`: one row per clip (status, language, seconds of speech, segment and word count).
+- `GET /api/projects/{id}/speech-languages`: `{languages, detect_only, available}` (empty `languages` = detect any).
+  `PUT` with `{languages, detect_only}` saves them and queues every clip again (`queued`); only transcripts and what
+  is made from them are redone. Unknown codes, duplicates, more than 8, or "detect only" outside the list are 422.
+- `PUT /api/media/{id}/speech-language` `{language}` (a code, or null to detect): sets the clip's language and
+  queues it. Media items carry `speech_language`. Transcript status `not_written` = speech in a "detect only"
+  language (no text, `speech_s` set).
+- Search leaves out segments marked uncertain unless `include_uncertain=true`.
 - `GET /api/projects/{id}/transcripts/search?q=...&media_id=...&limit=50`: keyword search (FTS5, BM25 order). Each
   hit has the clip, the segment's time range, `jump_s` (when the first word starting with the first search term is
   spoken, else the segment start) and the text split

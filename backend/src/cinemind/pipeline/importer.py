@@ -230,7 +230,11 @@ def enqueue_ingest(session: Session, settings: Settings, asset: MediaAsset) -> J
             "shot_min_len_s": settings.shot_min_len_s,
             "keyframes_per_shot": settings.keyframes_per_shot,
             "qc_detect": detector_params(settings.quality),
-            "transcribe": transcribe_stages.job_params(settings),
+            "transcribe": transcribe_stages.job_params(
+                settings,
+                transcribe_stages.project_speech(session, asset.project_id),
+                asset.speech_language,
+            ),
             "faces": face_stages.job_params(settings),
             "embed_visual": embed_stages.visual_params(settings),
             "embed_text": embed_stages.text_params(settings),

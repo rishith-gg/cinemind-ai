@@ -44,6 +44,10 @@ def _message(row: Transcript | None) -> str | None:
         "no_audio": "This clip has no audio track.",
         "model_missing": f"{reason} {PULL_HINT}".strip(),
         "audio_unreadable": reason or "The audio track could not be decoded.",
+        "not_written": (
+            'Speech found in a language set to "detect only" for this project, so no '
+            "transcript is written. Change it under Spoken languages on the Transcripts page."
+        ),
     }.get(row.status, reason or None)
 
 
@@ -160,11 +164,15 @@ def search_transcripts(
     q: Annotated[str, Query(min_length=1, max_length=200)],
     media_id: Annotated[str | None, Query(max_length=32)] = None,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    include_uncertain: bool = False,
 ) -> TranscriptSearchOut:
     """Keyword search in the project's transcripts (all words must occur; each matches the start
-    of a word). Hits are ordered by BM25 and carry the time the first matching word is spoken."""
+    of a word). Hits are ordered by BM25 and carry the time the first matching word is spoken.
+    Segments marked uncertain are left out unless `include_uncertain`."""
     get_project(session, project_id)
-    terms, hits = transcript_search.search(session, project_id, q, media_id, limit)
+    terms, hits = transcript_search.search(
+        session, project_id, q, media_id, limit, include_uncertain
+    )
     return TranscriptSearchOut(
         query=q,
         terms=terms,

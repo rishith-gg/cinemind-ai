@@ -20,6 +20,9 @@ class Project(Base):
     description: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, onupdate=utcnow)
+    # Per-project choices made in the app (not the machine's settings file), e.g. the spoken
+    # languages: {"speech": {"languages": ["en", "kn"], "detect_only": ["kn"]}}.
+    settings: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, server_default="{}")
 
 
 class MediaAsset(Base):
@@ -64,6 +67,9 @@ class MediaAsset(Base):
     artifacts: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     # Technical Quality Score of the whole clip, 0..1 (None until the quality stages ran).
     quality_score: Mapped[float | None] = mapped_column(nullable=True)
+    # Language of the speech as set by the user for this clip (None = detect it among the
+    # project's spoken languages).
+    speech_language: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     __table_args__ = (
         Index("ix_media_project", "project_id"),

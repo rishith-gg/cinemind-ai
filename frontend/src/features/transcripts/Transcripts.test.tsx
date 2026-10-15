@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { MemoryRouter } from "react-router";
@@ -82,50 +82,93 @@ function wrap(ui: ReactNode, path = "/transcripts") {
   );
 }
 
-/** Answers by URL: the search endpoint, else the per-project overview. */
-function backend(search: unknown = HITS) {
+const SPEECH = { languages: ["en", "kn"], detect_only: ["kn"], available: ["en", "hi", "kn", "ta"], queued: 0 };
+
+/** Answers by URL: the search endpoint, the spoken languages, one clip's transcript, else the
+ * per-project overview. Records every call (method, path and query, body). */
+function backend(search: unknown = HITS, transcript: unknown = TRANSCRIPT, summary: unknown = SUMMARY) {
   const calls: string[] = [];
-  const fetcher = vi.fn(async (input: Request | string | URL) => {
-    const url = new URL(input instanceof Request ? input.url : String(input), "http://localhost");
-    calls.push(url.pathname + url.search);
-    return Response.json(url.pathname.endsWith("/search") ? search : SUMMARY);
+  const bodies: unknown[] = [];
+  const fetcher = vi.fn(async (input: Request | string | URL, init?: RequestInit) => {
+    const req = input instanceof Request ? input : new Request(new URL(String(input), "http://localhost"), init);
+    const url = new URL(req.url);
+    calls.push(`${req.method === "GET" ? "" : req.method + " "}${url.pathname}${url.search}`);
+    if (req.method !== "GET") bodies.push(await req.json().catch(() => null));
+    if (url.pathname.endsWith("/search")) return Response.json(search);
+    if (url.pathname.endsWith("/speech-languages")) return Response.json(req.method === "PUT" ? { ...SPEECH, ...(bodies.at(-1) as object), queued: 2 } : SPEECH);
+    if (url.pathname.endsWith("/speech-language")) return Response.json({ ...(bodies.at(-1) as object), queued: true });
+    if (url.pathname.endsWith("/transcript")) return Response.json(transcript);
+    return Response.json(summary);
   });
   vi.stubGlobal("fetch", fetcher);
-  return calls;
+  return Object.assign(calls, { bodies });
 }
 
-it("follows playback: highlights the spoken word, and a click on a word or a time seeks there", async () => {
-  vi.stubGlobal("fetch", vi.fn(async () => Response.json(TRANSCRIPT)));
-  const onSeek = vi.fn();
-  wrap(<TranscriptPanel mediaId="m1" time={1.3} onSeek={onSeek} />);
-  const panel = within(await screen.findByRole("region", { name: "Transcript" }));
-  expect(panel.getByText(/English \(93% sure\) · Whisper small · 2 segments/)).toBeInTheDocument();
-  const [first, second] = panel.getAllByRole("listitem");
-  expect(first).toHaveAttribute("aria-current", "true");
-  expect(second).not.toHaveAttribute("aria-current");
-  expect(panel.getByRole("button", { name: "camera" })).toHaveClass("bg-blue-600");
-  expect(panel.getByRole("button", { name: "Hello" })).not.toHaveClass("bg-blue-600");
+const panel = (props: Partial<Parameters<typeof TranscriptPanel>[0]> = {}) => (
+  <TranscriptPanel mediaId="m1" projectId="p1" clipLanguage={null} time={0} onSeek={vi.fn()} {...props} />
+);
 
-  await userEvent.click(panel.getByRole("button", { name: "forest" }));
+it("follows playback: highlights the spoken word, and a click on a word or a time seeks there", async () => {
+  backend();
+  const onSeek = vi.fn();
+  wrap(panel({ time: 1.3, onSeek }));
+  const region = within(await screen.findByRole("region", { name: "Transcript" }));
+  expect(region.getByText(/English \(93% sure\) · Whisper small · 2 segments/)).toBeInTheDocument();
+  const [first] = region.getAllByRole("listitem");
+  expect(first).toHaveAttribute("aria-current", "true");
+  expect(region.getByRole("button", { name: "camera" })).toHaveClass("bg-blue-600");
+  expect(region.getByRole("button", { name: "Hello" })).not.toHaveClass("bg-blue-600");
+
+  await userEvent.click(region.getByRole("button", { name: "rolling." }));
+  expect(onSeek).toHaveBeenLastCalledWith(1.7);
+  await userEvent.click(region.getByRole("button", { name: "Show them" }));
+  await userEvent.click(region.getByRole("button", { name: "forest" }));
   expect(onSeek).toHaveBeenLastCalledWith(5.5);
-  await userEvent.click(panel.getByRole("button", { name: "Jump to 0:04.00" }));
+  await userEvent.click(region.getByRole("button", { name: "Jump to 0:04.00" }));
   expect(onSeek).toHaveBeenLastCalledWith(4);
 });
 
-it("marks what the model was unsure about and says the text is machine-made", async () => {
-  vi.stubGlobal("fetch", vi.fn(async () => Response.json({ ...TRANSCRIPT, language_probability: 0.31, language_uncertain: true })));
-  wrap(<TranscriptPanel mediaId="m1" time={0} onSeek={vi.fn()} />);
-  const panel = within(await screen.findByRole("region", { name: "Transcript" }));
-  const [first, second] = panel.getAllByRole("listitem") as [HTMLElement, HTMLElement];
+it("hides what the model was unsure about until asked, and says the text is machine-made", async () => {
+  backend(HITS, { ...TRANSCRIPT, language_probability: 0.31, language_uncertain: true });
+  wrap(panel());
+  const region = within(await screen.findByRole("region", { name: "Transcript" }));
+  expect(region.getAllByRole("listitem")).toHaveLength(1);
+  const notes = region.getAllByRole("note").map((n) => n.textContent);
+  expect(notes[0]).toContain("The language was a guess (31% sure)");
+  expect(notes[1]).toContain("1 of 2 lines are hidden: the speech model was unsure about them.");
+  expect(region.getByText(/Machine transcript; it can be wrong/)).toHaveTextContent("Unsure means the model's own likelihood is under -1");
+
+  await userEvent.click(region.getByRole("button", { name: "Show them" }));
+  const [first, second] = region.getAllByRole("listitem") as [HTMLElement, HTMLElement];
   expect(within(second).getByText("uncertain")).toBeInTheDocument();
   expect(within(first).queryByText("uncertain")).not.toBeInTheDocument();
-  expect(panel.getByRole("note")).toHaveTextContent("The language was a guess (31% sure)");
-  expect(panel.getByText(/Machine transcript; it can be wrong/)).toHaveTextContent("1 of 2 segments are marked uncertain");
+  await userEvent.type(region.getByLabelText("Find in this transcript"), "FOREST");
+  expect(region.getAllByRole("listitem")).toHaveLength(1);
+  await userEvent.type(region.getByLabelText("Find in this transcript"), "x");
+  expect(region.getByText(/Nothing in this transcript contains “FORESTx”/)).toBeInTheDocument();
+});
 
-  await userEvent.type(panel.getByLabelText("Find in this transcript"), "FOREST");
-  expect(panel.getAllByRole("listitem")).toHaveLength(1);
-  await userEvent.type(panel.getByLabelText("Find in this transcript"), "x");
-  expect(panel.getByText(/Nothing in this transcript contains “FORESTx”/)).toBeInTheDocument();
+it("says when every line was unsure, and lets the user set the clip's language", async () => {
+  const calls = backend(HITS, { ...TRANSCRIPT, segments: TRANSCRIPT.segments.map((s) => ({ ...s, uncertain: true })) });
+  wrap(panel());
+  const region = within(await screen.findByRole("region", { name: "Transcript" }));
+  expect(await region.findByText(/unsure about all 2 lines of this clip, so they are hidden/)).toBeInTheDocument();
+  expect(region.queryAllByRole("listitem")).toHaveLength(0);
+  const picker = await region.findByRole("combobox");
+  expect(within(picker).getByRole("option", { name: "Detect among English, Kannada" })).toBeInTheDocument();
+  expect(within(picker).getByRole("option", { name: "Kannada (detect only)" })).toBeInTheDocument();
+  await userEvent.selectOptions(picker, "en");
+  await waitFor(() => expect(calls).toContain("PUT /api/media/m1/speech-language"));
+  expect(calls.bodies).toEqual([{ language: "en" }]);
+});
+
+it("shows speech in a detect-only language without text", async () => {
+  backend(HITS, { ...TRANSCRIPT, status: "not_written", language: "kn", speech_s: 67.6, segments: [], message: "Speech found in a language set to \"detect only\"." });
+  wrap(panel({ clipLanguage: "kn" }));
+  const region = within(await screen.findByRole("region", { name: "Transcript" }));
+  expect(region.getByText("Kannada speech, 68 s.")).toBeInTheDocument();
+  expect(region.getByRole("note")).toHaveTextContent("detect only");
+  expect(await region.findByRole("combobox")).toHaveValue("kn");
 });
 
 it.each([
@@ -134,8 +177,8 @@ it.each([
   ["no_audio", "This clip has no audio track."],
   ["pending", "Not transcribed yet. Processing may still be running; otherwise press Reprocess."],
 ])("says why there is no text (%s)", async (status, message) => {
-  vi.stubGlobal("fetch", vi.fn(async () => Response.json({ ...TRANSCRIPT, status, message, language: null, segments: [] })));
-  wrap(<TranscriptPanel mediaId="m1" time={0} onSeek={vi.fn()} />);
+  backend(HITS, { ...TRANSCRIPT, status, message, language: null, segments: [] });
+  wrap(panel());
   expect(await screen.findByRole("note")).toHaveTextContent(message);
   expect(screen.queryByRole("list")).not.toBeInTheDocument();
 });
@@ -152,12 +195,32 @@ it("searches the project's transcripts and links each hit to the moment the word
   await userEvent.type(screen.getByLabelText("Search transcripts"), " forest ");
   await userEvent.click(screen.getByRole("button", { name: "Search" }));
   const results = within(await screen.findByRole("list", { name: "Search results" }));
-  expect(calls).toContain("/api/projects/p1/transcripts/search?q=forest");
+  expect(calls).toContain("/api/projects/p1/transcripts/search?q=forest&include_uncertain=false");
   const hit = results.getByRole("link");
   expect(hit).toHaveAttribute("href", "/library/m1?t=5.5");
   expect(hit).toHaveTextContent("0:05.50 interview.mov");
   expect(within(hit).getByText("forest").tagName).toBe("MARK");
   expect(within(hit).getByText("uncertain")).toBeInTheDocument();
+
+  await userEvent.click(screen.getByLabelText(/Include lines the speech model was unsure about/));
+  await waitFor(() => expect(calls).toContain("/api/projects/p1/transcripts/search?q=forest&include_uncertain=true"));
+});
+
+it("edits the project's spoken languages and transcribes again", async () => {
+  useCurrentProject.setState({ id: "p1" });
+  const calls = backend();
+  wrap(<TranscriptsPage />);
+  const box = within(await screen.findByRole("region", { name: "Spoken languages" }));
+  expect(box.getByLabelText("Write transcripts in English")).toBeChecked();
+  expect(box.getByLabelText("Write transcripts in Kannada")).not.toBeChecked();
+  const save = box.getByRole("button", { name: "Save and transcribe again" });
+  expect(save).toBeDisabled();
+  await userEvent.selectOptions(box.getByLabelText("Add a spoken language"), "hi");
+  await userEvent.click(box.getByLabelText("Write transcripts in Kannada"));
+  await userEvent.click(box.getByRole("button", { name: "Remove English" }));
+  await userEvent.click(save);
+  await waitFor(() => expect(calls).toContain("PUT /api/projects/p1/speech-languages"));
+  expect(calls.bodies).toEqual([{ languages: ["kn", "hi"], detect_only: [] }]);
 });
 
 it("says when nothing matches, and what to do when the speech model is missing", async () => {
@@ -168,7 +231,7 @@ it("says when nothing matches, and what to do when the speech model is missing",
   expect(screen.getByLabelText("Search transcripts")).toHaveValue("zebra crossing");
 
   const hint = "The speech model 'small' (487 MB) is not downloaded. Run `uv run cinemind models pull` once (needs internet), then press Reprocess.";
-  vi.stubGlobal("fetch", vi.fn(async () => Response.json([{ ...SUMMARY[1], status: "model_missing", message: hint }])));
+  backend(HITS, TRANSCRIPT, [{ ...SUMMARY[1], status: "model_missing", message: hint }]);
   wrap(<TranscriptsPage />);
   expect(await screen.findByRole("alert")).toHaveTextContent("cinemind models pull");
   expect(screen.getAllByText("Speech model not downloaded").length).toBeGreaterThan(0);

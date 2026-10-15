@@ -134,6 +134,7 @@ def to_out(
         qc_flags=flags or [],
         transcript_status=transcript.status if transcript else None,
         transcript_language=transcript.language if transcript else None,
+        speech_language=asset.speech_language,
         job=JobBrief.model_validate(job) if job else None,
     )
 

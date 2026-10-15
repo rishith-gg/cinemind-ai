@@ -305,6 +305,30 @@ export type Check = {
 };
 
 /**
+ * ClipLanguage
+ */
+export type ClipLanguage = {
+    /**
+     * Language
+     */
+    language: string | null;
+};
+
+/**
+ * ClipLanguageOut
+ */
+export type ClipLanguageOut = {
+    /**
+     * Language
+     */
+    language: string | null;
+    /**
+     * Queued
+     */
+    queued: boolean;
+};
+
+/**
  * DoctorReport
  */
 export type DoctorReport = {
@@ -947,6 +971,10 @@ export type MediaOut = {
      * Transcript Language
      */
     transcript_language: string | null;
+    /**
+     * Speech Language
+     */
+    speech_language?: string | null;
     job: JobBrief | null;
 };
 
@@ -1471,6 +1499,47 @@ export type ShotTagsOut = {
 };
 
 /**
+ * SpeechLanguages
+ *
+ * What the user said about a project's speech (kept in the project's settings). Detection
+ * picks among `languages` (empty = any language Whisper knows). Languages in `detect_only`
+ * are recognised but not written down: for them the model's text was judged too poor to be
+ * useful, so the clip shows that it has speech in that language and no transcript.
+ */
+export type SpeechLanguages = {
+    /**
+     * Languages
+     */
+    languages?: Array<string>;
+    /**
+     * Detect Only
+     */
+    detect_only?: Array<string>;
+};
+
+/**
+ * SpeechLanguagesOut
+ */
+export type SpeechLanguagesOut = {
+    /**
+     * Languages
+     */
+    languages: Array<string>;
+    /**
+     * Detect Only
+     */
+    detect_only: Array<string>;
+    /**
+     * Available
+     */
+    available: Array<string>;
+    /**
+     * Queued
+     */
+    queued: number;
+};
+
+/**
  * TagCountOut
  */
 export type TagCountOut = {
@@ -1894,7 +1963,7 @@ export type TranscriptOut = {
     /**
      * Status
      */
-    status: 'pending' | 'done' | 'no_speech' | 'no_audio' | 'model_missing' | 'audio_unreadable';
+    status: 'pending' | 'done' | 'no_speech' | 'no_audio' | 'model_missing' | 'audio_unreadable' | 'not_written';
     /**
      * Message
      */
@@ -2028,7 +2097,7 @@ export type TranscriptSummary = {
     /**
      * Status
      */
-    status: 'pending' | 'done' | 'no_speech' | 'no_audio' | 'model_missing' | 'audio_unreadable';
+    status: 'pending' | 'done' | 'no_speech' | 'no_audio' | 'model_missing' | 'audio_unreadable' | 'not_written';
     /**
      * Message
      */
@@ -3596,6 +3665,10 @@ export type SearchTranscriptsData = {
          * Limit
          */
         limit?: number;
+        /**
+         * Include Uncertain
+         */
+        include_uncertain?: boolean;
     };
     url: '/api/projects/{project_id}/transcripts/search';
 };
@@ -3633,6 +3706,144 @@ export type SearchTranscriptsResponses = {
 };
 
 export type SearchTranscriptsResponse = SearchTranscriptsResponses[keyof SearchTranscriptsResponses];
+
+export type GetSpeechLanguagesData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/speech-languages';
+};
+
+export type GetSpeechLanguagesErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetSpeechLanguagesError = GetSpeechLanguagesErrors[keyof GetSpeechLanguagesErrors];
+
+export type GetSpeechLanguagesResponses = {
+    /**
+     * Successful Response
+     */
+    200: SpeechLanguagesOut;
+};
+
+export type GetSpeechLanguagesResponse = GetSpeechLanguagesResponses[keyof GetSpeechLanguagesResponses];
+
+export type SetSpeechLanguagesData = {
+    body: SpeechLanguages;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/speech-languages';
+};
+
+export type SetSpeechLanguagesErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type SetSpeechLanguagesError = SetSpeechLanguagesErrors[keyof SetSpeechLanguagesErrors];
+
+export type SetSpeechLanguagesResponses = {
+    /**
+     * Successful Response
+     */
+    200: SpeechLanguagesOut;
+};
+
+export type SetSpeechLanguagesResponse = SetSpeechLanguagesResponses[keyof SetSpeechLanguagesResponses];
+
+export type SetClipSpeechLanguageData = {
+    body: ClipLanguage;
+    path: {
+        /**
+         * Media Id
+         */
+        media_id: string;
+    };
+    query?: never;
+    url: '/api/media/{media_id}/speech-language';
+};
+
+export type SetClipSpeechLanguageErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type SetClipSpeechLanguageError = SetClipSpeechLanguageErrors[keyof SetClipSpeechLanguageErrors];
+
+export type SetClipSpeechLanguageResponses = {
+    /**
+     * Successful Response
+     */
+    200: ClipLanguageOut;
+};
+
+export type SetClipSpeechLanguageResponse = SetClipSpeechLanguageResponses[keyof SetClipSpeechLanguageResponses];
 
 export type ListActorsData = {
     body?: never;

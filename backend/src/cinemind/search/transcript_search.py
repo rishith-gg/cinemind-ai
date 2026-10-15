@@ -9,6 +9,7 @@ from typing import Any
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
+from cinemind.core import transcribe_config as limits
 from cinemind.core.errors import InvalidInputError
 from cinemind.db.models import TranscriptWord
 
@@ -27,6 +28,8 @@ _SQL = text(
     JOIN media_assets m ON m.id = s.media_id
     WHERE transcript_fts MATCH :match AND m.project_id = :project
       AND (:media IS NULL OR s.media_id = :media)
+      AND (:uncertain OR (s.avg_logprob >= :logprob_floor
+                          AND s.compression_ratio <= :compression_ceiling))
     ORDER BY rank, m.filename, s.start_s
     LIMIT :limit
     """
@@ -93,8 +96,15 @@ def _parts(marked: str) -> list[tuple[str, bool]]:
 
 
 def search(
-    session: Session, project_id: str, query: str, media_id: str | None = None, limit: int = 50
+    session: Session,
+    project_id: str,
+    query: str,
+    media_id: str | None = None,
+    limit: int = 50,
+    include_uncertain: bool = False,
 ) -> tuple[list[str], list[Hit]]:
+    """Hits for `query`, best first. Segments marked uncertain (the model's own acceptance
+    limits, `is_uncertain`) are left out unless `include_uncertain`."""
     terms = query_terms(query)
     rows = session.execute(
         _SQL,
@@ -103,6 +113,9 @@ def search(
             "project": project_id,
             "media": media_id,
             "limit": limit,
+            "uncertain": include_uncertain,
+            "logprob_floor": limits.UNCERTAIN_LOGPROB_BELOW,
+            "compression_ceiling": limits.UNCERTAIN_COMPRESSION_ABOVE,
         },
     ).all()
     words: dict[int, list[Any]] = {}

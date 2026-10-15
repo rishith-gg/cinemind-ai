@@ -8,8 +8,8 @@ Add tables only through a new migration (`alembic revision --autogenerate`, then
 ## Phase 1 tables
 | Table | Purpose |
 |---|---|
-| `projects` | id (uuid hex), name, description, timestamps. Deleting removes derived files under `data/projects/<id>/` only. |
-| `media_assets` | id, project_id, path, filename, `content_hash`. `import_mode` (reference/copy/upload), `size_bytes`, ffprobe metadata (`probed`, container, duration, size, rational `fps_num/fps_den`, `is_vfr`, codecs, bitrate, audio, timecode, colour) and artifact paths relative to the project dir (`proxy_path`, `poster_path`, `strip_path`, `waveform_path`). Unique `(project_id, content_hash)` = duplicate detection. Migration 0002. |
+| `projects` | id (uuid hex), name, description, timestamps, `settings` (JSON, choices made in the app, e.g. `speech`: `{languages, detect_only}`; migration 0011). Deleting removes derived files under `data/projects/<id>/` only. |
+| `media_assets` | id, project_id, path, filename, `content_hash`. `import_mode` (reference/copy/upload), `size_bytes`, ffprobe metadata (`probed`, container, duration, size, rational `fps_num/fps_den`, `is_vfr`, codecs, bitrate, audio, timecode, colour) and artifact paths relative to the project dir (`proxy_path`, `poster_path`, `strip_path`, `waveform_path`), `speech_language` (set by the user for this clip, null = detected; migration 0011). Unique `(project_id, content_hash)` = duplicate detection. Migration 0002. |
 | `jobs` | one processing run: `chain`, `params`, `status` (queued/running/succeeded/failed/cancelled), `progress`, `cancel_requested`, error code/message, `attempts`. |
 | `job_stages` | one row per stage of the chain: status (pending/running/succeeded/cached/failed/cancelled), progress, and provenance (`cache_key`, `params_hash`, `model_name`, `model_version`). |
 | `stage_results` | the cache. Key = sha256 of `(media content hash, stage, params hash, model name, model version)`; value = the stage's JSON result. |
@@ -40,7 +40,7 @@ Datetimes are stored as naive UTC and returned timezone-aware (`UTCDateTime`).
 ## Phase 6 tables (migrations 0006, 0007)
 | Table | Purpose |
 |---|---|
-| `transcripts` | one row per clip once the transcribe stage ran: `status`, `language` and its probability, `model` and `model_revision`, `speech_s` (seconds kept by the voice-activity detector), `digest` (hash of the stage result the rows were written from; an unchanged result keeps its rows and ids), `details` (engine version, device, compute type, settings, reason when there is no text). |
+| `transcripts` | one row per clip once the transcribe stage ran: `status` (incl. `not_written` = speech in a "detect only" language), `language` and its probability, `model` and `model_revision`, `speech_s` (seconds kept by the voice-activity detector), `digest` (hash of the stage result the rows were written from; an unchanged result keeps its rows and ids), `details` (engine version, device, compute type, settings, `language_source` (`detected`, `project`, `clip`, `settings`), `language_scores`, reason when there is no text). |
 | `transcript_segments` | `index`, `start_s`/`end_s`, `text`, `confidence` (mean word probability), and the model's `avg_logprob`, `no_speech_prob`, `compression_ratio`. Integer id. Cascades from `media_assets`. |
 | `transcript_words` | `segment_id`, `index`, `start_s`/`end_s`, `word`, `probability`. Cascades from `transcript_segments`. |
 | `transcript_fts` | FTS5 virtual table over `transcript_segments.text` (external content, `rowid` = segment id, tokenizer `unicode61 remove_diacritics 2 categories 'L* N* Co Mn Mc'` since 0007, which rebuilds the index so combining marks stay inside words). Three triggers on `transcript_segments` keep it in step, also for cascaded deletes. Not an ORM model; created with raw SQL in the migration. |

@@ -8,30 +8,61 @@ the audio through the model again.
 
 import hashlib
 import json
+import logging
 from typing import Any
 
+from pydantic import ValidationError
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from cinemind.ai import transcriber
 from cinemind.core.config import Settings
 from cinemind.core.errors import ModelMissingError, SourceMissingError, UnreadableMediaError
-from cinemind.db.models import Transcript, TranscriptSegment, TranscriptWord
+from cinemind.core.transcribe_config import SpeechLanguages
+from cinemind.db.models import Project, Transcript, TranscriptSegment, TranscriptWord
 from cinemind.jobs.registry import Stage, StageContext
 from cinemind.pipeline.stage_utils import checked_source, media_id, source_info
 
 PIPELINE_VERSION = "1"
 
+log = logging.getLogger(__name__)
 
-def job_params(settings: Settings) -> dict[str, Any]:
+
+def project_speech(session: Session, project_id: str) -> SpeechLanguages:
+    """The project's spoken languages as the user set them (none set = detect any language).
+    A stored value that no longer validates (e.g. after an upgrade) counts as none set."""
+    project = session.get(Project, project_id)
+    stored: dict[str, Any] = project.settings if project else {}
+    raw: Any = stored.get("speech") or {}
+    try:
+        return SpeechLanguages.model_validate(raw)
+    except ValidationError:
+        log.warning("project %s: ignoring invalid spoken languages %r", project_id, raw)
+        return SpeechLanguages()
+
+
+# Job parameters that describe what the user said about the language, not `[transcribe]`.
+_LANGUAGE_KEYS = ("languages", "detect_only", "clip_language")
+
+
+def job_params(
+    settings: Settings, speech: SpeechLanguages | None = None, clip_language: str | None = None
+) -> dict[str, Any]:
     """What a transcript depends on (part of the stage cache key): the model and its pinned
-    revision plus the `[transcribe]` settings."""
+    revision, the `[transcribe]` settings, and the project's spoken languages and this clip's
+    language when the user set them (left out when not set, so older caches stay valid)."""
     choice = transcriber.choose_model(settings)
-    return {
+    params: dict[str, Any] = {
         "model": choice.name,
         "revision": choice.revision,
         **settings.transcribe.model_dump(exclude={"model"}),
     }
+    if speech is not None and speech.languages:
+        params["languages"] = list(speech.languages)
+        params["detect_only"] = list(speech.detect_only)
+    if clip_language:
+        params["clip_language"] = clip_language
+    return params
 
 
 def run_transcribe(ctx: StageContext) -> dict[str, Any]:
@@ -52,8 +83,14 @@ def run_transcribe(ctx: StageContext) -> dict[str, Any]:
         raise SourceMissingError(
             f"The original file '{source.name}' is missing or was moved. Relink it to continue."
         )
+    skip = ("model", "revision", *_LANGUAGE_KEYS)
     cfg = ctx.settings.transcribe.model_copy(
-        update={k: v for k, v in params.items() if k not in ("model", "revision")}
+        update={k: v for k, v in params.items() if k not in skip}
+    )
+    plan = transcriber.LanguagePlan(
+        forced=params.get("clip_language"),
+        allowed=tuple(params.get("languages") or ()),
+        detect_only=tuple(params.get("detect_only") or ()),
     )
     try:
         audio = transcriber.decode_audio(source, ctx.check_cancelled)
@@ -62,16 +99,25 @@ def run_transcribe(ctx: StageContext) -> dict[str, Any]:
         return {**base, "status": "audio_unreadable", "reason": exc.message}
     ctx.progress(0.02)
     try:
-        found = transcriber.transcribe(choice, audio, cfg, ctx.progress, ctx.check_cancelled)
+        found = transcriber.transcribe(choice, audio, cfg, ctx.progress, ctx.check_cancelled, plan)
     except ModelMissingError as exc:  # removed between the check above and loading
         return {**base, "status": "model_missing", "reason": exc.message}
     return {
         **base,
         **found,
-        "status": "done" if found["segments"] else "no_speech",
+        "status": _status(found),
         "engine": transcriber.engine_version(),
-        "settings": cfg.model_dump(exclude={"model"}),
+        "settings": {
+            **cfg.model_dump(exclude={"model"}),
+            **{k: params[k] for k in _LANGUAGE_KEYS if k in params},
+        },
     }
+
+
+def _status(found: dict[str, Any]) -> str:
+    if found.get("not_written"):
+        return "not_written"
+    return "done" if found["segments"] else "no_speech"
 
 
 def verify_transcribe(_ctx: StageContext, cached: dict[str, Any]) -> bool:
@@ -100,7 +146,16 @@ def persist_transcribe(session: Session, ctx: StageContext, result: dict[str, An
     row.model, row.model_revision = result["model"], result["revision"]
     row.speech_s = float(result.get("speech_s", 0.0))
     row.digest = digest
-    keys = ("engine", "device", "compute_type", "settings", "language_detected", "reason")
+    keys = (
+        "engine",
+        "device",
+        "compute_type",
+        "settings",
+        "language_detected",
+        "language_source",
+        "language_scores",
+        "reason",
+    )
     row.details = {key: result[key] for key in keys if key in result}
     for index, seg in enumerate(result["segments"]):
         words: list[list[Any]] = seg["words"]

@@ -43,11 +43,21 @@ clip-vit-b32 578 MB, minilm-l6 87 MB, siglip-base 779 MB for testing). Details: 
 Phase 7 (faces and actors) is described in AI_PIPELINE.md "Faces and actors" and EVALUATION.md sections 6 and 7.
 Phase 6 (transcription) is described in AI_PIPELINE.md "Transcription" and EVALUATION.md sections 4 and 5.
 
-Next step: Phase 9 (hybrid search: keyword + text vectors + picture vectors, fused).
+Fixes after Phase 8, from the user's feedback (2026-10-15):
+- Clip page: Previous / Next and the P / N keys, in the library's current filter and sort.
+- Actors: faces found in a single sampled frame are set aside as "seen briefly" (D-082; 27 actors became 14 on the
+  user's project, the shirt, raincoat, mask and blurred faces among the 25 set aside). "Same person?" questions on
+  the Actors page merge or keep apart look-alike people; the answers are labels for `eval/actor_pairs.py` (D-083).
+- Transcripts: per-project spoken languages, "detect only" languages, a clip's language set by hand, and uncertain
+  lines hidden by default (D-084). The user's project is English + Kannada (detect only): 6 English transcripts,
+  5 Kannada clips marked as speech without text (EVALUATION.md section 5).
+- Deleted `data/phase4-verify/` (the Resolve test it served is confirmed).
+
+Next step: the user's reviews below, then Phase 9 (hybrid search: keyword + text vectors + picture vectors, fused).
 
 Export path for the rest of the project (decided in Phase 4): FCP7 XML into DaVinci Resolve.
 
-### Phase 4 run on the user's real footage (2026-10-09, M1 8 GB, `data/phase4-verify`, not an evaluation)
+### Phase 4 run on the user's real footage (2026-10-09, M1 8 GB, `data/phase4-verify` (deleted 2026-10-15), not an evaluation)
 Numbers from `eval/phase4_run_summary.py data/phase4-verify` (output kept in
 `eval/results/phase4_run_summary_2026-10-09.txt`); one run, not a benchmark and not an accuracy figure:
 - 17 clips, 352.7 s, 0 failed jobs. Stage wall time summed over the clips: proxy 200.4 s, shots 16.1 s, keyframes 7.3 s.
@@ -67,8 +77,8 @@ None.
 ## Open issues / notes
 - Phase 8, needs the user: (1) review tags on a few clips (approve / reject); `eval/tag_feedback.py` turns that into
   precision on this footage; (2) correct the scenes of one edited reel on the Shots and scenes page, so the scene
-  limit (0.8, a convention) can be measured instead of guessed; (3) confirm the spoken languages (the text model is
-  English by default; `[embed] text_model = "multilingual-minilm-l12"` for Hindi/Kannada).
+  limit (0.8, a convention) can be measured instead of guessed. Spoken languages: answered (English and Kannada;
+  Kannada has no transcripts, so the English text model is enough for now).
 - Phase 8 limitations: tag thresholds come from web photos (Places365) and low-light object crops (CODaN), not video;
   precision depends on how common a tag is. The shot rule (more than half of the keyframes) is not evaluated. Shot
   size is never shown (no open labelled set; CineScale is by request). On this footage 71 shots became 68 scenes:
@@ -79,8 +89,9 @@ None.
   --install`). Peak memory with Whisper, CLIP and MiniLM loaded in one worker was not measured. Left open from review:
   `api/media.py` is still 406 lines; the doctor repeats the model choice of `embedder`; a truncated model file shows
   a generic error instead of "download again"; deleting old embedding folders happens before the commit.
-- Phase 7, needs the user: (1) look at the Actors page and say whether the groups are usable; correcting them there
-  (merge, split, move) also produces the labels a purity figure for this footage needs; (2) say whether keeping
+- Phase 7, needs the user: (1) answer the "Same person?" questions on the Actors page and fix mixed groups with
+  Split (seen 2026-10-15: one group still holds the blue-cap person and the person with glasses); the answers and
+  corrections are the labels a figure for this footage needs (`eval/actor_pairs.py`); (2) say whether keeping
   YuNet + SFace on every tier is acceptable or InsightFace should be added (D-061).
 - Phase 7 limitations: the grouping is a suggestion; on the user's footage some groups mix different people and one
   person is spread over several groups (seen by eye, not measured). Small, turned, blurred or covered faces are
@@ -92,11 +103,12 @@ None.
   review: grouping memory is not capped (full distance table); a pre-Phase-7 job retried after a `[faces]` change
   can reuse a stale scan; the reasons behind a face's placement are tooltips only (not reachable by keyboard or
   touch); merging two named people keeps one name without asking; `api/media.py` is 406 lines.
-- Phase 6, needs the user: (1) say which languages are spoken in the footage; (2) read the transcript of
-  "Timeline One.mov" in the app and say whether the words are right; (3) for a WER on own material, write the true
+- Phase 6, needs the user: (1) languages answered (English, Kannada); (2) read the transcripts of
+  "Timeline One.mov" and "5A9A…mov" in the app and say whether the words are right; (3) for a WER on own material, write the true
   words of one or two clips into `clip.txt` files (EVALUATION.md section 4).
 - Phase 6 limitations: on noisy clips without clear speech (water, music, crowds) Whisper writes fluent text that was
-  never said; it is marked uncertain in most but not all cases, and nothing is hidden. Results on such audio differ
+  never said; it is marked uncertain in most but not all cases (uncertain lines are hidden by default since
+  2026-10-15; fluent text that passes the model's own limits is still shown). Results on such audio differ
   from run to run, and those clips are slow (up to 166 s for one clip here). One language per clip. `small` is weak
   outside English; `medium` (1.5 GB) was not tried on this 8 GB machine. The keyword index has no stemming and is
   tested with English plus a few Hindi and Kannada words. The GPU path has never run on a real NVIDIA card. No speaker labels, no subtitle (SRT) export, no transcript editing, no "speech present" quality flag. The
@@ -127,7 +139,6 @@ None.
 - Review items left open on purpose: export is a GET that writes a file; a timecode track counted on a different base
   than the video rate (some 50/59.94p cameras) is not handled and needs a real timecoded clip to check; illegal
   drop-frame labels are accepted; the EDL header says non-drop while a drop-frame source keeps `;` (Resolve test decides).
-- `data/phase4-verify/` (141 MB of proxies) is only the Phase 4 check run; delete the folder when the Resolve test is done.
 - Phase 1 known limitations (from review, deferred): single worker assumed (D-016, no lease/lock file); SSE uses a sync polling generator (no async disconnect detection, `job_events` never pruned); `cancel`/`retry` are not atomic conditional updates; `resolve_in_roots` accepts relative paths (Phase 3 callers reject them before calling); 
 - Phase 3 limitations: `media_roots` must be set by hand in `cinemind.toml` (no UI to add roots); the Library has no sort/filter/bulk actions yet (later phases add the data they sort by); no job cancel/retry buttons in the UI yet (API exists); proxy hardware encoders other than VideoToolbox/libx264 are untested here (no NVENC/QSV on this machine); HEVC/ProRes decoding speed on the 8 GB M1 not benchmarked (no numbers claimed).
 - Phase 2 limitations: `e2e/` is linted but not type-checked by `T check`; the SSE hook is unit-tested with a fake EventSource and only the connected indicator uses it (no job UI yet, so no E2E for live progress); the Playwright port 8765 is fixed.

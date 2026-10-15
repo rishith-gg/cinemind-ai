@@ -17,6 +17,7 @@ export const STATUS_LABEL: Record<TranscriptOut["status"], string> = {
   no_audio: "No audio track",
   model_missing: "Speech model not downloaded",
   audio_unreadable: "Audio not readable",
+  not_written: "Detect only (no transcript)",
 };
 
 export const UNCERTAIN_HINT =

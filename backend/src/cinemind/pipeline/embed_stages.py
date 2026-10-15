@@ -205,7 +205,7 @@ def run_embed_text(ctx: StageContext) -> dict[str, Any]:
     spec = embedder.choose_text(ctx.settings, params["model"])
     base: dict[str, Any] = {"model": spec.key, "revision": spec.revision, "dir": None, "count": 0}
     transcript = ctx.previous["transcribe"]
-    if transcript.get("status") not in ("done", "no_speech", "no_audio"):
+    if transcript.get("status") not in ("done", "no_speech", "no_audio", "not_written"):
         # No transcript yet (speech model missing, unreadable audio): try again next run.
         return {
             **base,
