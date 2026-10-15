@@ -19,7 +19,7 @@ _Last updated: 2026-10-14_
 - [x] Phase 6: Transcription (WER measured on a public English sample; the user's own clips are not labelled yet)
 - [x] Phase 7: Faces and actors (purity/ARI measured on a public face set; the user's own footage has no identity labels yet)
 - [x] Phase 8: Embeddings, tags, scenes (tag thresholds evaluated on public labelled photos; scene limit is a convention, not evaluated)
-- [ ] Phase 9: Hybrid search
+- [x] Phase 9: Hybrid search (ablation measured on the user's footage with judgments by Claude; the user's own judgments pending)
 - [ ] Phase 10: Ranking, selects, explainability
 - [ ] Phase 11: Rough cut engine + timeline UI
 - [ ] Phase 12: P1 differentiators
@@ -27,6 +27,17 @@ _Last updated: 2026-10-14_
 - [ ] Phase 14: Polish, packaging, demo
 
 ## Current state
+Phase 9 is complete. The Search page finds shots by a typed query from four lists fused with Reciprocal Rank Fusion
+(k = 60): spoken words (FTS5 / BM25), labels (shown tags, people, scene, file name), meaning of speech (MiniLM) and
+picture (CLIP text side against keyframes); "more like this" and a dropped picture search by picture. Filters: clip,
+person, scene, minimum technical score, with speech. Every card shows the matched line and, per list, the rank and
+score that put it there; ✓ / ✕ judgments feed `eval/search_eval.py`. Measured on the user's 71 shots with 17
+test queries judged by Claude from keyframes (EVALUATION.md section 10): the picture list alone reached nDCG@10
+0.925, MRR 1.0; the fusion of all four 0.907 / 0.971 ("person walking": relevant first result). The text floor
+(0.35) was chosen on 12 separate development queries; with the first floor (0.25) the fusion gives 0.817 / 0.814.
+Code review fixed: searches no longer take the write lock, filters reach beyond each list's depth, uploaded
+pictures are checked by header, tied scores share a rank. Details: AI_PIPELINE.md "Hybrid search".
+
 Phase 8 is complete. Every keyframe gets a picture vector (OpenCLIP ViT-B/32 on this lite machine; SigLIP on the
 larger tiers) and a colour histogram, every transcript segment a text vector (MiniLM, English); all vectors live in
 the database and the per-project vector index files are rebuilt from them (exact numpy search on macOS, FAISS
@@ -53,7 +64,7 @@ Fixes after Phase 8, from the user's feedback (2026-10-15):
   5 Kannada clips marked as speech without text (EVALUATION.md section 5).
 - Deleted `data/phase4-verify/` (the Resolve test it served is confirmed).
 
-Next step: the user's reviews below, then Phase 9 (hybrid search: keyword + text vectors + picture vectors, fused).
+Next step: the user's reviews below (now also ✓ / ✕ on search results), then Phase 10 (ranking, selects, explainability).
 
 Export path for the rest of the project (decided in Phase 4): FCP7 XML into DaVinci Resolve.
 
@@ -75,6 +86,16 @@ file was re-read with OTIO: same cuts, gapless.
 None.
 
 ## Open issues / notes
+- Phase 9, needs the user: search for a few things you would look for when editing and mark results ✓ / ✕; then
+  `uv run python eval/search_eval.py run data --judge user --out` gives figures from your own judgments (the current
+  ones are Claude's, from still keyframes, on queries that favour pictures).
+- Phase 9 limitations: the fused order is slightly below the picture list alone on these picture-only queries (a
+  transcript line or a partly wrong tag can still lift an unrelated shot); weights are fixed until Phase 10's
+  weights panel. The first search after a start loads the models in the API process (observed: about 26 s once;
+  memory not measured; the worker holds its own copies). Judgments are Claude's, from still keyframes. Spoken-word search needs
+  every word in one line. Labels are matched by a scan, fine for hundreds of shots, untested for many thousands. No
+  selects / rejects, no MMR, no quality term in the order (Phase 10). Picture search sees one to three keyframes per
+  shot, not motion ("walking" is judged from a still).
 - Phase 8, needs the user: (1) review tags on a few clips (approve / reject); `eval/tag_feedback.py` turns that into
   precision on this footage; (2) correct the scenes of one edited reel on the Shots and scenes page, so the scene
   limit (0.8, a convention) can be measured instead of guessed. Spoken languages: answered (English and Kannada;

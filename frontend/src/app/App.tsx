@@ -12,10 +12,10 @@ import { ProjectPage } from "../features/projects/ProjectPage";
 import { ProjectsPage } from "../features/projects/ProjectsPage";
 import { ShotsPage } from "../features/shots/ShotsPage";
 import { SettingsPage } from "../features/system/SettingsPage";
+import { SearchPage } from "../features/search/SearchPage";
 import { TranscriptsPage } from "../features/transcripts/TranscriptsPage";
 
 const LATER = [
-  { path: "search", title: "Search", phase: 9 },
   { path: "timeline", title: "Timeline", phase: 11 },
 ];
 
@@ -29,6 +29,7 @@ export function App() {
         <Route path="library" element={<LibraryPage />} />
         <Route path="library/:mediaId" element={<ClipPage />} />
         <Route path="shots" element={<ShotsPage />} />
+        <Route path="search" element={<SearchPage />} />
         <Route path="transcripts" element={<TranscriptsPage />} />
         <Route path="actors" element={<ActorsPage />} />
         <Route path="actors/:actorId" element={<ActorPage />} />

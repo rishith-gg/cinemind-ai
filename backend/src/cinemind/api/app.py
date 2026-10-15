@@ -1,6 +1,7 @@
 """FastAPI application factory. Bound to 127.0.0.1 only (see core/config.py)."""
 
 import logging
+import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -23,6 +24,7 @@ from cinemind.api import (
     media,
     projects,
     quality,
+    search,
     shots,
     speech,
     timelines,
@@ -69,6 +71,10 @@ def create_app(
     frontend_dist: Path | None = FRONTEND_DIST, settings: Settings | None = None
 ) -> FastAPI:
     settings = settings or get_settings()
+    # Rule 1: search embeds queries in this process; models are read from data/models only,
+    # and the Hugging Face libraries must never try the network (as in the worker).
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
@@ -97,6 +103,7 @@ def create_app(
     app.include_router(timelines.router)
     app.include_router(transcripts.router)
     app.include_router(speech.router)
+    app.include_router(search.router)
     app.include_router(actors.router)
     app.include_router(actor_pairs.router)
     app.include_router(analysis.router)

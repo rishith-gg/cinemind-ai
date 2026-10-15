@@ -276,3 +276,53 @@ measurement: the three forest shots are forest tracks and trees; most indoor sho
 decorations, a few are debatable (decorations in a doorway, two people by a plant); two of the three "night / low
 light" shots are dark scenes, the third (a jeep on a forest track in overcast light) looks wrong. Precision on this
 footage needs the user's approve/reject reviews (`eval/tag_feedback.py`).
+
+## 10. Search: P@K, nDCG@10, MRR and ablations on the user's footage (Phase 9)
+Script: `uv run python eval/search_eval.py run data --judge claude --out` (test set) and `--judge claude-dev`
+(development set). Output: `eval/results/search_eval_claude_2026-10-15.txt` / `.json` and
+`eval/results/search_eval_claude-dev_2026-10-15.txt` / `.json`. Judgments: `eval/datasets/search_judgments_claude_2026-10-15.json`
+and `..._claude-dev_2026-10-15.json` (re-import with `eval/search_eval.py import`; shot ids belong to the user's
+project, so they only re-run there). Models as printed: picture clip-vit-b32, text minilm-l6; RRF k = 60, weights 1.
+
+**Who judged what.** Two sets of queries, both written after looking at the footage and judged against every one of
+the 71 shots of the user's project (complete judgments, nothing unjudged): a test set of 17 queries (1,207
+judgments; relevant shots per query median 4, range 1 to 12, as printed) and a development set of 12 other queries
+(852 judgments) used only to choose the text floor. The judge was Claude, from one middle keyframe per shot, not the
+user, and not from the moving picture or the sound; stored as judges "claude" and "claude-dev", apart from the
+user's own marks. Some concepts recur between the sets (fog / misty mountains, lake / river). The queries describe
+what is visible; none asks for spoken words (the footage has six short English transcripts), which favours the
+picture list. Treat the figures as a check of the plumbing on real footage, not as how good search is.
+
+**Choosing the text floor on the development set** (`--text-floor`; hybrid rows in
+`eval/results/search_eval_claude-dev_floors_2026-10-15.txt`): floor 0.25 gave nDCG@10 0.809 / MRR 0.833; 0.35, 0.45,
+0.55 and 1.0 (text list off) all gave 0.833 / 0.917. A text weight of 0.5 (`--weight text=0.5`) changed nothing at
+any floor in a trial run whose output was not kept. 0.35, the lowest value with the best score, became the default (D-086).
+
+**Test set, with the chosen settings:**
+
+| configuration | P@5 | P@10 | nDCG@10 | MRR |
+|---|---|---|---|---|
+| keyword (spoken words, BM25) | 0.000 | 0.000 | 0.000 | 0.000 |
+| labels (tags, named people, scene, file) | 0.047 | 0.024 | 0.043 | 0.078 |
+| text (meaning of speech) | 0.000 | 0.000 | 0.000 | 0.000 |
+| visual (picture) | 0.588 | 0.376 | 0.925 | 1.000 |
+| hybrid (all four, RRF) | 0.600 | 0.376 | 0.907 | 0.971 |
+| hybrid without keyword | 0.600 | 0.376 | 0.907 | 0.971 |
+| hybrid without labels | 0.588 | 0.376 | 0.901 | 0.941 |
+| hybrid without text | 0.600 | 0.376 | 0.921 | 1.000 |
+| hybrid without visual | 0.047 | 0.024 | 0.042 | 0.074 |
+
+P@10 is capped by how few relevant shots most queries have.
+
+What the per-query table of the output file shows:
+- The picture list put a relevant shot first for all 17 queries; the fusion for 16 of 17 ("person walking"
+  included).
+- The fusion lost to pictures alone on two queries: "person talking to the camera" (nDCG 0.928 to 0.710; a shot
+  with a transcript line above the floor came first) and "night" (0.637 to 0.541; the labels list brings in shots
+  tagged "Night / low light", and those tags are known to be partly wrong, section 9). It gained on "forest" (0.822
+  to 0.836, through the "Forest" tag).
+- Spoken-word search found nothing: no query word occurs in the transcripts.
+
+With the first floor, 0.25 (set before any judgment), the same code gives the fusion nDCG@10 0.817 and MRR 0.814
+on the test set (`eval/results/search_eval_claude_floor-0.25_2026-10-15.txt`); the floor was changed using the
+development set only (`eval/results/search_eval_claude-dev_floors_2026-10-15.txt`), not these 17 queries. The user's own marks are counted with `--judge user`; none yet.

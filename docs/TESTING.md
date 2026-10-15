@@ -38,6 +38,19 @@ Test footage is synthetic and generated on demand with ffmpeg (never committed).
   "blue" prompts, and two paraphrases must be closer than an unrelated sentence. Tag precision on labelled photos is
   measured by `eval/tag_calibration.py`, not by a test. The E2E data folder has no picture or text models: the E2E
   test edits scenes by hand and checks the "not downloaded" message on the clip page.
+- Search: unit tests check the RRF arithmetic and weights, the label matching rule, the settings and the metrics
+  (precision, reciprocal rank, nDCG) against their definitions. API tests with the stand-in models (on `cuts.mp4`,
+  four shots, and a made-up transcript) check that a typed query fuses all four lists and explains each, that one
+  list can run alone, that uncertain lines never match, every filter, "more like this", search by a dark-blue picture
+  finding the dark-blue shot, judgments per normalised query, a missing model turning its list off with a message,
+  the text-similarity floor, the evaluation script end to end, tied scores sharing a rank, picture sizes read from
+  JPEG / PNG / WebP headers (TIFF refused), a time before or after every shot, a search leaving no write lock and a
+  stale index rebuilt once and committed, a filter finding a shot beyond each list's depth, the speech filter
+  following the user's tag review, small words and unnamed people not matching labels, other projects' shots and
+  oversized or fake pictures refused, a double judgment replacing the first, and vectors of another model reported
+  instead of hidden. How good search is on real footage is measured
+  by `eval/search_eval.py`, not by a test. The E2E test searches by a file name (the E2E data folder has no models)
+  and moves to the next clip with the N key.
 - Timecode: drop-frame conversion is checked against known values and round-tripped frame by frame across minute and
   ten-minute boundaries.
 

@@ -346,7 +346,48 @@ macOS, where FAISS and torch load clashing OpenMP runtimes into one process and 
 elsewhere. One file per project, kind (`keyframe`, `segment`) and model under
 `data/projects/<id>/index/`, plus a `.ids.json` mapping positions to keyframe or segment ids. Files are derived from
 the `embeddings` rows: rebuilt after the last queued job, when asked (`POST /api/projects/{id}/index/rebuild`), or
-before a search when the rows' digest differs from the one the file was built from. Search itself is Phase 9.
+before a search when the rows' digest differs from the one the file was built from.
+
+## Hybrid search (Phase 9)
+Existing pieces: SQLite FTS5 with BM25, MiniLM (sentences), CLIP / SigLIP (pictures and their text side), and
+Reciprocal Rank Fusion (Cormack, Clarke and Buettcher 2009). Ours: what each list covers, how a line or keyframe
+becomes a shot, the label matching rule, the filters and the explanation. Code: `search/retrievers.py`,
+`search/hybrid.py`. The unit of a result is a shot.
+- *Four lists*, each a ranking of shots with one entry per shot (its best line or keyframe) and its own score:
+  `keyword` (FTS5 / BM25 over transcript lines; every word must occur, matched from the start of a word; uncertain
+  lines left out), `labels` (the query's words against the shot's shown or approved tags, actor names, scene name and
+  file name; people only once the user named them; a label word matches a query word when equal, or when the query
+  word has 4+ letters and starts it, so "walk" finds "walking"; small words such as "a", "of", "in" are ignored;
+  ranked by how many query words matched), `text` (the query through MiniLM against
+  transcript-line vectors; lines under cosine `text_min_similarity` 0.35 are left out, chosen on a development set
+  of queries, D-086), and
+  `visual` (the query in the CLIP prompt "a photo of {query}." against keyframe vectors; best keyframe per shot).
+- *A line or keyframe becomes a shot* by time: the shot of that clip whose start is the last one at or before the
+  spoken word (keyword), the line's start (text), or the keyframe's own shot (visual).
+- *Fusion*: each list gives a shot `weight / (k + rank)`; the fused score is the sum (`[search] rrf_k` 60, weights
+  1, depth 100 per list, 50 results). RRF needs no calibration between a BM25 value and a cosine. The fused score
+  orders results only; it is not a probability. Equal scores in a list share a rank. With a filter set every list
+  is searched in full and cut after filtering. The jump time is the best evidence: a spoken word, then a line, then
+  a keyframe, then the shot start (D-085).
+- *By picture*: "More like this" uses the mean picture vector of a shot's keyframes (the shot itself is left out);
+  a dropped picture (JPEG / PNG / WebP, up to 15 MB, read in memory only) goes through the picture model. Both use
+  the visual list only.
+- *Filters* (clip, person, scene, minimum Technical Quality Score of the shot, "with speech" = the shot's speech tag
+  is shown) remove shots from every list before fusion.
+- *Explanation*: every result carries, per list it is in, its rank, the list's own score, what it added to the
+  fused score, the matched line with the matched words marked, and the labels that matched.
+- *Models in the API process*: the query is embedded in the API process (observed once on the M1, not measured:
+  the first search after a start took about 26 s while the models loaded, later ones 0.05 to 0.8 s). A list whose
+  model is not downloaded, or whose vectors were made with another model, is reported as off with how to fix it;
+  the others still answer. Nothing is downloaded (`HF_HUB_OFFLINE` and `TRANSFORMERS_OFFLINE` are forced on).
+- *Index and locks*: a search compares a cheap fingerprint of the rows (count and id range, no vectors read) with
+  the one the index file was built from, and searches the file as it is when they match, without any lock. Only a
+  changed index is rebuilt, and that rebuild is committed at once, after the query was embedded, so the write lock
+  is held for the build alone. Loaded index files are kept in memory, by file (each build has its own file name).
+- *Pictures sent by the user* must be JPEG, PNG or WebP (checked from the first bytes) and at most 40 megapixels
+  (read from the header before decoding).
+- *Judgments*: on a text search the user can mark a result good or not (✓ / ✕). These marks do not change the
+  order; they are the labels `eval/search_eval.py` measures against (EVALUATION.md section 10).
 
 ### Known limits
 - Thresholds were set on web photos (Places365) and object crops in low light (CODaN), not on video frames; precision
@@ -356,3 +397,9 @@ before a search when the rows' digest differs from the one the file was built fr
   between places every second give almost one scene per shot. Clips are ordered by file name, not capture time.
 - The English text model gives poor vectors for Hindi or Kannada transcripts; the multilingual model is a setting.
 - The models stay loaded in the worker next to Whisper (weight files: 0.6 GB for CLIP B/32, 0.09 GB for MiniLM); peak memory was not measured.
+- Search: the API process holds the picture and text models after the first search (about 0.7 GB of weights more;
+  not measured). On the user's footage the fused ranking scored below the picture list alone, because a transcript
+  line above the text floor, or a partly wrong tag, can lift a shot above better picture matches (EVALUATION.md
+  section 10). Spoken-word
+  search needs every word in one line. Labels depend on the tags, which have known errors. No selects / rejects yet
+  (Phase 10).

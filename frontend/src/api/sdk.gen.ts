@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AnswerActorPairData, AnswerActorPairErrors, AnswerActorPairResponses, BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetActorData, GetActorErrors, GetActorResponses, GetFaceCropData, GetFaceCropErrors, GetFaceCropResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaFacesData, GetMediaFacesErrors, GetMediaFacesResponses, GetMediaQualityData, GetMediaQualityErrors, GetMediaQualityResponses, GetMediaResponses, GetMediaTranscriptData, GetMediaTranscriptErrors, GetMediaTranscriptResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetSpeechLanguagesData, GetSpeechLanguagesErrors, GetSpeechLanguagesResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, ListActorPairsData, ListActorPairsErrors, ListActorPairsResponses, ListActorsData, ListActorsErrors, ListActorsResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaEmbeddingsData, ListMediaEmbeddingsErrors, ListMediaEmbeddingsResponses, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListMediaTagsData, ListMediaTagsErrors, ListMediaTagsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListProjectTagsData, ListProjectTagsErrors, ListProjectTagsResponses, ListProjectTranscriptsData, ListProjectTranscriptsErrors, ListProjectTranscriptsResponses, ListScenesData, ListScenesErrors, ListScenesResponses, ListSetAsideFacesData, ListSetAsideFacesErrors, ListSetAsideFacesResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, ListVectorIndexesData, ListVectorIndexesErrors, ListVectorIndexesResponses, MergeActorsData, MergeActorsErrors, MergeActorsResponses, PlaceFaceTracksData, PlaceFaceTracksErrors, PlaceFaceTracksResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RebuildVectorIndexesData, RebuildVectorIndexesErrors, RebuildVectorIndexesResponses, RegroupActorsData, RegroupActorsErrors, RegroupActorsResponses, RegroupScenesData, RegroupScenesErrors, RegroupScenesResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RenameActorData, RenameActorErrors, RenameActorResponses, RenameSceneData, RenameSceneErrors, RenameSceneResponses, RetryJobData, RetryJobErrors, RetryJobResponses, ReviewTagData, ReviewTagErrors, ReviewTagResponses, SearchTranscriptsData, SearchTranscriptsErrors, SearchTranscriptsResponses, SetClipSpeechLanguageData, SetClipSpeechLanguageErrors, SetClipSpeechLanguageResponses, SetSceneBoundaryData, SetSceneBoundaryErrors, SetSceneBoundaryResponses, SetSpeechLanguagesData, SetSpeechLanguagesErrors, SetSpeechLanguagesResponses, SplitActorData, SplitActorErrors, SplitActorResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
+import type { AnswerActorPairData, AnswerActorPairErrors, AnswerActorPairResponses, BrowseFolderData, BrowseFolderErrors, BrowseFolderResponses, CancelJobData, CancelJobErrors, CancelJobResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateTimelineData, CreateTimelineErrors, CreateTimelineResponses, DeleteMediaData, DeleteMediaErrors, DeleteMediaResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteTimelineData, DeleteTimelineErrors, DeleteTimelineResponses, ExportTimelineData, ExportTimelineErrors, ExportTimelineResponses, GetActorData, GetActorErrors, GetActorResponses, GetFaceCropData, GetFaceCropErrors, GetFaceCropResponses, GetHealthData, GetHealthResponses, GetJobData, GetJobErrors, GetJobResponses, GetKeyframeData, GetKeyframeErrors, GetKeyframeResponses, GetMediaData, GetMediaErrors, GetMediaFacesData, GetMediaFacesErrors, GetMediaFacesResponses, GetMediaQualityData, GetMediaQualityErrors, GetMediaQualityResponses, GetMediaResponses, GetMediaTranscriptData, GetMediaTranscriptErrors, GetMediaTranscriptResponses, GetPosterData, GetPosterErrors, GetPosterResponses, GetProjectData, GetProjectErrors, GetProjectResponses, GetSpeechLanguagesData, GetSpeechLanguagesErrors, GetSpeechLanguagesResponses, GetStripData, GetStripErrors, GetStripResponses, GetTimelineData, GetTimelineErrors, GetTimelineResponses, GetWaveformData, GetWaveformErrors, GetWaveformResponses, ImportMediaData, ImportMediaErrors, ImportMediaResponses, JudgeSearchResultData, JudgeSearchResultErrors, JudgeSearchResultResponses, ListActorPairsData, ListActorPairsErrors, ListActorPairsResponses, ListActorsData, ListActorsErrors, ListActorsResponses, ListJobsData, ListJobsErrors, ListJobsResponses, ListMediaData, ListMediaEmbeddingsData, ListMediaEmbeddingsErrors, ListMediaEmbeddingsResponses, ListMediaErrors, ListMediaResponses, ListMediaShotsData, ListMediaShotsErrors, ListMediaShotsResponses, ListMediaTagsData, ListMediaTagsErrors, ListMediaTagsResponses, ListProjectsData, ListProjectShotsData, ListProjectShotsErrors, ListProjectShotsResponses, ListProjectsResponses, ListProjectTagsData, ListProjectTagsErrors, ListProjectTagsResponses, ListProjectTranscriptsData, ListProjectTranscriptsErrors, ListProjectTranscriptsResponses, ListScenesData, ListScenesErrors, ListScenesResponses, ListSetAsideFacesData, ListSetAsideFacesErrors, ListSetAsideFacesResponses, ListTimelinesData, ListTimelinesErrors, ListTimelinesResponses, ListVectorIndexesData, ListVectorIndexesErrors, ListVectorIndexesResponses, MergeActorsData, MergeActorsErrors, MergeActorsResponses, PlaceFaceTracksData, PlaceFaceTracksErrors, PlaceFaceTracksResponses, ProcessMediaData, ProcessMediaErrors, ProcessMediaResponses, ProcessProjectData, ProcessProjectErrors, ProcessProjectResponses, RebuildVectorIndexesData, RebuildVectorIndexesErrors, RebuildVectorIndexesResponses, RegroupActorsData, RegroupActorsErrors, RegroupActorsResponses, RegroupScenesData, RegroupScenesErrors, RegroupScenesResponses, RelinkMediaData, RelinkMediaErrors, RelinkMediaResponses, RenameActorData, RenameActorErrors, RenameActorResponses, RenameSceneData, RenameSceneErrors, RenameSceneResponses, RetryJobData, RetryJobErrors, RetryJobResponses, ReviewTagData, ReviewTagErrors, ReviewTagResponses, SearchByImageData, SearchByImageErrors, SearchByImageResponses, SearchShotsData, SearchShotsErrors, SearchShotsResponses, SearchTranscriptsData, SearchTranscriptsErrors, SearchTranscriptsResponses, SetClipSpeechLanguageData, SetClipSpeechLanguageErrors, SetClipSpeechLanguageResponses, SetSceneBoundaryData, SetSceneBoundaryErrors, SetSceneBoundaryResponses, SetSpeechLanguagesData, SetSpeechLanguagesErrors, SetSpeechLanguagesResponses, SplitActorData, SplitActorErrors, SplitActorResponses, StreamJobEventsData, StreamJobEventsErrors, StreamJobEventsResponses, StreamProxyData, StreamProxyErrors, StreamProxyResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -297,6 +297,52 @@ export const setSpeechLanguages = <ThrowOnError extends boolean = false>(options
  */
 export const setClipSpeechLanguage = <ThrowOnError extends boolean = false>(options: Options<SetClipSpeechLanguageData, ThrowOnError>): RequestResult<SetClipSpeechLanguageResponses, SetClipSpeechLanguageErrors, ThrowOnError> => (options.client ?? client).put<SetClipSpeechLanguageResponses, SetClipSpeechLanguageErrors, ThrowOnError>({
     url: '/api/media/{media_id}/speech-language',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search Shots
+ *
+ * Shots for a typed query (all four lists) or like a given shot (pictures only), best
+ * first, each with the rank and score it had in every list it is in.
+ */
+export const searchShots = <ThrowOnError extends boolean = false>(options: Options<SearchShotsData, ThrowOnError>): RequestResult<SearchShotsResponses, SearchShotsErrors, ThrowOnError> => (options.client ?? client).post<SearchShotsResponses, SearchShotsErrors, ThrowOnError>({
+    url: '/api/projects/{project_id}/search',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search By Image
+ *
+ * Shots that look like a picture (JPEG, PNG or WebP as the raw request body, up to 15 MB).
+ * The picture is only read in memory, never stored.
+ */
+export const searchByImage = <ThrowOnError extends boolean = false>(options: Options<SearchByImageData, ThrowOnError>): RequestResult<SearchByImageResponses, SearchByImageErrors, ThrowOnError> => (options.client ?? client).post<SearchByImageResponses, SearchByImageErrors, ThrowOnError>({
+    bodySerializer: null,
+    url: '/api/projects/{project_id}/search/image',
+    ...options,
+    headers: {
+        'Content-Type': 'application/octet-stream',
+        ...options.headers
+    }
+});
+
+/**
+ * Judge Result
+ *
+ * Mark a result as a good or a bad answer to a query (or take that back). These are the
+ * labels the search evaluation (`eval/search_eval.py`) measures against.
+ */
+export const judgeSearchResult = <ThrowOnError extends boolean = false>(options: Options<JudgeSearchResultData, ThrowOnError>): RequestResult<JudgeSearchResultResponses, JudgeSearchResultErrors, ThrowOnError> => (options.client ?? client).put<JudgeSearchResultResponses, JudgeSearchResultErrors, ThrowOnError>({
+    url: '/api/projects/{project_id}/search/judgments',
     ...options,
     headers: {
         'Content-Type': 'application/json',

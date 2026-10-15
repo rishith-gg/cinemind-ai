@@ -65,6 +65,11 @@ def _pieces(value: str) -> list[str]:
     return pieces + ([current] if current else [])
 
 
+def words(value: str) -> list[str]:
+    """The words of a label or query term, normalised the way the index normalises text."""
+    return _pieces(value)
+
+
 def query_terms(query: str) -> list[str]:
     """The words of a search box entry. Quotes, control characters and FTS5 operators typed by
     the user are data, never syntax."""

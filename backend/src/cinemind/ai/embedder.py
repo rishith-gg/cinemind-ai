@@ -15,6 +15,7 @@ import hashlib
 import json
 import logging
 import shutil
+import threading
 from collections.abc import Callable, Sequence
 from functools import lru_cache
 from importlib.metadata import version
@@ -41,6 +42,7 @@ log = logging.getLogger(__name__)
 PULL_HINT = "Run `uv run cinemind models pull` once (needs internet), then press Reprocess."
 # Colour histogram: hue x saturation x value bins on the HSV image.
 HIST_BINS = (8, 4, 4)
+_LOADING = threading.Lock()
 _HIST_HEIGHT = 180  # frames are shrunk to this height first; colour needs no detail
 
 
@@ -213,8 +215,14 @@ class VisualModel:
 
 
 @lru_cache(maxsize=1)
-def _visual(spec: EmbedModel, models_root: Path, device: str) -> VisualModel:
+def _visual_cached(spec: EmbedModel, models_root: Path, device: str) -> VisualModel:
     return VisualModel(spec, models_root, device)
+
+
+def _visual(spec: EmbedModel, models_root: Path, device: str) -> VisualModel:
+    # The API serves searches on several threads: load a model once, not once per thread.
+    with _LOADING:
+        return _visual_cached(spec, models_root, device)
 
 
 def embed_images(spec: EmbedModel, settings: Settings, frames: Sequence[Any]) -> Any:
@@ -286,8 +294,13 @@ class TextModel:
 
 
 @lru_cache(maxsize=1)
-def _text(spec: EmbedModel, models_root: Path, device: str) -> TextModel:
+def _text_cached(spec: EmbedModel, models_root: Path, device: str) -> TextModel:
     return TextModel(spec, models_root, device)
+
+
+def _text(spec: EmbedModel, models_root: Path, device: str) -> TextModel:
+    with _LOADING:
+        return _text_cached(spec, models_root, device)
 
 
 def embed_texts(spec: EmbedModel, settings: Settings, texts: Sequence[str]) -> Any:

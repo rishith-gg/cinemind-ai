@@ -180,7 +180,38 @@ class VectorIndexRow(Base):
     dim: Mapped[int]
     count: Mapped[int]
     digest: Mapped[str] = mapped_column(String(64))
+    # Count and id range of the rows (`vector_index.fingerprint`): checked by every search
+    # without reading any vector; a different value means the index may be out of date.
+    fingerprint: Mapped[str] = mapped_column(String(100), default="", server_default="")
     path: Mapped[str] = mapped_column(Text)  # relative to the project directory
     built_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
 
     __table_args__ = (UniqueConstraint("project_id", "kind", "model", name="uq_vector_indexes"),)
+
+
+class SearchJudgment(Base):
+    """Is this shot a good result for this query? The labels of `eval/search_eval.py`.
+    `query` is stored normalised (`normal_query`); `shot_id` has no foreign key, so a judgment
+    outlives a re-detection that keeps the shot's frames (like tag reviews). `judge` says who
+    decided: "user" from the app, or the name given to the evaluation script's import."""
+
+    __tablename__ = "search_judgments"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    project_id: Mapped[str] = _project_fk()
+    media_id: Mapped[str] = _media_fk()
+    query: Mapped[str] = mapped_column(String(200))
+    shot_id: Mapped[str] = mapped_column(String(32))
+    relevant: Mapped[bool]
+    judge: Mapped[str] = mapped_column(String(32))
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("project_id", "query", "shot_id", "judge", name="uq_search_judgment"),
+        Index("ix_search_judgments_project", "project_id", "query"),
+    )
+
+
+def normal_query(text: str) -> str:
+    """How a query is stored with its judgments: trimmed, case-folded, single spaces."""
+    return " ".join(text.casefold().split())[:200]

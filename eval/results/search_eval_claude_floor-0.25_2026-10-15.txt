@@ -1,0 +1,35 @@
+Search evaluation, 2026-10-15: project 31c271179e7d45ec9bee76aa34f8af50 (71 shots), judge claude, 1207 judgments, 17 queries with at least one relevant shot (0 judged queries without any left out); relevant shots per query: median 4, range 1 to 12.
+Unjudged shots count as not relevant; 'unjudged' is their mean number in the top 10. Queries are searched in their stored, normalised form (lower case).
+Models: picture clip-vit-b32, text minilm-l6. Machine: Darwin arm64.
+Settings: RRF k=60, depth 100, weights {'keyword': 1.0, 'labels': 1.0, 'text': 1.0, 'visual': 1.0}, text floor 0.25, visual prompt 'a photo of {}.'.
+
+configuration           P@5   P@10  nDCG@10    MRR  unjudged
+keyword               0.000  0.000    0.000  0.000       0.0
+labels                0.047  0.024    0.043  0.078       0.0
+text                  0.000  0.000    0.000  0.000       0.0
+visual                0.588  0.376    0.925  1.000       0.0
+hybrid                0.565  0.376    0.817  0.814       0.0
+hybrid - keyword      0.565  0.376    0.817  0.814       0.0
+hybrid - labels       0.565  0.376    0.802  0.755       0.0
+hybrid - text         0.600  0.376    0.921  1.000       0.0
+hybrid - visual       0.047  0.024    0.042  0.074       0.0
+
+nDCG@10 per query (first result relevant: *)
+query                                      keyword        labels          text        visual        hybrid hybrid - text
+a river                                     0.000         0.000         0.000         0.962*        0.733         0.962*
+city street with traffic                    0.000         0.000         0.000         1.000*        1.000*        1.000*
+flower decorations for a festival           0.000         0.000         0.000         0.934*        0.934*        0.934*
+forest                                      0.000         0.539*        0.000         0.822*        0.811*        0.836*
+jeep on a muddy road                        0.000         0.000         0.000         1.000*        1.000*        1.000*
+misty mountains                             0.000         0.000         0.000         0.725*        0.725*        0.725*
+night                                       0.000         0.195         0.000         0.637*        0.541*        0.559*
+old man and woman sitting                   0.000         0.000         0.000         0.933*        0.933*        0.933*
+people in an office                         0.000         0.000         0.000         1.000*        0.631         1.000*
+person talking to the camera                0.000         0.000         0.000         0.928*        0.615         0.928*
+person walking                              0.000         0.000         0.000         1.000*        0.693         1.000*
+plates of food                              0.000         0.000         0.000         0.982*        0.982*        0.982*
+selfie of friends                           0.000         0.000         0.000         0.956*        0.748         0.956*
+swimming pool                               0.000         0.000         0.000         1.000*        1.000*        1.000*
+underwater                                  0.000         0.000         0.000         1.000*        0.693         1.000*
+waterfall                                   0.000         0.000         0.000         0.846*        0.846*        0.846*
+women lighting a lamp                       0.000         0.000         0.000         1.000*        1.000*        1.000*

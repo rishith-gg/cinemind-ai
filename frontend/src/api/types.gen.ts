@@ -756,6 +756,46 @@ export type JobStageOut = {
 };
 
 /**
+ * JudgmentIn
+ */
+export type JudgmentIn = {
+    /**
+     * Query
+     */
+    query: string;
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Relevant
+     */
+    relevant: boolean | null;
+};
+
+/**
+ * JudgmentOut
+ */
+export type JudgmentOut = {
+    /**
+     * Query
+     */
+    query: string;
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Relevant
+     */
+    relevant: boolean | null;
+    /**
+     * Judged
+     */
+    judged: number;
+};
+
+/**
  * KeyframeOut
  */
 export type KeyframeOut = {
@@ -779,6 +819,42 @@ export type KeyframeOut = {
      * Sharpness
      */
     sharpness: number;
+};
+
+/**
+ * ListHit
+ *
+ * Why a result is there, for one list.
+ */
+export type ListHit = {
+    /**
+     * Rank
+     */
+    rank: number;
+    /**
+     * Score
+     */
+    score: number;
+    /**
+     * Contribution
+     */
+    contribution: number;
+    /**
+     * Time S
+     */
+    time_s: number;
+    /**
+     * Text
+     */
+    text: string | null;
+    /**
+     * Parts
+     */
+    parts: Array<TextPart> | null;
+    /**
+     * Matched
+     */
+    matched: Array<string>;
 };
 
 /**
@@ -1352,6 +1428,151 @@ export type ScenesOut = {
      * Message
      */
     message: string | null;
+};
+
+/**
+ * SearchFilters
+ */
+export type SearchFilters = {
+    /**
+     * Media Id
+     */
+    media_id?: string | null;
+    /**
+     * Actor Id
+     */
+    actor_id?: string | null;
+    /**
+     * Scene Id
+     */
+    scene_id?: string | null;
+    /**
+     * Min Quality
+     */
+    min_quality?: number | null;
+    /**
+     * Has Dialogue
+     */
+    has_dialogue?: boolean;
+};
+
+/**
+ * SearchOut
+ */
+export type SearchOut = {
+    /**
+     * Query
+     */
+    query: string | null;
+    /**
+     * Like Shot Id
+     */
+    like_shot_id: string | null;
+    /**
+     * Results
+     */
+    results: Array<SearchResult>;
+    /**
+     * Lists
+     */
+    lists: {
+        [key: string]: number;
+    };
+    /**
+     * Unavailable
+     */
+    unavailable: {
+        [key: string]: string;
+    };
+    /**
+     * Rrf K
+     */
+    rrf_k: number;
+    /**
+     * Weights
+     */
+    weights: {
+        [key: string]: number;
+    };
+};
+
+/**
+ * SearchRequest
+ */
+export type SearchRequest = {
+    /**
+     * Q
+     */
+    q?: string | null;
+    /**
+     * Like Shot Id
+     */
+    like_shot_id?: string | null;
+    filters?: SearchFilters;
+    /**
+     * Use
+     */
+    use?: Array<'keyword' | 'labels' | 'text' | 'visual'> | null;
+};
+
+/**
+ * SearchResult
+ */
+export type SearchResult = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Shot Index
+     */
+    shot_index: number;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Jump S
+     */
+    jump_s: number;
+    /**
+     * Keyframe Url
+     */
+    keyframe_url: string | null;
+    /**
+     * Scene Name
+     */
+    scene_name: string | null;
+    /**
+     * Quality Score
+     */
+    quality_score: number | null;
+    /**
+     * Score
+     */
+    score: number;
+    /**
+     * Why
+     */
+    why: {
+        [key: string]: ListHit;
+    };
+    /**
+     * Relevant
+     */
+    relevant: boolean | null;
 };
 
 /**
@@ -3844,6 +4065,165 @@ export type SetClipSpeechLanguageResponses = {
 };
 
 export type SetClipSpeechLanguageResponse = SetClipSpeechLanguageResponses[keyof SetClipSpeechLanguageResponses];
+
+export type SearchShotsData = {
+    body: SearchRequest;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/search';
+};
+
+export type SearchShotsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type SearchShotsError = SearchShotsErrors[keyof SearchShotsErrors];
+
+export type SearchShotsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SearchOut;
+};
+
+export type SearchShotsResponse = SearchShotsResponses[keyof SearchShotsResponses];
+
+export type SearchByImageData = {
+    body: Blob | File;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: {
+        /**
+         * Media Id
+         */
+        media_id?: string | null;
+        /**
+         * Actor Id
+         */
+        actor_id?: string | null;
+        /**
+         * Scene Id
+         */
+        scene_id?: string | null;
+        /**
+         * Min Quality
+         */
+        min_quality?: number | null;
+        /**
+         * Has Dialogue
+         */
+        has_dialogue?: boolean;
+    };
+    url: '/api/projects/{project_id}/search/image';
+};
+
+export type SearchByImageErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type SearchByImageError = SearchByImageErrors[keyof SearchByImageErrors];
+
+export type SearchByImageResponses = {
+    /**
+     * Successful Response
+     */
+    200: SearchOut;
+};
+
+export type SearchByImageResponse = SearchByImageResponses[keyof SearchByImageResponses];
+
+export type JudgeSearchResultData = {
+    body: JudgmentIn;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/search/judgments';
+};
+
+export type JudgeSearchResultErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type JudgeSearchResultError = JudgeSearchResultErrors[keyof JudgeSearchResultErrors];
+
+export type JudgeSearchResultResponses = {
+    /**
+     * Successful Response
+     */
+    200: JudgmentOut;
+};
+
+export type JudgeSearchResultResponse = JudgeSearchResultResponses[keyof JudgeSearchResultResponses];
 
 export type ListActorsData = {
     body?: never;

@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 import numpy as np
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from cinemind.core.config import Settings
@@ -166,6 +166,21 @@ def _digest(rows: list[tuple[int, str, bytes]]) -> str:
     return h.hexdigest()
 
 
+def fingerprint(session: Session, project_id: str, kind: str, model: str) -> str:
+    """Count, smallest, largest and summed row id of the rows: one SQL aggregate, no vectors
+    read. Rows are only ever added or deleted (a changed vector is a new row), so any change
+    changes this."""
+    query = (
+        select(func.count(), func.min(Embedding.id), func.max(Embedding.id), func.sum(Embedding.id))
+        .join(MediaAsset, MediaAsset.id == Embedding.media_id)
+        .where(
+            MediaAsset.project_id == project_id, Embedding.kind == kind, Embedding.model == model
+        )
+    )
+    count, low, high, total = session.execute(query).one()
+    return f"{count}:{low}:{high}:{total}"
+
+
 def current_digest(session: Session, project_id: str, kind: str, model: str) -> str:
     """The digest an index of these rows would have now (compare with the stored one)."""
     return _digest(_rows(session, project_id, kind, model))
@@ -209,6 +224,7 @@ def rebuild(
         and not force
         and (settings.project_dir(project_id) / record.path).is_file()
     ):
+        record.fingerprint = fingerprint(session, project_id, kind, model)
         return record
     vectors = np.stack([np.frombuffer(v, dtype=np.float32) for _, _, v in rows])
     index = new_index(vectors.shape[1], choose_backend(settings.embed.index_backend))
@@ -236,6 +252,7 @@ def rebuild(
         session.add(record)
     record.backend, record.dim, record.count = index.backend, int(vectors.shape[1]), len(rows)
     record.digest, record.path, record.built_at = digest, f"index/{name}{suffix}", utcnow()
+    record.fingerprint = fingerprint(session, project_id, kind, model)
     log.info(
         "built %s index %s for project %s (%d vectors)", index.backend, name, project_id, len(rows)
     )
@@ -259,24 +276,68 @@ def rebuild_project(
     return built
 
 
+# Loaded index files, by path. A path names one build (its digest is in the file name), so a
+# cached entry can never be stale; old builds simply stop being asked for.
+_LOADED: dict[str, tuple[VectorIndex, list[str]]] = {}
+_KEEP_LOADED = 8
+
+
 def load(settings: Settings, record: VectorIndexRow) -> tuple[VectorIndex, list[str]]:
-    """The index file of a record and the ref ids of its positions."""
+    """The index file of a record and the ref ids of its positions (cached per file)."""
     path = settings.project_dir(record.project_id) / record.path
-    ids = json.loads(path.with_suffix(".ids.json").read_text())
-    index: VectorIndex = (
-        FaissIndex.load(path) if record.backend == "faiss" else NumpyIndex.load(path)
+    key = str(path)
+    if key not in _LOADED:
+        ids = json.loads(path.with_suffix(".ids.json").read_text())
+        index: VectorIndex = (
+            FaissIndex.load(path) if record.backend == "faiss" else NumpyIndex.load(path)
+        )
+        if len(_LOADED) >= _KEEP_LOADED:
+            _LOADED.pop(next(iter(_LOADED)))
+        _LOADED[key] = (index, ids)
+    return _LOADED[key]
+
+
+def _current(
+    session: Session, settings: Settings, project_id: str, kind: str, model: str
+) -> VectorIndexRow | None:
+    """The record to search, rebuilt first only if the rows changed. A search otherwise takes no
+    lock; a rebuild is committed at once, so the write lock is held for the build alone."""
+    record = session.scalar(
+        select(VectorIndexRow).where(
+            VectorIndexRow.project_id == project_id,
+            VectorIndexRow.kind == kind,
+            VectorIndexRow.model == model,
+        )
     )
-    return index, ids
+    if (
+        record is not None
+        and record.fingerprint == fingerprint(session, project_id, kind, model)
+        and record.backend == choose_backend(settings.embed.index_backend)
+        and (settings.project_dir(project_id) / record.path).is_file()
+    ):
+        return record
+    record = rebuild(session, settings, project_id, kind, model)
+    session.commit()
+    return record
 
 
 def search(
     session: Session, settings: Settings, project_id: str, kind: str, model: str, query: Any, k: int
 ) -> list[tuple[str, float]]:
-    """(ref id, cosine similarity) of the k nearest vectors; the index is brought up to date
-    first."""
-    record = rebuild(session, settings, project_id, kind, model)
+    """(ref id, cosine similarity) of the k nearest vectors. The index is brought up to date
+    first if its rows changed (see `_current`); call this after any model inference, never
+    inside a transaction that must stay open."""
+    record = _current(session, settings, project_id, kind, model)
     if record is None:
         return []
-    index, ids = load(settings, record)
-    scores, positions = index.search(np.asarray(query, dtype=np.float32), k)
+    try:
+        index, ids = load(settings, record)
+    except FileNotFoundError:  # another process replaced that build a moment ago
+        session.rollback()
+        record = rebuild(session, settings, project_id, kind, model)
+        session.commit()
+        if record is None:
+            return []
+        index, ids = load(settings, record)
+    scores, positions = index.search(np.asarray(query, dtype=np.float32), min(k, len(ids)))
     return [(ids[p], float(s)) for s, p in zip(scores[0], positions[0], strict=True) if p >= 0]

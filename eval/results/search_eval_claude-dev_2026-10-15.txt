@@ -1,0 +1,30 @@
+Search evaluation, 2026-10-15: project 31c271179e7d45ec9bee76aa34f8af50 (71 shots), judge claude-dev, 852 judgments, 12 queries with at least one relevant shot (0 judged queries without any left out); relevant shots per query: median 3.0, range 1 to 10.
+Unjudged shots count as not relevant; 'unjudged' is their mean number in the top 10. Queries are searched in their stored, normalised form (lower case).
+Models: picture clip-vit-b32, text minilm-l6. Machine: Darwin arm64.
+Settings: RRF k=60, depth 100, weights {'keyword': 1.0, 'labels': 1.0, 'text': 1.0, 'visual': 1.0}, text floor 0.35, visual prompt 'a photo of {}.'.
+
+configuration           P@5   P@10  nDCG@10    MRR  unjudged
+keyword               0.000  0.000    0.000  0.000       0.0
+labels                0.017  0.017    0.038  0.042       0.0
+text                  0.000  0.000    0.000  0.000       0.0
+visual                0.433  0.275    0.832  0.917       0.0
+hybrid                0.433  0.275    0.833  0.917       0.0
+hybrid - keyword      0.433  0.275    0.833  0.917       0.0
+hybrid - labels       0.433  0.275    0.832  0.917       0.0
+hybrid - text         0.433  0.275    0.833  0.917       0.0
+hybrid - visual       0.017  0.017    0.038  0.042       0.0
+
+nDCG@10 per query (first result relevant: *)
+query                                      keyword        labels          text        visual        hybrid hybrid - text
+a man wearing a cap                         0.000         0.000         0.000         1.000*        1.000*        1.000*
+bowls of snacks                             0.000         0.000         0.000         0.920*        0.920*        0.920*
+crowd in a stadium                          0.000         0.000         0.000         1.000*        1.000*        1.000*
+fog                                         0.000         0.000         0.000         0.931*        0.931*        0.931*
+green trees                                 0.000         0.000         0.000         0.539*        0.539*        0.539*
+indoor room                                 0.000         0.453         0.000         0.901*        0.913*        0.913*
+lake                                        0.000         0.000         0.000         0.877*        0.877*        0.877*
+shirtless man                               0.000         0.000         0.000         0.877*        0.877*        0.877*
+statue of a god                             0.000         0.000         0.000         0.906*        0.906*        0.906*
+two men sitting outside                     0.000         0.000         0.000         0.631         0.631         0.631 
+wet rocks                                   0.000         0.000         0.000         0.639         0.639         0.639 
+woman in a saree                            0.000         0.000         0.000         0.765*        0.765*        0.765*

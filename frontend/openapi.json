@@ -2975,6 +2975,365 @@
         }
       }
     },
+    "/api/projects/{project_id}/search": {
+      "post": {
+        "tags": [
+          "search"
+        ],
+        "summary": "Search Shots",
+        "description": "Shots for a typed query (all four lists) or like a given shot (pictures only), best\nfirst, each with the rank and score it had in every list it is in.",
+        "operationId": "searchShots",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/search/image": {
+      "post": {
+        "tags": [
+          "search"
+        ],
+        "summary": "Search By Image",
+        "description": "Shots that look like a picture (JPEG, PNG or WebP as the raw request body, up to 15 MB).\nThe picture is only read in memory, never stored.",
+        "operationId": "searchByImage",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "media_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 32
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Media Id"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 32
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Actor Id"
+            }
+          },
+          {
+            "name": "scene_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 32
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Scene Id"
+            }
+          },
+          {
+            "name": "min_quality",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "maximum": 1,
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Quality"
+            }
+          },
+          {
+            "name": "has_dialogue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Has Dialogue"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/search/judgments": {
+      "put": {
+        "tags": [
+          "search"
+        ],
+        "summary": "Judge Result",
+        "description": "Mark a result as a good or a bad answer to a query (or take that back). These are the\nlabels the search evaluation (`eval/search_eval.py`) measures against.",
+        "operationId": "judgeSearchResult",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JudgmentIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JudgmentOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
     "/api/projects/{project_id}/actors": {
       "get": {
         "tags": [
@@ -6221,6 +6580,79 @@
         ],
         "title": "JobStageOut"
       },
+      "JudgmentIn": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Query"
+          },
+          "shot_id": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Shot Id"
+          },
+          "relevant": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relevant"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query",
+          "shot_id",
+          "relevant"
+        ],
+        "title": "JudgmentIn"
+      },
+      "JudgmentOut": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Query"
+          },
+          "shot_id": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Shot Id"
+          },
+          "relevant": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relevant"
+          },
+          "judged": {
+            "type": "integer",
+            "title": "Judged"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query",
+          "shot_id",
+          "relevant",
+          "judged"
+        ],
+        "title": "JudgmentOut"
+      },
       "KeyframeOut": {
         "properties": {
           "id": {
@@ -6253,6 +6685,71 @@
           "sharpness"
         ],
         "title": "KeyframeOut"
+      },
+      "ListHit": {
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "contribution": {
+            "type": "number",
+            "title": "Contribution"
+          },
+          "time_s": {
+            "type": "number",
+            "title": "Time S"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "parts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TextPart"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parts"
+          },
+          "matched": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Matched",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "rank",
+          "score",
+          "contribution",
+          "time_s",
+          "text",
+          "parts",
+          "matched"
+        ],
+        "title": "ListHit",
+        "description": "Why a result is there, for one list."
       },
       "MediaFacesOut": {
         "properties": {
@@ -7281,6 +7778,295 @@
           "message"
         ],
         "title": "ScenesOut"
+      },
+      "SearchFilters": {
+        "properties": {
+          "media_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Id"
+          },
+          "actor_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Id"
+          },
+          "scene_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scene Id"
+          },
+          "min_quality": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Quality"
+          },
+          "has_dialogue": {
+            "type": "boolean",
+            "title": "Has Dialogue",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "SearchFilters"
+      },
+      "SearchOut": {
+        "properties": {
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Query"
+          },
+          "like_shot_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Like Shot Id"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SearchResult"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "lists": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Lists"
+          },
+          "unavailable": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Unavailable"
+          },
+          "rrf_k": {
+            "type": "integer",
+            "title": "Rrf K"
+          },
+          "weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Weights"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query",
+          "like_shot_id",
+          "results",
+          "lists",
+          "unavailable",
+          "rrf_k",
+          "weights"
+        ],
+        "title": "SearchOut"
+      },
+      "SearchRequest": {
+        "properties": {
+          "q": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Q"
+          },
+          "like_shot_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Like Shot Id"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/SearchFilters",
+            "default": {
+              "has_dialogue": false
+            }
+          },
+          "use": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "keyword",
+                    "labels",
+                    "text",
+                    "visual"
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use"
+          }
+        },
+        "type": "object",
+        "title": "SearchRequest"
+      },
+      "SearchResult": {
+        "properties": {
+          "shot_id": {
+            "type": "string",
+            "title": "Shot Id"
+          },
+          "media_id": {
+            "type": "string",
+            "title": "Media Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "shot_index": {
+            "type": "integer",
+            "title": "Shot Index"
+          },
+          "start_s": {
+            "type": "number",
+            "title": "Start S"
+          },
+          "end_s": {
+            "type": "number",
+            "title": "End S"
+          },
+          "jump_s": {
+            "type": "number",
+            "title": "Jump S"
+          },
+          "keyframe_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keyframe Url"
+          },
+          "scene_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scene Name"
+          },
+          "quality_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Score"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "why": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ListHit"
+            },
+            "type": "object",
+            "title": "Why"
+          },
+          "relevant": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relevant"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shot_id",
+          "media_id",
+          "filename",
+          "shot_index",
+          "start_s",
+          "end_s",
+          "jump_s",
+          "keyframe_url",
+          "scene_name",
+          "quality_score",
+          "score",
+          "why",
+          "relevant"
+        ],
+        "title": "SearchResult"
       },
       "ShotOut": {
         "properties": {

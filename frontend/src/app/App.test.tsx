@@ -95,6 +95,6 @@ it("shows a not-found state for an unknown project", async () => {
 });
 
 it("labels unbuilt screens honestly", async () => {
-  renderApp("/search");
-  expect(await screen.findByText(/built in Phase 9/)).toBeInTheDocument();
+  renderApp("/timeline");
+  expect(await screen.findByText(/built in Phase 11/)).toBeInTheDocument();
 });

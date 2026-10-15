@@ -114,6 +114,19 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
 - CLI: `cinemind models pull` now also fetches the picture and text models of the tier (`models pull visual`,
   `models pull text`, or a model name such as `siglip-base`); `models list` and `cinemind doctor` report them.
 
+## Implemented (Phase 9): hybrid search
+- `POST /api/projects/{id}/search` `{q | like_shot_id, filters?, use?}`: shots, best first. `filters`: `media_id`,
+  `actor_id`, `scene_id`, `min_quality` (0..1), `has_dialogue`. `use`: which lists (`keyword`, `labels`, `text`,
+  `visual`; default all). A `like_shot_id` search uses the picture list only. Each result: shot, clip, times,
+  `jump_s`, `keyframe_url`, scene name, quality score, fused `score`, `why` (per list: `rank`, `score`,
+  `contribution`, `time_s`, matched `text` / `parts` / `matched` labels) and the user's judgment (`relevant`).
+  The response also says how many shots each list found, which lists could not run and why, `rrf_k` and `weights`.
+- `POST /api/projects/{id}/search/image`: a picture as the raw body (`application/octet-stream`, up to 15 MB; not
+  stored); filters as query parameters. 413 when too large, 422 when not a picture.
+- `PUT /api/projects/{id}/search/judgments` `{query, shot_id, relevant}`: mark a result good (`true`) or not
+  (`false`), or take it back (`null`); stored with the query normalised (trimmed, lower case, single spaces).
+- Errors: an empty query 422, a shot from another project 404.
+
 ## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc, transcribe, faces, embed_visual, embed_text, tags
 - validate: ffprobe (by content, not extension): rational fps, VFR flag (avg vs nominal rate differ > 0.5 %),
   codecs, display size (rotation applied), timecode, colour tags. Corrupt or non-media files fail with a plain message.

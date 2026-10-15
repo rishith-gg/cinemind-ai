@@ -70,8 +70,8 @@ def _after_ingest(factory: sessionmaker[Session], settings: Settings, job_id: st
 def main() -> None:
     # Rule 1: processing never downloads. Models are read from data/models by path already; this
     # also stops the Hugging Face libraries from trying the network if that ever changes.
-    os.environ.setdefault("HF_HUB_OFFLINE", "1")
-    os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
     parser = argparse.ArgumentParser(description="CineMind job worker")
     parser.add_argument("--parent-pid", type=int, default=None)
     args = parser.parse_args()
