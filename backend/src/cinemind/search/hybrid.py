@@ -21,7 +21,7 @@ from cinemind.core.search_config import RETRIEVERS
 from cinemind.db.analysis import Tag
 from cinemind.db.models import MediaAsset, QualityMetric, Shot
 from cinemind.db.people import FaceTrack
-from cinemind.pipeline import tag_review
+from cinemind.pipeline import shot_marks, tag_review
 from cinemind.search import retrievers
 from cinemind.search.retrievers import Item, Shots, Unavailable
 
@@ -33,11 +33,13 @@ class Filters:
     scene_id: str | None = None
     min_quality: float | None = None  # the shot's Technical Quality Score, 0..1
     has_dialogue: bool = False  # the shot has the "speech" tag (certain transcript lines)
+    selects_only: bool = False  # only shots the user selected
+    include_rejected: bool = False  # rejected shots are left out unless this is set
 
     def active(self) -> bool:
         return any(
             (self.media_id, self.actor_id, self.scene_id, self.min_quality is not None,
-             self.has_dialogue)
+             self.has_dialogue, self.selects_only)
         )  # fmt: skip
 
 
@@ -61,6 +63,8 @@ def allowed_shots(session: Session, project_id: str, filters: Filters) -> set[st
         good = select(QualityMetric.shot_id).where(QualityMetric.score >= filters.min_quality)
         query = query.where(Shot.id.in_(good))
     kept = set(session.scalars(query))
+    if filters.selects_only:
+        kept &= shot_marks.selected(session, project_id)
     if filters.has_dialogue:  # the speech tag as the app shows it: the user's review decides
         tags = list(
             session.scalars(select(Tag).where(Tag.group == "speech", Tag.shot_id.in_(kept)))
@@ -134,9 +138,14 @@ class Outcome:
 def run(session: Session, settings: Settings, project_id: str, query: Query) -> Outcome:
     cfg = settings.search
     keep = allowed_shots(session, project_id, query.filters)
+    # Rejected shots are few: dropped after each list, without searching the lists in full.
+    hidden: set[str] = (
+        set() if query.filters.include_rejected else shot_marks.rejected(session, project_id)
+    )
     # With a filter every list is searched in full and cut to `depth` after filtering, so the
     # shots a filter keeps are found however far down the project-wide ranking they are.
     depth = cfg.depth if keep is None else 1_000_000
+    depth += len(hidden) if keep is None else 0  # rejected shots must not shorten a list
     shots = Shots(session, project_id)
     unknown = set(query.use) - set(RETRIEVERS)
     if unknown:
@@ -172,6 +181,8 @@ def run(session: Session, settings: Settings, project_id: str, query: Query) -> 
         except Unavailable as exc:
             unavailable[name] = str(exc)
             continue
-        lists[name] = [i for i in found if keep is None or i.shot_id in keep][: cfg.depth]
+        lists[name] = [
+            i for i in found if (keep is None or i.shot_id in keep) and i.shot_id not in hidden
+        ][: cfg.depth]
     results = fuse(lists, cfg.weights, cfg.rrf_k, cfg.max_results)
     return Outcome(results, {name: len(items) for name, items in lists.items()}, unavailable)

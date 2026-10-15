@@ -326,3 +326,30 @@ What the per-query table of the output file shows:
 With the first floor, 0.25 (set before any judgment), the same code gives the fusion nDCG@10 0.817 and MRR 0.814
 on the test set (`eval/results/search_eval_claude_floor-0.25_2026-10-15.txt`); the floor was changed using the
 development set only (`eval/results/search_eval_claude-dev_floors_2026-10-15.txt`), not these 17 queries. The user's own marks are counted with `--judge user`; none yet.
+
+## 11. Ranking: the weighted order with the duplicate penalty (Phase 10)
+Same scripts, judgments and output files as section 10 (the `ranked` rows). Ranking weights: the defaults
+(relevance 1.0, quality 0.2, selection 0.3, person 0.1, scene 0.1, duplicate 0.3) and duplicate threshold 0.85, set
+before this run and not tuned on either set. The script also prints the spread of picture similarity between the
+user's shots (2,485 pairs): median 0.453, 90th percentile 0.658, 99th 0.820, maximum 0.952; the threshold was put
+above the 99th percentile so the penalty applies to near-identical shots only. The project has no selects or stars,
+so the selection signal is 0 everywhere and is not measured (the script leaves that row out).
+
+| configuration | dev nDCG@10 | dev MRR | test P@5 | test nDCG@10 | test MRR |
+|---|---|---|---|---|---|
+| hybrid (fused order, section 10) | 0.833 | 0.917 | 0.600 | 0.907 | 0.971 |
+| ranked (defaults) | 0.820 | 0.958 | 0.565 | 0.881 | 0.961 |
+| ranked without quality | 0.811 | 0.917 | 0.565 | 0.899 | 0.971 |
+| ranked without the duplicate penalty | 0.833 | 0.958 | 0.576 | 0.894 | 0.961 |
+
+What this says, and what it cannot:
+- With the default weights the ranking lowers nDCG@10 on both sets (dev 0.833 to 0.820, test 0.907 to 0.881); MRR
+  rose on dev (0.917 to 0.958) and fell slightly on test (0.971 to 0.961). It still put a relevant shot first for
+  16 of the 17 test queries, "person walking" included.
+- Quality: on the test set it costs (0.899 without it), on the dev set it helps (0.811 without it). It moves
+  well-exposed shots up whether or not they match better ("jeep on a muddy road" 1.000 to 0.918).
+- Duplicate penalty: it costs a little on both sets (0.894 and 0.833 without it). These judgments mark every
+  look-alike shot of a query relevant, and nDCG rewards keeping them together, while the penalty deliberately spreads
+  them; binary relevance cannot credit variety, so these figures cannot say whether an editor is better served.
+- Nothing was tuned on the test set; the weights can be changed per search on the Search page, and the order
+  changes deterministically with them (tested).

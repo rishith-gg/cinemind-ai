@@ -20,13 +20,22 @@ _Last updated: 2026-10-14_
 - [x] Phase 7: Faces and actors (purity/ARI measured on a public face set; the user's own footage has no identity labels yet)
 - [x] Phase 8: Embeddings, tags, scenes (tag thresholds evaluated on public labelled photos; scene limit is a convention, not evaluated)
 - [x] Phase 9: Hybrid search (ablation measured on the user's footage with judgments by Claude; the user's own judgments pending)
-- [ ] Phase 10: Ranking, selects, explainability
+- [x] Phase 10: Ranking, selects, explainability (learned re-weighting P1-D deferred to Phase 12)
 - [ ] Phase 11: Rough cut engine + timeline UI
 - [ ] Phase 12: P1 differentiators
 - [ ] Phase 13: Evaluation
 - [ ] Phase 14: Polish, packaging, demo
 
 ## Current state
+Phase 10 is complete. Search results are ranked after fusion by a weighted sum of relevance, technical quality, the
+user's selects / stars, named person and scene matches, minus a penalty for near-identical pictures (MMR, cosine
+above 0.85); every card shows the breakdown (value × weight = contribution) and which shot it duplicates. What-if
+sliders change the weights for one search and the order changes deterministically. Select / Reject / 1-5 stars on
+search cards and the Shots page; rejected shots leave every result list unless "Show rejected"; "Selects only".
+Marks are logged as feedback for a later learned re-weighting (P1-D, Phase 12). Measured with the same judgments as
+Phase 9 (EVALUATION.md section 11): the default weights lower nDCG@10 slightly (test 0.907 to 0.881, dev 0.833 to
+0.820); binary judgments cannot credit the variety the duplicate penalty adds. Not tuned on the test set.
+
 Phase 9 is complete. The Search page finds shots by a typed query from four lists fused with Reciprocal Rank Fusion
 (k = 60): spoken words (FTS5 / BM25), labels (shown tags, people, scene, file name), meaning of speech (MiniLM) and
 picture (CLIP text side against keyframes); "more like this" and a dropped picture search by picture. Filters: clip,
@@ -64,7 +73,7 @@ Fixes after Phase 8, from the user's feedback (2026-10-15):
   5 Kannada clips marked as speech without text (EVALUATION.md section 5).
 - Deleted `data/phase4-verify/` (the Resolve test it served is confirmed).
 
-Next step: the user's reviews below (now also ✓ / ✕ on search results), then Phase 10 (ranking, selects, explainability).
+Next step: the user's reviews below (✓ / ✕ on search results, selects / rejects on shots), then Phase 11 (rough cut engine + timeline UI).
 
 Export path for the rest of the project (decided in Phase 4): FCP7 XML into DaVinci Resolve.
 
@@ -86,6 +95,12 @@ file was re-read with OTIO: same cuts, gapless.
 None.
 
 ## Open issues / notes
+- Phase 10, needs the user: select and reject shots while browsing (Shots page or Search), and judge a few searches;
+  then the ranking can be measured with selects and with the user's own sense of relevance.
+- Phase 10 limitations: default weights are conventions and cost a little nDCG on Claude's picture-only judgments;
+  the duplicate threshold 0.85 is a convention placed from the similarity spread of this footage; quality is the
+  shot's Technical Quality Score only (no aesthetic score); no learned re-weighting yet (P1-D, Phase 12); MMR is
+  quadratic in the number of results (fine at 50).
 - Phase 9, needs the user: search for a few things you would look for when editing and mark results ✓ / ✕; then
   `uv run python eval/search_eval.py run data --judge user --out` gives figures from your own judgments (the current
   ones are Claude's, from still keyframes, on queries that favour pictures).

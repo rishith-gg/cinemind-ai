@@ -36,7 +36,7 @@ from cinemind.core.errors import NotFoundError
 from cinemind.db.analysis import EmbeddingSet, Scene, SceneEdit, SceneRun, Tag, VectorIndexRow
 from cinemind.db.models import Keyframe, MediaAsset, Shot
 from cinemind.pipeline import scenes as scene_service
-from cinemind.pipeline import tag_review
+from cinemind.pipeline import shot_marks, tag_review
 from cinemind.search import vector_index
 
 router = APIRouter(tags=["analysis"])
@@ -81,6 +81,7 @@ def _scenes_out(session: Session, settings: Settings, project_id: str) -> Scenes
     for scene in scene_rows:
         for step in scene.details.get("steps", []):
             steps[str(step["shot_id"])] = step
+    marks = shot_marks.marks_for(session, shot_ids)
     by_scene: dict[str, list[SceneShotOut]] = {}
     for shot in shots:
         step = steps.get(shot.id, {})
@@ -99,6 +100,8 @@ def _scenes_out(session: Session, settings: Settings, project_id: str) -> Scenes
                 combined=step.get("combined"),
                 decision=str(step.get("decision", "not grouped yet")),
                 edit=edit if edit in ("split", "join") else None,
+                mark=marks[shot.id].mark if shot.id in marks else None,  # pyright: ignore[reportArgumentType]
+                stars=marks[shot.id].stars if shot.id in marks else 0,
             )
         )
     run = session.get(SceneRun, project_id)

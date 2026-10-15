@@ -1,6 +1,7 @@
 """Hybrid search (keyword, labels, transcript meaning, pictures; fused with RRF), search by
 picture, and the user's relevance judgments of results."""
 
+import json
 from typing import Annotated
 
 import cv2
@@ -22,14 +23,17 @@ from cinemind.api.search_schemas import (
     SearchOut,
     SearchRequest,
     SearchResult,
+    SignalOut,
 )
 from cinemind.core.config import Settings
 from cinemind.core.errors import InvalidInputError, NotFoundError, PayloadTooLargeError
+from cinemind.core.ranking_config import check_weights
 from cinemind.core.search_config import RETRIEVERS
 from cinemind.db.analysis import Scene, SearchJudgment, normal_query
 from cinemind.db.base import utcnow
 from cinemind.db.models import Keyframe, MediaAsset, QualityMetric, Shot
-from cinemind.search import hybrid
+from cinemind.pipeline import shot_marks
+from cinemind.search import hybrid, ranking
 from cinemind.utils.pictures import picture_size
 
 router = APIRouter(tags=["search"])
@@ -37,6 +41,25 @@ router = APIRouter(tags=["search"])
 USER = "user"
 MAX_IMAGE_MB = 15
 MAX_IMAGE_PIXELS = 40_000_000
+
+
+def _weights(settings: Settings, override: dict[str, float] | None) -> dict[str, float]:
+    """The `[ranking]` weights with a request's overrides on top (the one place they merge)."""
+    return {**settings.ranking.weights, **(override or {})}
+
+
+def _parse_weights(raw: str | None) -> dict[str, float] | None:
+    if not raw:
+        return None
+    try:
+        value = json.loads(raw)
+        if not isinstance(value, dict):
+            raise ValueError("not an object")
+        weights = {str(k): float(v) for k, v in value.items()}  # pyright: ignore[reportUnknownArgumentType, reportUnknownVariableType]
+        check_weights(weights)
+    except (ValueError, TypeError) as exc:
+        raise InvalidInputError(f"The ranking weights could not be read: {exc}") from exc
+    return weights
 
 
 def _filters(body: SearchFilters) -> hybrid.Filters:
@@ -48,10 +71,12 @@ def _out(
     settings: Settings,
     project_id: str,
     outcome: hybrid.Outcome,
+    ranked: list[ranking.Ranked],
+    weights: dict[str, float],
     text: str | None,
     like: str | None,
 ) -> SearchOut:
-    ids = [r.shot_id for r in outcome.results]
+    ids = [r.fused.shot_id for r in ranked]
     rows = session.execute(
         select(Shot, MediaAsset.filename, Scene.name, QualityMetric.score)
         .join(MediaAsset, MediaAsset.id == Shot.media_id)
@@ -75,8 +100,10 @@ def _out(
                 )
             )
         }
+    marks = shot_marks.marks_for(session, ids)
     results: list[SearchResult] = []
-    for fused in outcome.results:
+    for entry in ranked:
+        fused = entry.fused
         if fused.shot_id not in info:
             continue
         shot, filename, scene, quality = info[fused.shot_id]
@@ -108,6 +135,15 @@ def _out(
                 quality_score=quality,
                 score=fused.score,
                 why=why,
+                final=entry.final,
+                breakdown={
+                    name: SignalOut(value=v, weight=w, contribution=c)
+                    for name, (v, w, c) in entry.breakdown.items()
+                },
+                duplicate_of=entry.duplicate_of,
+                notes=entry.notes,
+                mark=marks[shot.id].mark if shot.id in marks else None,  # pyright: ignore[reportArgumentType]
+                stars=marks[shot.id].stars if shot.id in marks else 0,
                 relevant=judged.get(shot.id),
             )
         )
@@ -120,6 +156,8 @@ def _out(
         unavailable=outcome.unavailable,
         rrf_k=cfg.rrf_k,
         weights=cfg.weights,
+        ranking_weights=weights,
+        ranking_defaults=settings.ranking.weights,
     )
 
 
@@ -146,9 +184,10 @@ def search_shots(
         filters=_filters(body.filters),
         use=body.use or RETRIEVERS,
     )
-    outcome = hybrid.run(session, settings, project_id, query)
+    weights = _weights(settings, body.weights)
+    outcome, ranked = ranking.run_ranked(session, settings, project_id, query, weights)
     text = None if body.like_shot_id else (body.q or "").strip()
-    return _out(session, settings, project_id, outcome, text, body.like_shot_id)
+    return _out(session, settings, project_id, outcome, ranked, weights, text, body.like_shot_id)
 
 
 @router.post(
@@ -175,11 +214,18 @@ async def search_by_image(
     scene_id: Annotated[str | None, Query(max_length=32)] = None,
     min_quality: Annotated[float | None, Query(ge=0, le=1)] = None,
     has_dialogue: bool = False,
+    selects_only: bool = False,
+    include_rejected: bool = False,
+    weights: Annotated[
+        str | None,
+        Query(max_length=500, description='Ranking weights as JSON, e.g. {"quality": 1}'),
+    ] = None,
 ) -> SearchOut:
     """Shots that look like a picture (JPEG, PNG or WebP as the raw request body, up to 15 MB
     and 40 megapixels). The picture is only read in memory, never stored."""
     limit = MAX_IMAGE_MB * 1024 * 1024
     await run_in_threadpool(get_project, session, project_id)
+    used = _weights(settings, _parse_weights(weights))
     declared = request.headers.get("content-length")
     if declared and declared.isdigit() and int(declared) > limit:
         raise PayloadTooLargeError(f"The picture is larger than {MAX_IMAGE_MB} MB.")
@@ -208,10 +254,12 @@ async def search_by_image(
             scene_id=scene_id,
             min_quality=min_quality,
             has_dialogue=has_dialogue,
+            selects_only=selects_only,
+            include_rejected=include_rejected,
         )
         query = hybrid.Query(image=image, filters=_filters(filters))
-        outcome = hybrid.run(session, settings, project_id, query)
-        return _out(session, settings, project_id, outcome, None, None)
+        outcome, ranked = ranking.run_ranked(session, settings, project_id, query, used)
+        return _out(session, settings, project_id, outcome, ranked, used, None, None)
 
     return await run_in_threadpool(work)
 

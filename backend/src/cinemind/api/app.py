@@ -21,6 +21,7 @@ from cinemind.api import (
     analysis,
     fs,
     jobs,
+    marks,
     media,
     projects,
     quality,
@@ -104,6 +105,7 @@ def create_app(
     app.include_router(transcripts.router)
     app.include_router(speech.router)
     app.include_router(search.router)
+    app.include_router(marks.router)
     app.include_router(actors.router)
     app.include_router(actor_pairs.router)
     app.include_router(analysis.router)

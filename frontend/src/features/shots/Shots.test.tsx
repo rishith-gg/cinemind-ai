@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { MemoryRouter } from "react-router";
@@ -157,4 +157,25 @@ it("formats positions and frame rates", () => {
   expect(rateLabel(30000, 1001)).toBe("29.97");
   expect(rateLabel(24000, 1001)).toBe("23.976");
   expect(rateLabel(60, 1)).toBe("60");
+});
+
+it("selects, rejects and stars a shot from the Shots page", async () => {
+  useCurrentProject.setState({ id: "p1" });
+  const calls: { method: string; url: string; body: unknown }[] = [];
+  const marked = scenes();
+  marked.scenes[0]!.shots[1] = sceneShot(1, 2, 3.52, { mark: "select", stars: 2 });
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (req: Request) => {
+      const body: unknown = req.method === "GET" ? null : await req.json();
+      calls.push({ method: req.method, url: req.url, body });
+      if (req.url.includes("/mark")) return Response.json({ shot_id: "s0", mark: "reject", stars: 0 });
+      return Response.json(marked);
+    }),
+  );
+  wrap(<ShotsPage />);
+  expect(await screen.findByRole("button", { name: "Select cuts.mp4, shot 2", pressed: true })).toBeInTheDocument();
+  expect(screen.getByLabelText("Stars for cuts.mp4, shot 2: 2 of 5")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Reject cuts.mp4, shot 1" }));
+  await waitFor(() => expect(calls.find((c) => c.url.includes("/api/shots/s0/mark"))).toMatchObject({ method: "PUT", body: { mark: "reject" } }));
 });

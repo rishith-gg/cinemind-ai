@@ -17,3 +17,12 @@ export function whyLine(name: string, hit: ListHit): string {
 
 export const FUSION_NOTE =
   "Each list ranks shots its own way; the order here adds 1 / (k + rank) from every list a shot is in (Reciprocal Rank Fusion). The score only orders results, it is not a probability.";
+
+export const SIGNAL_LABEL: Record<string, string> = {
+  relevance: "Relevance",
+  quality: "Technical quality",
+  selection: "Your selects / stars",
+  person: "Named person",
+  scene: "Scene name",
+  duplicate: "Duplicate (minus)",
+};

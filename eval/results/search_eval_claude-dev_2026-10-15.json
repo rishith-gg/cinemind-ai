@@ -62,6 +62,27 @@
    "ndcg": 0.03770901274778756,
    "mrr": 0.041666666666666664,
    "unj": 0.0
+  },
+  "ranked": {
+   "p5": 0.4166666666666667,
+   "p10": 0.25833333333333336,
+   "ndcg": 0.8204141312621914,
+   "mrr": 0.9583333333333334,
+   "unj": 0.0
+  },
+  "ranked - quality": {
+   "p5": 0.43333333333333335,
+   "p10": 0.25833333333333336,
+   "ndcg": 0.8114409672218437,
+   "mrr": 0.9166666666666666,
+   "unj": 0.0
+  },
+  "ranked - duplicate": {
+   "p5": 0.4166666666666667,
+   "p10": 0.26666666666666666,
+   "ndcg": 0.8328384343625871,
+   "mrr": 0.9583333333333334,
+   "unj": 0.0
   }
  },
  "queries": [
@@ -143,7 +164,43 @@
     "c5a56430e3c5e6e0e34fdde9eb02bc28",
     "400087f176a930e7be57e40a67ef60b5"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "027e1a9e0756103460750a31b1fb1192",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "e295dc1356a4ff4961df020784835f0b",
+    "178efdf35a7804df20717bad8c89039f",
+    "d70405e167bf348ef786433e7e680eb7",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "378782b040b9fcaf5ba0e7c5bcc87e77",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "400087f176a930e7be57e40a67ef60b5",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28"
+   ],
+   "ranked - quality": [
+    "027e1a9e0756103460750a31b1fb1192",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "e295dc1356a4ff4961df020784835f0b",
+    "178efdf35a7804df20717bad8c89039f",
+    "d70405e167bf348ef786433e7e680eb7",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "378782b040b9fcaf5ba0e7c5bcc87e77",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "400087f176a930e7be57e40a67ef60b5"
+   ],
+   "ranked - duplicate": [
+    "027e1a9e0756103460750a31b1fb1192",
+    "e295dc1356a4ff4961df020784835f0b",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "178efdf35a7804df20717bad8c89039f",
+    "d70405e167bf348ef786433e7e680eb7",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "378782b040b9fcaf5ba0e7c5bcc87e77",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "400087f176a930e7be57e40a67ef60b5",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28"
+   ]
   },
   "bowls of snacks": {
    "keyword": [],
@@ -209,7 +266,43 @@
     "1becad1368388afcc5d666f1a875a7d4",
     "b0afea0b5df95e8ef9cbb7bc471b5d75"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "c69944aa72bac509c5a036ba0565624b",
+    "c20663a5e964c1ef32799d3568953826",
+    "d06464bd0367abaaf3cb36bac0e69e04",
+    "52a21ab89e89ff39ef17e1cbee82d798",
+    "9ddb74715662948cc5a866f5c9f7f82b",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "ebf76808b389617e6d1d144c1320f662",
+    "aaa7ca854aea2061798e2afd18a5a723",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "b0afea0b5df95e8ef9cbb7bc471b5d75"
+   ],
+   "ranked - quality": [
+    "c69944aa72bac509c5a036ba0565624b",
+    "c20663a5e964c1ef32799d3568953826",
+    "52a21ab89e89ff39ef17e1cbee82d798",
+    "d06464bd0367abaaf3cb36bac0e69e04",
+    "9ddb74715662948cc5a866f5c9f7f82b",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "ebf76808b389617e6d1d144c1320f662",
+    "aaa7ca854aea2061798e2afd18a5a723",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "b0afea0b5df95e8ef9cbb7bc471b5d75"
+   ],
+   "ranked - duplicate": [
+    "c69944aa72bac509c5a036ba0565624b",
+    "c20663a5e964c1ef32799d3568953826",
+    "d06464bd0367abaaf3cb36bac0e69e04",
+    "52a21ab89e89ff39ef17e1cbee82d798",
+    "9ddb74715662948cc5a866f5c9f7f82b",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "ebf76808b389617e6d1d144c1320f662",
+    "aaa7ca854aea2061798e2afd18a5a723",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "b0afea0b5df95e8ef9cbb7bc471b5d75"
+   ]
   },
   "crowd in a stadium": {
    "keyword": [],
@@ -275,7 +368,43 @@
     "c5a56430e3c5e6e0e34fdde9eb02bc28",
     "ebf76808b389617e6d1d144c1320f662"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "aaa7ca854aea2061798e2afd18a5a723",
+    "e295dc1356a4ff4961df020784835f0b",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "d70405e167bf348ef786433e7e680eb7",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "08d394dbcdcb04ffb0558cf17255290a",
+    "ebf76808b389617e6d1d144c1320f662",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28"
+   ],
+   "ranked - quality": [
+    "aaa7ca854aea2061798e2afd18a5a723",
+    "e295dc1356a4ff4961df020784835f0b",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "d70405e167bf348ef786433e7e680eb7",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "08d394dbcdcb04ffb0558cf17255290a",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "ebf76808b389617e6d1d144c1320f662"
+   ],
+   "ranked - duplicate": [
+    "aaa7ca854aea2061798e2afd18a5a723",
+    "e295dc1356a4ff4961df020784835f0b",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "d70405e167bf348ef786433e7e680eb7",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "08d394dbcdcb04ffb0558cf17255290a",
+    "ebf76808b389617e6d1d144c1320f662",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28"
+   ]
   },
   "fog": {
    "keyword": [],
@@ -341,7 +470,43 @@
     "76dec27fc22a82cd13673bfa887a7ba8",
     "4b460587a008b0280e3eeaaca1667877"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "ca68ed8aef37c722cbec00efa0243718",
+    "4470a6c90067b10b7fdf580a1b633698",
+    "178efdf35a7804df20717bad8c89039f",
+    "0a55d024b68e8f774674a950e061e74f",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "41f34751dd99a7ce800fb496605123cb",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "7b015ed6ce1a821c425ff42c4be5b02c"
+   ],
+   "ranked - quality": [
+    "4470a6c90067b10b7fdf580a1b633698",
+    "ca68ed8aef37c722cbec00efa0243718",
+    "0a55d024b68e8f774674a950e061e74f",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "178efdf35a7804df20717bad8c89039f",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "41f34751dd99a7ce800fb496605123cb",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "7b015ed6ce1a821c425ff42c4be5b02c"
+   ],
+   "ranked - duplicate": [
+    "ca68ed8aef37c722cbec00efa0243718",
+    "4470a6c90067b10b7fdf580a1b633698",
+    "178efdf35a7804df20717bad8c89039f",
+    "0a55d024b68e8f774674a950e061e74f",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "41f34751dd99a7ce800fb496605123cb",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "4b460587a008b0280e3eeaaca1667877"
+   ]
   },
   "green trees": {
    "keyword": [],
@@ -407,7 +572,43 @@
     "7bea72c895447e9505d98ce2403fa464",
     "13a7854ce6e4cd604d0e9bded11476c0"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "2744e597a26c84068fd353545a25e06d",
+    "c689b644b9faa063c28bad1278ec02e8",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "178efdf35a7804df20717bad8c89039f",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "4f502d20a23db09b79de570727d35d6a",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "ca68ed8aef37c722cbec00efa0243718",
+    "7bea72c895447e9505d98ce2403fa464",
+    "13a7854ce6e4cd604d0e9bded11476c0"
+   ],
+   "ranked - quality": [
+    "2744e597a26c84068fd353545a25e06d",
+    "c689b644b9faa063c28bad1278ec02e8",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "178efdf35a7804df20717bad8c89039f",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "4f502d20a23db09b79de570727d35d6a",
+    "ca68ed8aef37c722cbec00efa0243718",
+    "7bea72c895447e9505d98ce2403fa464",
+    "13a7854ce6e4cd604d0e9bded11476c0"
+   ],
+   "ranked - duplicate": [
+    "2744e597a26c84068fd353545a25e06d",
+    "c689b644b9faa063c28bad1278ec02e8",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "178efdf35a7804df20717bad8c89039f",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "4f502d20a23db09b79de570727d35d6a",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "ca68ed8aef37c722cbec00efa0243718",
+    "7bea72c895447e9505d98ce2403fa464",
+    "13a7854ce6e4cd604d0e9bded11476c0"
+   ]
   },
   "indoor room": {
    "keyword": [],
@@ -495,6 +696,42 @@
     "aaf9e39cedfc5d1e5d5502473c784a5e",
     "b0afea0b5df95e8ef9cbb7bc471b5d75",
     "b8501812bee28bb2f12a5b5a62a1b72c"
+   ],
+   "ranked": [
+    "400087f176a930e7be57e40a67ef60b5",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "c20663a5e964c1ef32799d3568953826",
+    "67c4601858d5a6678815bfce2d513fcb",
+    "c5eef625f21dfc568f8799fe6ced9ce4",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "aaf9e39cedfc5d1e5d5502473c784a5e",
+    "7dc51fa7912023ad0292724b8b86c91e"
+   ],
+   "ranked - quality": [
+    "400087f176a930e7be57e40a67ef60b5",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "c20663a5e964c1ef32799d3568953826",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "67c4601858d5a6678815bfce2d513fcb",
+    "c5eef625f21dfc568f8799fe6ced9ce4",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "aaf9e39cedfc5d1e5d5502473c784a5e"
+   ],
+   "ranked - duplicate": [
+    "400087f176a930e7be57e40a67ef60b5",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "c20663a5e964c1ef32799d3568953826",
+    "67c4601858d5a6678815bfce2d513fcb",
+    "c5eef625f21dfc568f8799fe6ced9ce4",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "aaf9e39cedfc5d1e5d5502473c784a5e",
+    "7dc51fa7912023ad0292724b8b86c91e"
    ]
   },
   "lake": {
@@ -561,7 +798,43 @@
     "531ef6c8145eef1ed4f12900eb337882",
     "41f34751dd99a7ce800fb496605123cb"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "2744e597a26c84068fd353545a25e06d",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "15521600893952bf6762eda6cf6face2",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "531ef6c8145eef1ed4f12900eb337882",
+    "41f34751dd99a7ce800fb496605123cb"
+   ],
+   "ranked - quality": [
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "2744e597a26c84068fd353545a25e06d",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "15521600893952bf6762eda6cf6face2",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "531ef6c8145eef1ed4f12900eb337882",
+    "41f34751dd99a7ce800fb496605123cb"
+   ],
+   "ranked - duplicate": [
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "2744e597a26c84068fd353545a25e06d",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "15521600893952bf6762eda6cf6face2",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "531ef6c8145eef1ed4f12900eb337882",
+    "41f34751dd99a7ce800fb496605123cb"
+   ]
   },
   "shirtless man": {
    "keyword": [],
@@ -627,7 +900,43 @@
     "884112256e64ad5b6dd0cc44fe627be3",
     "027e1a9e0756103460750a31b1fb1192"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "0555bbc4adfedcd5a409c1f4758d16d9",
+    "178efdf35a7804df20717bad8c89039f",
+    "28b71358e5b27430ab3b66129fc6f542",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "4dba0bac675735125329d677086abd21",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "3a6f75fea55184cb2a4b3bd255afa78a",
+    "e295dc1356a4ff4961df020784835f0b",
+    "400087f176a930e7be57e40a67ef60b5",
+    "d70405e167bf348ef786433e7e680eb7"
+   ],
+   "ranked - quality": [
+    "0555bbc4adfedcd5a409c1f4758d16d9",
+    "178efdf35a7804df20717bad8c89039f",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "4dba0bac675735125329d677086abd21",
+    "28b71358e5b27430ab3b66129fc6f542",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "3a6f75fea55184cb2a4b3bd255afa78a",
+    "e295dc1356a4ff4961df020784835f0b",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "400087f176a930e7be57e40a67ef60b5"
+   ],
+   "ranked - duplicate": [
+    "0555bbc4adfedcd5a409c1f4758d16d9",
+    "178efdf35a7804df20717bad8c89039f",
+    "28b71358e5b27430ab3b66129fc6f542",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "4dba0bac675735125329d677086abd21",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "3a6f75fea55184cb2a4b3bd255afa78a",
+    "e295dc1356a4ff4961df020784835f0b",
+    "027e1a9e0756103460750a31b1fb1192",
+    "400087f176a930e7be57e40a67ef60b5"
+   ]
   },
   "statue of a god": {
    "keyword": [],
@@ -693,7 +1002,43 @@
     "b8501812bee28bb2f12a5b5a62a1b72c",
     "884112256e64ad5b6dd0cc44fe627be3"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "d4d2958321a1013d0857107720fe8436",
+    "6e728c8f82c67b7a74c7d3385a920d3d",
+    "67c4601858d5a6678815bfce2d513fcb",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "ef046f796821353195d286ece11ec9b5",
+    "c689b644b9faa063c28bad1278ec02e8",
+    "87a7272d986095621effceea1fdddd28"
+   ],
+   "ranked - quality": [
+    "d4d2958321a1013d0857107720fe8436",
+    "6e728c8f82c67b7a74c7d3385a920d3d",
+    "67c4601858d5a6678815bfce2d513fcb",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "ef046f796821353195d286ece11ec9b5",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "c689b644b9faa063c28bad1278ec02e8"
+   ],
+   "ranked - duplicate": [
+    "d4d2958321a1013d0857107720fe8436",
+    "67c4601858d5a6678815bfce2d513fcb",
+    "6e728c8f82c67b7a74c7d3385a920d3d",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "87a7272d986095621effceea1fdddd28",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "ef046f796821353195d286ece11ec9b5",
+    "c689b644b9faa063c28bad1278ec02e8"
+   ]
   },
   "two men sitting outside": {
    "keyword": [],
@@ -759,7 +1104,43 @@
     "d8e1c96457167c7e9470db83a6a36d87",
     "d70405e167bf348ef786433e7e680eb7"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "3275dd361339cfac12f623101e90a97e",
+    "fbc7259812ec04236d420b5f665952b9",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "400087f176a930e7be57e40a67ef60b5",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "d8e1c96457167c7e9470db83a6a36d87",
+    "d70405e167bf348ef786433e7e680eb7",
+    "378782b040b9fcaf5ba0e7c5bcc87e77"
+   ],
+   "ranked - quality": [
+    "3275dd361339cfac12f623101e90a97e",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "fbc7259812ec04236d420b5f665952b9",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "400087f176a930e7be57e40a67ef60b5",
+    "0a55d024b68e8f774674a950e061e74f",
+    "d8e1c96457167c7e9470db83a6a36d87",
+    "d70405e167bf348ef786433e7e680eb7"
+   ],
+   "ranked - duplicate": [
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "3275dd361339cfac12f623101e90a97e",
+    "fbc7259812ec04236d420b5f665952b9",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "400087f176a930e7be57e40a67ef60b5",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "d8e1c96457167c7e9470db83a6a36d87",
+    "d70405e167bf348ef786433e7e680eb7",
+    "378782b040b9fcaf5ba0e7c5bcc87e77"
+   ]
   },
   "wet rocks": {
    "keyword": [],
@@ -825,7 +1206,43 @@
     "2adc04e6ebb162c5d081a8c4919abc8e",
     "7b015ed6ce1a821c425ff42c4be5b02c"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "41f34751dd99a7ce800fb496605123cb",
+    "531ef6c8145eef1ed4f12900eb337882",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "2a6892627bc30c046ff310c2914edfbd",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "2adc04e6ebb162c5d081a8c4919abc8e",
+    "7b015ed6ce1a821c425ff42c4be5b02c",
+    "d92d497b9e8459c688182c4e9fb38dce"
+   ],
+   "ranked - quality": [
+    "41f34751dd99a7ce800fb496605123cb",
+    "531ef6c8145eef1ed4f12900eb337882",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "2a6892627bc30c046ff310c2914edfbd",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "2adc04e6ebb162c5d081a8c4919abc8e",
+    "d92d497b9e8459c688182c4e9fb38dce",
+    "7b015ed6ce1a821c425ff42c4be5b02c"
+   ],
+   "ranked - duplicate": [
+    "41f34751dd99a7ce800fb496605123cb",
+    "531ef6c8145eef1ed4f12900eb337882",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "2a6892627bc30c046ff310c2914edfbd",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "d92d497b9e8459c688182c4e9fb38dce",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "2adc04e6ebb162c5d081a8c4919abc8e",
+    "7b015ed6ce1a821c425ff42c4be5b02c"
+   ]
   },
   "woman in a saree": {
    "keyword": [],
@@ -891,7 +1308,43 @@
     "e295dc1356a4ff4961df020784835f0b",
     "ef046f796821353195d286ece11ec9b5"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "aaf9e39cedfc5d1e5d5502473c784a5e",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "027e1a9e0756103460750a31b1fb1192",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "3275dd361339cfac12f623101e90a97e",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "ef046f796821353195d286ece11ec9b5",
+    "e295dc1356a4ff4961df020784835f0b"
+   ],
+   "ranked - quality": [
+    "aaf9e39cedfc5d1e5d5502473c784a5e",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "027e1a9e0756103460750a31b1fb1192",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "3275dd361339cfac12f623101e90a97e",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "ef046f796821353195d286ece11ec9b5",
+    "e295dc1356a4ff4961df020784835f0b"
+   ],
+   "ranked - duplicate": [
+    "aaf9e39cedfc5d1e5d5502473c784a5e",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "027e1a9e0756103460750a31b1fb1192",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "3275dd361339cfac12f623101e90a97e",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "e295dc1356a4ff4961df020784835f0b",
+    "6e728c8f82c67b7a74c7d3385a920d3d"
+   ]
   }
  },
  "judge": "claude-dev",
@@ -905,7 +1358,10 @@
    "hybrid - keyword": 1.0,
    "hybrid - labels": 1.0,
    "hybrid - text": 1.0,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 1.0,
+   "ranked - quality": 1.0,
+   "ranked - duplicate": 1.0
   },
   "bowls of snacks": {
    "keyword": 0.0,
@@ -916,7 +1372,10 @@
    "hybrid - keyword": 0.9197207891481876,
    "hybrid - labels": 0.9197207891481876,
    "hybrid - text": 0.9197207891481876,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.8772153153380493,
+   "ranked - quality": 0.9197207891481876,
+   "ranked - duplicate": 0.8772153153380493
   },
   "crowd in a stadium": {
    "keyword": 0.0,
@@ -927,7 +1386,10 @@
    "hybrid - keyword": 1.0,
    "hybrid - labels": 1.0,
    "hybrid - text": 1.0,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 1.0,
+   "ranked - quality": 1.0,
+   "ranked - duplicate": 1.0
   },
   "fog": {
    "keyword": 0.0,
@@ -938,7 +1400,10 @@
    "hybrid - keyword": 0.931177758276532,
    "hybrid - labels": 0.931177758276532,
    "hybrid - text": 0.931177758276532,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.815806919977848,
+   "ranked - quality": 0.843706044175124,
+   "ranked - duplicate": 0.9032786340792562
   },
   "green trees": {
    "keyword": 0.0,
@@ -949,7 +1414,10 @@
    "hybrid - keyword": 0.5388856921828065,
    "hybrid - labels": 0.5388856921828065,
    "hybrid - text": 0.5388856921828065,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.5388856921828065,
+   "ranked - quality": 0.5388856921828065,
+   "ranked - duplicate": 0.5388856921828065
   },
   "indoor room": {
    "keyword": 0.0,
@@ -960,7 +1428,10 @@
    "hybrid - keyword": 0.9134015924715543,
    "hybrid - labels": 0.9010126104210695,
    "hybrid - text": 0.9134015924715543,
-   "hybrid - visual": 0.4525081529734507
+   "hybrid - visual": 0.4525081529734507,
+   "ranked": 0.6364391809889587,
+   "ranked - quality": 0.9134015924715543,
+   "ranked - duplicate": 0.6364391809889587
   },
   "lake": {
    "keyword": 0.0,
@@ -971,7 +1442,10 @@
    "hybrid - keyword": 0.8772153153380493,
    "hybrid - labels": 0.8772153153380493,
    "hybrid - text": 0.8772153153380493,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.8772153153380493,
+   "ranked - quality": 0.8772153153380493,
+   "ranked - duplicate": 0.8772153153380493
   },
   "shirtless man": {
    "keyword": 0.0,
@@ -982,7 +1456,10 @@
    "hybrid - keyword": 0.8772153153380493,
    "hybrid - labels": 0.8772153153380493,
    "hybrid - text": 0.8772153153380493,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.8503449055347546,
+   "ranked - quality": 0.8772153153380493,
+   "ranked - duplicate": 0.8503449055347546
   },
   "statue of a god": {
    "keyword": 0.0,
@@ -993,7 +1470,10 @@
    "hybrid - keyword": 0.9058653015743079,
    "hybrid - labels": 0.9058653015743079,
    "hybrid - text": 0.9058653015743079,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.8374713958478633,
+   "ranked - quality": 0.7246262544989281,
+   "ranked - duplicate": 0.9058653015743079
   },
   "two men sitting outside": {
    "keyword": 0.0,
@@ -1004,7 +1484,10 @@
    "hybrid - keyword": 0.6309297535714575,
    "hybrid - labels": 0.6309297535714575,
    "hybrid - text": 0.6309297535714575,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 1.0,
+   "ranked - quality": 0.6309297535714575,
+   "ranked - duplicate": 1.0
   },
   "wet rocks": {
    "keyword": 0.0,
@@ -1015,7 +1498,10 @@
    "hybrid - keyword": 0.6394562303262419,
    "hybrid - labels": 0.6394562303262419,
    "hybrid - text": 0.6394562303262419,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.6462302129493455,
+   "ranked - quality": 0.6462302129493455,
+   "ranked - duplicate": 0.6394562303262419
   },
   "woman in a saree": {
    "keyword": 0.0,
@@ -1026,7 +1512,10 @@
    "hybrid - keyword": 0.7653606369886217,
    "hybrid - labels": 0.7653606369886217,
    "hybrid - text": 0.7653606369886217,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.7653606369886217,
+   "ranked - quality": 0.7653606369886217,
+   "ranked - duplicate": 0.7653606369886217
   }
  }
 }

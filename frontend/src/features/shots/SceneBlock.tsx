@@ -1,11 +1,12 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, type ReactNode, useState } from "react";
 import { Link } from "react-router";
 
-import type { SceneOut, SceneShotOut } from "../../api";
-import { renameSceneMutation, setSceneBoundaryMutation } from "../../api/@tanstack/react-query.gen";
+import type { MarkOut, SceneOut, ScenesOut, SceneShotOut } from "../../api";
+import { listScenesQueryKey, renameSceneMutation, setSceneBoundaryMutation } from "../../api/@tanstack/react-query.gen";
 import { toast } from "../../lib/toast";
 import { formatTime } from "../library/format";
+import { MarkButtons } from "../marks/MarkButtons";
 import { useSetScenes } from "./scenes";
 
 /** Plain words for how a shot compares with the one before it (the "why" behind the grouping). */
@@ -16,7 +17,16 @@ export function similarityNote(shot: SceneShotOut): string {
   return parts.join(" · ");
 }
 
-export function ShotCard({ shot, children }: { shot: SceneShotOut; children?: ReactNode }) {
+/** The scene list with one shot's new mark patched in (no refetch, so the buttons never show
+ * the old state in between). */
+function withMark(old: ScenesOut | undefined, out: MarkOut): ScenesOut | undefined {
+  if (!old) return old;
+  const fix = (s: SceneShotOut) => (s.shot_id === out.shot_id ? { ...s, mark: out.mark, stars: out.stars } : s);
+  return { ...old, scenes: old.scenes.map((c) => ({ ...c, shots: c.shots.map(fix) })), ungrouped: old.ungrouped.map(fix) };
+}
+
+export function ShotCard({ projectId, shot, children }: { projectId: string; shot: SceneShotOut; children?: ReactNode }) {
+  const qc = useQueryClient();
   const label = `${shot.filename}, shot ${shot.index + 1}`;
   return (
     <li className="w-44 overflow-hidden rounded border border-neutral-800 bg-neutral-900">
@@ -37,6 +47,15 @@ export function ShotCard({ shot, children }: { shot: SceneShotOut; children?: Re
           </p>
         </div>
       </Link>
+      <div className="border-t border-neutral-800 px-2 py-1">
+        <MarkButtons
+          shotId={shot.shot_id}
+          label={label}
+          mark={shot.mark ?? null}
+          stars={shot.stars ?? 0}
+          onChanged={(out) => qc.setQueriesData<ScenesOut>({ queryKey: listScenesQueryKey({ path: { project_id: projectId } }) }, (old) => withMark(old, out))}
+        />
+      </div>
       {children && <div className="space-y-1 border-t border-neutral-800 p-2 text-xs">{children}</div>}
     </li>
   );
@@ -106,7 +125,7 @@ export function SceneBlock({ projectId, scene, first }: { projectId: string; sce
       </header>
       <ul className="flex flex-wrap gap-3">
         {scene.shots.map((shot, i) => (
-          <ShotCard key={shot.shot_id} shot={shot}>
+          <ShotCard key={shot.shot_id} projectId={projectId} shot={shot}>
             {i > 0 && (
               <>
                 <p className="text-neutral-400" title="How this shot compares with the one before it">

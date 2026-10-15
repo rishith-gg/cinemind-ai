@@ -14,46 +14,16 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
-from cinemind.ai import embedder, transcriber
+from cinemind.ai import embedder
 from cinemind.core.config import Settings
 from cinemind.core.search_config import SearchConfig
-from cinemind.core.transcribe_config import MODEL_FILES
 from cinemind.search import metrics, retrievers
 from cinemind.search.hybrid import fuse
 from cinemind.search.retrievers import Item
 from cinemind.utils.pictures import picture_size
-from embed_helpers import use_fake_embedder, write_thresholds
-from helpers import drain, import_one
+from search_helpers import processed_cuts, search
 
 EVAL = Path(__file__).resolve().parents[2] / "eval"
-
-TAGS = {"forest": {"threshold": 0.0, "enabled": True, "precision": 0.93, "dataset": "places365"}}
-
-
-def _seg(start: float, end: float, text: str, logprob: float = -0.2) -> dict[str, Any]:
-    words = text.split()
-    step = (end - start) / len(words)
-    return {
-        "start": start,
-        "end": end,
-        "text": text,
-        "avg_logprob": logprob,
-        "no_speech_prob": 0.1,
-        "compression_ratio": 1.2,
-        "words": [[start + i * step, start + (i + 1) * step, w, 0.9] for i, w in enumerate(words)],
-    }
-
-
-def _speech(*_args: Any) -> dict[str, Any]:
-    return {
-        "language": "en",
-        "language_probability": 0.9,
-        "speech_s": 3.0,
-        "segments": [
-            _seg(0.2, 1.8, "walking into the forest now"),
-            _seg(6.2, 7.6, "the forest at night", logprob=-1.6),  # uncertain: never a hit
-        ],
-    }
 
 
 @pytest.fixture
@@ -65,29 +35,7 @@ def project(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> dict[str, Any]:
-    """cuts.mp4 (four shots: test pattern, colour bars, fractal, dark blue), processed with the
-    stand-in models and a transcript that mentions a forest in the first shot."""
-    write_thresholds(monkeypatch, api_settings, tmp_path, TAGS)
-    fake = use_fake_embedder(monkeypatch, api_settings)
-    folder = transcriber.choose_model(api_settings).path
-    folder.mkdir(parents=True)
-    for name in MODEL_FILES:
-        (folder / name).write_bytes(b"test")
-    monkeypatch.setattr(transcriber, "transcribe", _speech)
-    api_settings.media_roots.append(cut_footage)
-    # The stand-in text vectors are hashes: unrelated to each other, so no floor here.
-    api_settings.search = SearchConfig(text_min_similarity=-1.0)
-    media: Any = import_one(client, pid, cut_footage / "cuts.mp4")["media"]
-    drain(api_settings)
-    shots = client.get(f"/api/media/{media['id']}/shots").json()
-    assert len(shots) == 4
-    return {"media": media["id"], "shots": [s["id"] for s in shots], "fake": fake}
-
-
-def _search(client: TestClient, pid: str, **body: Any) -> Any:
-    res = client.post(f"/api/projects/{pid}/search", json=body)
-    assert res.status_code == 200, res.text
-    return res.json()
+    return processed_cuts(client, pid, api_settings, cut_footage, tmp_path, monkeypatch)
 
 
 # --- units ------------------------------------------------------------------------------------
@@ -142,7 +90,7 @@ def test_a_typed_query_fuses_all_four_lists_and_says_why(
     client: TestClient, pid: str, project: dict[str, Any]
 ) -> None:
     first = project["shots"][0]
-    out = _search(client, pid, q="forest")
+    out = search(client, pid, q="forest")
     assert out["rrf_k"] == 60 and out["unavailable"] == {}
     assert out["lists"]["keyword"] == 1 and out["lists"]["labels"] == 4
     assert out["lists"]["visual"] == 4 and out["lists"]["text"] >= 1
@@ -154,32 +102,32 @@ def test_a_typed_query_fuses_all_four_lists_and_says_why(
     assert top["why"]["labels"]["matched"] == ["tag: Forest"]
     assert top["keyframe_url"].startswith("/api/keyframes/") and top["relevant"] is None
     assert all(
-        r["score"] >= s["score"] for r, s in zip(out["results"], out["results"][1:], strict=False)
+        r["final"] >= s["final"] for r, s in zip(out["results"], out["results"][1:], strict=False)
     )
 
     # One list at a time (as the evaluation compares them); uncertain lines never match.
-    only = _search(client, pid, q="forest", use=["keyword"])
+    only = search(client, pid, q="forest", use=["keyword"])
     assert [r["shot_id"] for r in only["results"]] == [first]
-    assert _search(client, pid, q="night", use=["keyword"])["results"] == []
+    assert search(client, pid, q="night", use=["keyword"])["results"] == []
 
 
 def test_unrelated_transcript_lines_are_left_out_of_the_text_list(
     client: TestClient, pid: str, api_settings: Settings, project: dict[str, Any]
 ) -> None:
     api_settings.search = SearchConfig()  # the default floor of 0.25
-    out = _search(client, pid, q="forest")
+    out = search(client, pid, q="forest")
     assert out["lists"]["text"] == 0 and "text" not in out["results"][0]["why"]
 
 
 def test_filters_remove_shots_from_every_list(
     client: TestClient, pid: str, project: dict[str, Any]
 ) -> None:
-    assert _search(client, pid, q="forest", filters={"media_id": "0" * 32})["results"] == []
-    talking = _search(client, pid, q="forest", filters={"has_dialogue": True})["results"]
+    assert search(client, pid, q="forest", filters={"media_id": "0" * 32})["results"] == []
+    talking = search(client, pid, q="forest", filters={"has_dialogue": True})["results"]
     assert [r["shot_id"] for r in talking] == [project["shots"][0]]
-    good = _search(client, pid, q="forest", filters={"min_quality": 0.0})["results"]
+    good = search(client, pid, q="forest", filters={"min_quality": 0.0})["results"]
     assert len(good) == 4
-    assert _search(client, pid, q="forest", filters={"actor_id": "nobody"})["results"] == []
+    assert search(client, pid, q="forest", filters={"actor_id": "nobody"})["results"] == []
     bad = client.post(f"/api/projects/{pid}/search", json={"q": "x", "filters": {"min_quality": 2}})
     assert bad.status_code == 422
 
@@ -188,7 +136,7 @@ def test_more_like_this_and_search_by_picture(
     client: TestClient, pid: str, project: dict[str, Any], tmp_path: Path
 ) -> None:
     blue = project["shots"][3]
-    like = _search(client, pid, like_shot_id=blue)
+    like = search(client, pid, like_shot_id=blue)
     assert blue not in [r["shot_id"] for r in like["results"]]
     assert set(like["lists"]) == {"visual"} and like["query"] is None
 
@@ -218,7 +166,7 @@ def test_judgments_are_kept_per_query_and_can_be_taken_back(
     assert res.status_code == 200 and res.json() == {
         "query": "forest", "shot_id": first, "relevant": True, "judged": 1
     }  # fmt: skip
-    marks = {r["shot_id"]: r["relevant"] for r in _search(client, pid, q="FOREST")["results"]}
+    marks = {r["shot_id"]: r["relevant"] for r in search(client, pid, q="FOREST")["results"]}
     assert marks[first] is True and list(marks.values()).count(None) == 3
     assert (
         client.put(url, json={"query": "forest", "shot_id": first, "relevant": None}).json()[
@@ -236,7 +184,7 @@ def test_a_missing_model_turns_its_list_off_and_says_so(
     client: TestClient, pid: str, api_settings: Settings, project: dict[str, Any]
 ) -> None:
     shutil.rmtree(embedder.choose_text(api_settings).path(api_settings.models_path))
-    out = _search(client, pid, q="forest")
+    out = search(client, pid, q="forest")
     assert "text" not in out["lists"] and "models pull" in out["unavailable"]["text"]
     assert out["results"][0]["shot_id"] == project["shots"][0]
 
@@ -307,13 +255,13 @@ def test_a_search_takes_no_lock_and_a_stale_index_is_rebuilt_once(
         record = session.query(VectorIndexRow).filter_by(kind="keyframe").one()
         record.fingerprint = "stale"
         session.commit()
-    _search(client, pid, q="forest")
+    search(client, pid, q="forest")
     with factory() as session:
         record = session.query(VectorIndexRow).filter_by(kind="keyframe").one()
         built, path = record.built_at, record.path
         assert record.fingerprint != "stale"  # the rebuild was committed, not rolled back
         assert (api_settings.project_dir(pid) / path).is_file()
-    _search(client, pid, q="night")
+    search(client, pid, q="night")
     with factory() as session:
         assert session.query(VectorIndexRow).filter_by(kind="keyframe").one().built_at == built
     # Nothing holds the write lock after a search: another writer gets it at once.
@@ -330,14 +278,14 @@ def test_filters_find_shots_beyond_the_depth_of_each_list(
     from cinemind.db.models import Shot
 
     api_settings.search = SearchConfig(text_min_similarity=-1.0, depth=1)
-    (top,) = _search(client, pid, q="forest", use=["visual"])["results"]
+    (top,) = search(client, pid, q="forest", use=["visual"])["results"]
     with make_session_factory(make_engine(api_settings.db_path))() as session:
         scenes = {
             s.id: s.scene_id for s in session.query(Shot).filter(Shot.id.in_(project["shots"]))
         }
     other_scene = next(scene for scene in scenes.values() if scene != scenes[top["shot_id"]])
     wanted = {shot for shot, scene in scenes.items() if scene == other_scene}
-    kept = _search(client, pid, q="forest", use=["visual"], filters={"scene_id": other_scene})
+    kept = search(client, pid, q="forest", use=["visual"], filters={"scene_id": other_scene})
     # The project-wide top 1 is in another scene; the filter still finds this scene's best shot.
     assert len(kept["results"]) == 1 and kept["results"][0]["shot_id"] in wanted
 
@@ -348,14 +296,14 @@ def test_the_speech_filter_follows_the_users_review(
     first = project["shots"][0]
     review = {"shot_id": first, "name": "speech", "decision": "rejected"}
     assert client.put("/api/tags/review", json=review).status_code == 200
-    assert _search(client, pid, q="forest", filters={"has_dialogue": True})["results"] == []
+    assert search(client, pid, q="forest", filters={"has_dialogue": True})["results"] == []
 
 
 def test_labels_skip_small_words_and_unnamed_people(
     client: TestClient, pid: str, project: dict[str, Any]
 ) -> None:
-    assert _search(client, pid, q="of a the", use=["labels"])["results"] == []
-    assert _search(client, pid, q="cuts", use=["labels"])["lists"]["labels"] == 4  # file name
+    assert search(client, pid, q="of a the", use=["labels"])["results"] == []
+    assert search(client, pid, q="cuts", use=["labels"])["lists"]["labels"] == 4  # file name
 
 
 def test_other_projects_and_bad_uploads_are_refused(
@@ -389,7 +337,7 @@ def test_vectors_of_another_model_are_reported_not_hidden(
     client: TestClient, pid: str, api_settings: Settings, project: dict[str, Any]
 ) -> None:
     api_settings.embed = api_settings.embed.model_copy(update={"visual_model": "siglip-base"})
-    out = _search(client, pid, q="forest")
+    out = search(client, pid, q="forest")
     assert "visual" not in out["lists"] and "siglip-base" in out["unavailable"]["visual"]
     like = client.post(f"/api/projects/{pid}/search", json={"like_shot_id": project["shots"][0]})
     assert like.status_code == 200 and like.json()["results"] == []

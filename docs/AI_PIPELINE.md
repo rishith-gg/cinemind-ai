@@ -389,6 +389,35 @@ becomes a shot, the label matching rule, the filters and the explanation. Code: 
 - *Judgments*: on a text search the user can mark a result good or not (✓ / ✕). These marks do not change the
   order; they are the labels `eval/search_eval.py` measures against (EVALUATION.md section 10).
 
+## Ranking, selects and explainability (Phase 10)
+Existing method: Maximal Marginal Relevance (Carbonell and Goldstein 1998). Ours: the signals, their scaling and the
+default weights (`search/ranking.py`, `[ranking]`). The fused results are ranked again by
+
+`final = w_rel·relevance + w_q·quality + w_sel·selection + w_act·person + w_scn·scene − w_dup·duplicate`
+
+- *relevance*: the fused RRF score scaled to the results (best 1, last 0; a single result 1). RRF scores lie close
+  together (rank 1 and rank 10 differ by 13 % at k = 60), so dividing by the best one would let a small quality
+  weight outvote relevance.
+- *quality*: the shot's Technical Quality Score (0 when not measured; the card says so).
+- *selection*: 1 for a selected shot, otherwise its stars / 5 (0 for a rejected shot shown with "show rejected").
+- *person* / *scene*: 1 when the query matched the name of a person the user named, or of the shot's scene.
+- *duplicate*: how near-identical the shot's mean keyframe picture vector is to one already placed higher: 0 up
+  to a cosine of `duplicate_threshold` 0.85, rising to 1 at identical pictures (half of the user's shot pairs are
+  above 0.45, 1 % above 0.82, so a lower threshold called almost every result a duplicate). Off for "more like
+  this" and picture searches, whose results look alike by design. Each step places the remaining shot with the
+  highest score after this penalty; ties go to the smaller shot id, so the same weights always give the same order.
+- Default weights: relevance 1.0, quality 0.2, selection 0.3, person 0.1, scene 0.1, duplicate 0.3. Conventions set
+  before any evaluation, not validated; settings that name only some weights keep the defaults for the others.
+  The Search page's sliders change them for one search ("what if"), also for picture searches; the request's
+  `weights` do the same through the API (JSON in the `weights` query parameter for picture searches).
+- Every result returns its breakdown (value, weight, contribution per signal), the shot it looks like when the
+  duplicate penalty applied, and notes such as "quality not measured".
+- *Selects, rejects, stars*: set on search cards and the Shots page; stored per shot id (`shot_marks`) and logged in
+  `feedback_events` (`shot_mark`, with the state before). Rejected shots are left out of every result list unless
+  "Show rejected" is on; "Selects only" keeps selected shots only.
+- Not built: the learned re-weighting from select / reject feedback (SPEC P1-D) is left to Phase 12 with the other
+  P1 features; the feedback it needs is being logged.
+
 ### Known limits
 - Thresholds were set on web photos (Places365) and object crops in low light (CODaN), not on video frames; precision
   on a user's footage depends on how common each tag is there. Shot size is never shown (no labelled data).

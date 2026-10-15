@@ -51,6 +51,13 @@ Test footage is synthetic and generated on demand with ffmpeg (never committed).
   instead of hidden. How good search is on real footage is measured
   by `eval/search_eval.py`, not by a test. The E2E test searches by a file name (the E2E data folder has no models)
   and moves to the next clip with the N key.
+- Ranking: tests on the same processed `cuts.mp4` project check that every result's final score is the sum of its
+  breakdown, the duplicate penalty points at a shot placed higher, the same weights give the same order, quality
+  alone sorts by quality and relevance alone keeps the fused order, invalid weights are refused, selects and stars
+  rise with the selection weight, rejected shots disappear (and come back with "show rejected"), "selects only",
+  marks on the Shots page, mark validation and the feedback log, and the person / scene signals. Frontend tests
+  check the breakdown table, the mark buttons, the weight sliders sending new weights and the reset; the E2E test
+  rejects a result and checks it is gone from the next search.
 - Timecode: drop-frame conversion is checked against known values and round-tripped frame by frame across minute and
   ten-minute boundaries.
 

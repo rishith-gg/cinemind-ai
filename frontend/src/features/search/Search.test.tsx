@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
@@ -9,6 +9,7 @@ import { useCurrentProject } from "../../lib/currentProject";
 import { SearchPage } from "./SearchPage";
 
 const hit = (rank: number, score: number, extra = {}) => ({ rank, score, contribution: 1 / (60 + rank), time_s: 1.2, text: null, parts: null, matched: [], ...extra });
+const DEFAULTS = { relevance: 1, quality: 0.2, selection: 0.3, person: 0.1, scene: 0.1, duplicate: 0.3 };
 const RESULT = {
   shot_id: "s1",
   media_id: "m1",
@@ -22,13 +23,28 @@ const RESULT = {
   quality_score: 0.9,
   score: 0.0325,
   relevant: null,
+  final: 1.12,
+  breakdown: {
+    relevance: { value: 1, weight: 1, contribution: 1 },
+    quality: { value: 0.9, weight: 0.2, contribution: 0.18 },
+    selection: { value: 0, weight: 0.3, contribution: 0 },
+    person: { value: 0, weight: 0.1, contribution: 0 },
+    scene: { value: 0, weight: 0.1, contribution: 0 },
+    duplicate: { value: 0.2, weight: 0.3, contribution: -0.06 },
+  },
+  duplicate_of: "s0",
+  notes: [],
+  mark: null,
+  stars: 0,
   why: {
     keyword: hit(1, -2.5, { text: "into the forest", parts: [{ text: "into the ", match: false }, { text: "forest", match: true }] }),
     labels: hit(2, 1, { matched: ["tag: Forest"] }),
     visual: hit(3, 0.27),
   },
 };
-const OUT = { query: "forest", like_shot_id: null, results: [RESULT], lists: { keyword: 1, labels: 4, text: 0, visual: 4 }, unavailable: {}, rrf_k: 60, weights: {} };
+const OUT = { query: "forest", like_shot_id: null, results: [RESULT], lists: { keyword: 1, labels: 4, text: 0, visual: 4 }, unavailable: {}, rrf_k: 60, weights: {}, ranking_weights: DEFAULTS, ranking_defaults: DEFAULTS };
+
+const NO_FILTERS = { has_dialogue: false, selects_only: false, include_rejected: false };
 
 interface Call {
   method: string;
@@ -45,6 +61,7 @@ function backend(out: unknown = OUT) {
       const url = new URL(req.url);
       const body = req.method === "GET" ? null : req.headers.get("content-type")?.includes("json") ? await req.json() : "binary";
       calls.push({ method: req.method, path: url.pathname + url.search, body });
+      if (url.pathname.endsWith("/mark")) return Response.json({ shot_id: "s1", ...(body as object), stars: (body as { stars?: number }).stars ?? 0 });
       if (url.pathname.endsWith("/judgments")) return Response.json({ query: "forest", shot_id: "s1", relevant: true, judged: 1 });
       if (url.pathname.includes("/search")) return Response.json(out);
       if (url.pathname.endsWith("/actors")) return Response.json({ actors: [{ id: "a1", name: "Asha" }] });
@@ -83,7 +100,7 @@ it("searches, shows why each shot is there, and links to the moment", async () =
   await userEvent.type(screen.getByLabelText("Search shots"), "forest");
   await userEvent.click(screen.getByRole("button", { name: "Search" }));
   const card = within((await screen.findByRole("list", { name: "Search results" })).querySelector("li")!);
-  expect(searches(calls)[0]).toMatchObject({ method: "POST", path: "/api/projects/p1/search", body: { q: "forest", filters: { has_dialogue: false } } });
+  expect(searches(calls)[0]).toMatchObject({ method: "POST", path: "/api/projects/p1/search", body: { q: "forest", filters: NO_FILTERS } });
   expect(card.getByRole("link")).toHaveAttribute("href", "/library/m1?t=1.2");
   expect(card.getByText("forest").tagName).toBe("MARK");
   const why = within(card.getByRole("list", { name: "Why this result" }));
@@ -99,9 +116,9 @@ it("filters, finds more like a shot, and records judgments", async () => {
   wrap("/search?q=forest");
   await screen.findByRole("list", { name: "Search results" });
   await userEvent.click(screen.getByLabelText("With speech"));
-  await waitFor(() => expect(searches(calls).at(-1)?.body).toEqual({ q: "forest", filters: { has_dialogue: true } }));
+  await waitFor(() => expect(searches(calls).at(-1)?.body).toEqual({ q: "forest", filters: { ...NO_FILTERS, has_dialogue: true } }));
   await userEvent.selectOptions(await screen.findByRole("combobox", { name: "Person" }), "a1");
-  await waitFor(() => expect(searches(calls).at(-1)?.body).toEqual({ q: "forest", filters: { has_dialogue: true, actor_id: "a1" } }));
+  await waitFor(() => expect(searches(calls).at(-1)?.body).toEqual({ q: "forest", filters: { ...NO_FILTERS, has_dialogue: true, actor_id: "a1" } }));
 
   await userEvent.click(screen.getByRole("button", { name: "Good result: walk.mov shot 1" }));
   await waitFor(() => expect(calls.find((c) => c.path.endsWith("/judgments"))?.body).toEqual({ query: "forest", shot_id: "s1", relevant: true }));
@@ -126,4 +143,44 @@ it("asks for a project first", () => {
   useCurrentProject.setState({ id: null });
   wrap();
   expect(screen.getByText("No project selected")).toBeInTheDocument();
+});
+
+it("explains the score, marks shots, and re-ranks with other weights", async () => {
+  const calls = backend();
+  wrap("/search?q=forest");
+  await screen.findByRole("list", { name: "Search results" });
+  const table = within(screen.getByRole("table", { name: "Score breakdown" }));
+  expect(table.getByRole("row", { name: /Relevance 1.00 × 1.0 \+1.00/ })).toBeInTheDocument();
+  expect(table.getByRole("row", { name: /Duplicate \(minus\) 0.20 × 0.3 −0.06/ })).toBeInTheDocument();
+  expect(table.getByRole("row", { name: /Score 1.12/ })).toBeInTheDocument();
+  expect(screen.getByText(/Looks like another shot, placed higher/)).toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole("button", { name: "Select walk.mov shot 1" }));
+  await waitFor(() => expect(calls.find((c) => c.path === "/api/shots/s1/mark")?.body).toEqual({ mark: "select" }));
+  expect(await screen.findByRole("button", { name: "Select walk.mov shot 1", pressed: true })).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "4 stars for walk.mov shot 1" }));
+  await waitFor(() => expect(calls.filter((c) => c.path === "/api/shots/s1/mark").at(-1)?.body).toEqual({ stars: 4 }));
+  await userEvent.click(screen.getByRole("button", { name: "Reject walk.mov shot 1" }));
+  expect(await screen.findByText(/Rejected: left out of search unless/)).toBeInTheDocument();
+
+  await userEvent.click(screen.getByText("Ranking weights"));
+  const slider = screen.getByLabelText("Weight of Technical quality");
+  fireEvent.change(slider, { target: { value: "1.5" } });
+  await waitFor(() =>
+    expect(searches(calls).at(-1)?.body).toMatchObject({ q: "forest", weights: { relevance: 1, quality: 1.5, duplicate: 0.3 } }),
+  );
+  const sent = searches(calls).length;
+  await userEvent.click(screen.getByRole("button", { name: "Back to the defaults" }));
+  await waitFor(() => expect(screen.queryByRole("button", { name: "Back to the defaults" })).not.toBeInTheDocument());
+  expect(searches(calls)).toHaveLength(sent); // the cached search with the defaults is shown again
+});
+
+it("offers selects-only and show-rejected filters", async () => {
+  const calls = backend();
+  wrap("/search?q=forest");
+  await screen.findByRole("list", { name: "Search results" });
+  await userEvent.click(screen.getByLabelText("Selects only"));
+  await waitFor(() => expect(searches(calls).at(-1)?.body).toEqual({ q: "forest", filters: { ...NO_FILTERS, selects_only: true } }));
+  await userEvent.click(screen.getByLabelText("Show rejected"));
+  await waitFor(() => expect(searches(calls).at(-1)?.body).toMatchObject({ filters: { selects_only: true, include_rejected: true } }));
 });

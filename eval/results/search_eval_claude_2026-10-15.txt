@@ -2,6 +2,8 @@ Search evaluation, 2026-10-15: project 31c271179e7d45ec9bee76aa34f8af50 (71 shot
 Unjudged shots count as not relevant; 'unjudged' is their mean number in the top 10. Queries are searched in their stored, normalised form (lower case).
 Models: picture clip-vit-b32, text minilm-l6. Machine: Darwin arm64.
 Settings: RRF k=60, depth 100, weights {'keyword': 1.0, 'labels': 1.0, 'text': 1.0, 'visual': 1.0}, text floor 0.35, visual prompt 'a photo of {}.'.
+Ranking weights: {'relevance': 1.0, 'quality': 0.2, 'selection': 0.3, 'person': 0.1, 'scene': 0.1, 'duplicate': 0.3}; selects in the project: 0, rejects (left out): 0 (kept in for the evaluation).
+Picture similarity between shots (2485 pairs): p10 0.302, p50 0.453, p90 0.658, p99 0.820, max 0.952; duplicate threshold 0.85.
 
 configuration           P@5   P@10  nDCG@10    MRR  unjudged
 keyword               0.000  0.000    0.000  0.000       0.0
@@ -13,23 +15,27 @@ hybrid - keyword      0.600  0.376    0.907  0.971       0.0
 hybrid - labels       0.588  0.376    0.901  0.941       0.0
 hybrid - text         0.600  0.376    0.921  1.000       0.0
 hybrid - visual       0.047  0.024    0.042  0.074       0.0
+ranked                0.565  0.382    0.881  0.961       0.0
+ranked - quality      0.565  0.376    0.899  0.971       0.0
+ranked - duplicate    0.576  0.382    0.894  0.961       0.0
+(ranked - selection left out: no selects or stars in the project)
 
 nDCG@10 per query (first result relevant: *)
-query                                      keyword        labels          text        visual        hybrid hybrid - text
-a river                                     0.000         0.000         0.000         0.962*        0.962*        0.962*
+query                                      keyword        labels          text        visual        hybrid        ranked
+a river                                     0.000         0.000         0.000         0.962*        0.962*        0.971*
 city street with traffic                    0.000         0.000         0.000         1.000*        1.000*        1.000*
 flower decorations for a festival           0.000         0.000         0.000         0.934*        0.934*        0.934*
-forest                                      0.000         0.539*        0.000         0.822*        0.836*        0.836*
-jeep on a muddy road                        0.000         0.000         0.000         1.000*        1.000*        1.000*
-misty mountains                             0.000         0.000         0.000         0.725*        0.725*        0.725*
-night                                       0.000         0.195         0.000         0.637*        0.541*        0.559*
-old man and woman sitting                   0.000         0.000         0.000         0.933*        0.933*        0.933*
+forest                                      0.000         0.539*        0.000         0.822*        0.836*        0.912*
+jeep on a muddy road                        0.000         0.000         0.000         1.000*        1.000*        0.918*
+misty mountains                             0.000         0.000         0.000         0.725*        0.725*        0.682*
+night                                       0.000         0.195         0.000         0.637*        0.541*        0.541*
+old man and woman sitting                   0.000         0.000         0.000         0.933*        0.933*        0.922*
 people in an office                         0.000         0.000         0.000         1.000*        1.000*        1.000*
-person talking to the camera                0.000         0.000         0.000         0.928*        0.710         0.928*
-person walking                              0.000         0.000         0.000         1.000*        1.000*        1.000*
+person talking to the camera                0.000         0.000         0.000         0.928*        0.710         0.575 
+person walking                              0.000         0.000         0.000         1.000*        1.000*        0.877*
 plates of food                              0.000         0.000         0.000         0.982*        0.982*        0.982*
-selfie of friends                           0.000         0.000         0.000         0.956*        0.956*        0.956*
-swimming pool                               0.000         0.000         0.000         1.000*        1.000*        1.000*
-underwater                                  0.000         0.000         0.000         1.000*        1.000*        1.000*
-waterfall                                   0.000         0.000         0.000         0.846*        0.846*        0.846*
+selfie of friends                           0.000         0.000         0.000         0.956*        0.956*        0.967*
+swimming pool                               0.000         0.000         0.000         1.000*        1.000*        0.983*
+underwater                                  0.000         0.000         0.000         1.000*        1.000*        0.877*
+waterfall                                   0.000         0.000         0.000         0.846*        0.846*        0.842*
 women lighting a lamp                       0.000         0.000         0.000         1.000*        1.000*        1.000*

@@ -15,6 +15,7 @@ from pydantic_settings import (
 from cinemind.core.embed_config import EmbedConfig, SceneConfig
 from cinemind.core.face_config import FaceConfig
 from cinemind.core.quality_config import QualityConfig
+from cinemind.core.ranking_config import RankingConfig
 from cinemind.core.search_config import SearchConfig
 from cinemind.core.transcribe_config import TranscribeConfig
 
@@ -53,6 +54,7 @@ class Settings(BaseSettings):
     embed: EmbedConfig = EmbedConfig()
     scenes: SceneConfig = SceneConfig()
     search: SearchConfig = SearchConfig()
+    ranking: RankingConfig = RankingConfig()
     worker_poll_seconds: float = 0.5
     # Importable modules that register extra stage chains (used by tests and plugins).
     extra_stage_modules: list[str] = []

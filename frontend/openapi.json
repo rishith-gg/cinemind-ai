@@ -3074,7 +3074,7 @@
           "search"
         ],
         "summary": "Search By Image",
-        "description": "Shots that look like a picture (JPEG, PNG or WebP as the raw request body, up to 15 MB).\nThe picture is only read in memory, never stored.",
+        "description": "Shots that look like a picture (JPEG, PNG or WebP as the raw request body, up to 15 MB\nand 40 megapixels). The picture is only read in memory, never stored.",
         "operationId": "searchByImage",
         "parameters": [
           {
@@ -3164,6 +3164,45 @@
               "default": false,
               "title": "Has Dialogue"
             }
+          },
+          {
+            "name": "selects_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Selects Only"
+            }
+          },
+          {
+            "name": "include_rejected",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Rejected"
+            }
+          },
+          {
+            "name": "weights",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 500
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Ranking weights as JSON, e.g. {\"quality\": 1}",
+              "title": "Weights"
+            },
+            "description": "Ranking weights as JSON, e.g. {\"quality\": 1}"
           }
         ],
         "responses": {
@@ -3277,6 +3316,99 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/JudgmentOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
+    "/api/shots/{shot_id}/mark": {
+      "put": {
+        "tags": [
+          "search"
+        ],
+        "summary": "Mark Shot",
+        "description": "Select, reject or clear a shot, and set its stars. Rejected shots are left out of search\nunless asked for; selected and starred ones get the selection signal in the ranking.",
+        "operationId": "markShot",
+        "parameters": [
+          {
+            "name": "shot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Shot Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkOut"
                 }
               }
             }
@@ -6751,6 +6883,75 @@
         "title": "ListHit",
         "description": "Why a result is there, for one list."
       },
+      "MarkIn": {
+        "properties": {
+          "mark": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "select",
+                  "reject",
+                  "none"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mark"
+          },
+          "stars": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stars"
+          }
+        },
+        "type": "object",
+        "title": "MarkIn"
+      },
+      "MarkOut": {
+        "properties": {
+          "shot_id": {
+            "type": "string",
+            "title": "Shot Id"
+          },
+          "mark": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "select",
+                  "reject"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mark"
+          },
+          "stars": {
+            "type": "integer",
+            "title": "Stars"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shot_id",
+          "mark",
+          "stars"
+        ],
+        "title": "MarkOut"
+      },
       "MediaFacesOut": {
         "properties": {
           "media_id": {
@@ -7696,6 +7897,26 @@
               }
             ],
             "title": "Edit"
+          },
+          "mark": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "select",
+                  "reject"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mark"
+          },
+          "stars": {
+            "type": "integer",
+            "title": "Stars",
+            "default": 0
           }
         },
         "type": "object",
@@ -7834,6 +8055,16 @@
             "type": "boolean",
             "title": "Has Dialogue",
             "default": false
+          },
+          "selects_only": {
+            "type": "boolean",
+            "title": "Selects Only",
+            "default": false
+          },
+          "include_rejected": {
+            "type": "boolean",
+            "title": "Include Rejected",
+            "default": false
           }
         },
         "type": "object",
@@ -7894,6 +8125,20 @@
             },
             "type": "object",
             "title": "Weights"
+          },
+          "ranking_weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Ranking Weights"
+          },
+          "ranking_defaults": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Ranking Defaults"
           }
         },
         "type": "object",
@@ -7904,7 +8149,9 @@
           "lists",
           "unavailable",
           "rrf_k",
-          "weights"
+          "weights",
+          "ranking_weights",
+          "ranking_defaults"
         ],
         "title": "SearchOut"
       },
@@ -7937,7 +8184,9 @@
           "filters": {
             "$ref": "#/components/schemas/SearchFilters",
             "default": {
-              "has_dialogue": false
+              "has_dialogue": false,
+              "selects_only": false,
+              "include_rejected": false
             }
           },
           "use": {
@@ -7959,6 +8208,20 @@
               }
             ],
             "title": "Use"
+          },
+          "weights": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weights"
           }
         },
         "type": "object",
@@ -8038,6 +8301,54 @@
             "type": "object",
             "title": "Why"
           },
+          "final": {
+            "type": "number",
+            "title": "Final"
+          },
+          "breakdown": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SignalOut"
+            },
+            "type": "object",
+            "title": "Breakdown"
+          },
+          "duplicate_of": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duplicate Of"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "mark": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "select",
+                  "reject"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mark"
+          },
+          "stars": {
+            "type": "integer",
+            "title": "Stars"
+          },
           "relevant": {
             "anyOf": [
               {
@@ -8064,6 +8375,12 @@
           "quality_score",
           "score",
           "why",
+          "final",
+          "breakdown",
+          "duplicate_of",
+          "notes",
+          "mark",
+          "stars",
           "relevant"
         ],
         "title": "SearchResult"
@@ -8266,6 +8583,29 @@
           "tags"
         ],
         "title": "ShotTagsOut"
+      },
+      "SignalOut": {
+        "properties": {
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "weight": {
+            "type": "number",
+            "title": "Weight"
+          },
+          "contribution": {
+            "type": "number",
+            "title": "Contribution"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "weight",
+          "contribution"
+        ],
+        "title": "SignalOut"
       },
       "SpeechLanguages": {
         "properties": {

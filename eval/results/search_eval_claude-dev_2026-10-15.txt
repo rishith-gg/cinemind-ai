@@ -2,6 +2,8 @@ Search evaluation, 2026-10-15: project 31c271179e7d45ec9bee76aa34f8af50 (71 shot
 Unjudged shots count as not relevant; 'unjudged' is their mean number in the top 10. Queries are searched in their stored, normalised form (lower case).
 Models: picture clip-vit-b32, text minilm-l6. Machine: Darwin arm64.
 Settings: RRF k=60, depth 100, weights {'keyword': 1.0, 'labels': 1.0, 'text': 1.0, 'visual': 1.0}, text floor 0.35, visual prompt 'a photo of {}.'.
+Ranking weights: {'relevance': 1.0, 'quality': 0.2, 'selection': 0.3, 'person': 0.1, 'scene': 0.1, 'duplicate': 0.3}; selects in the project: 0, rejects (left out): 0 (kept in for the evaluation).
+Picture similarity between shots (2485 pairs): p10 0.302, p50 0.453, p90 0.658, p99 0.820, max 0.952; duplicate threshold 0.85.
 
 configuration           P@5   P@10  nDCG@10    MRR  unjudged
 keyword               0.000  0.000    0.000  0.000       0.0
@@ -13,18 +15,22 @@ hybrid - keyword      0.433  0.275    0.833  0.917       0.0
 hybrid - labels       0.433  0.275    0.832  0.917       0.0
 hybrid - text         0.433  0.275    0.833  0.917       0.0
 hybrid - visual       0.017  0.017    0.038  0.042       0.0
+ranked                0.417  0.258    0.820  0.958       0.0
+ranked - quality      0.433  0.258    0.811  0.917       0.0
+ranked - duplicate    0.417  0.267    0.833  0.958       0.0
+(ranked - selection left out: no selects or stars in the project)
 
 nDCG@10 per query (first result relevant: *)
-query                                      keyword        labels          text        visual        hybrid hybrid - text
+query                                      keyword        labels          text        visual        hybrid        ranked
 a man wearing a cap                         0.000         0.000         0.000         1.000*        1.000*        1.000*
-bowls of snacks                             0.000         0.000         0.000         0.920*        0.920*        0.920*
+bowls of snacks                             0.000         0.000         0.000         0.920*        0.920*        0.877*
 crowd in a stadium                          0.000         0.000         0.000         1.000*        1.000*        1.000*
-fog                                         0.000         0.000         0.000         0.931*        0.931*        0.931*
+fog                                         0.000         0.000         0.000         0.931*        0.931*        0.816*
 green trees                                 0.000         0.000         0.000         0.539*        0.539*        0.539*
-indoor room                                 0.000         0.453         0.000         0.901*        0.913*        0.913*
+indoor room                                 0.000         0.453         0.000         0.901*        0.913*        0.636*
 lake                                        0.000         0.000         0.000         0.877*        0.877*        0.877*
-shirtless man                               0.000         0.000         0.000         0.877*        0.877*        0.877*
-statue of a god                             0.000         0.000         0.000         0.906*        0.906*        0.906*
-two men sitting outside                     0.000         0.000         0.000         0.631         0.631         0.631 
-wet rocks                                   0.000         0.000         0.000         0.639         0.639         0.639 
+shirtless man                               0.000         0.000         0.000         0.877*        0.877*        0.850*
+statue of a god                             0.000         0.000         0.000         0.906*        0.906*        0.837*
+two men sitting outside                     0.000         0.000         0.000         0.631         0.631         1.000*
+wet rocks                                   0.000         0.000         0.000         0.639         0.639         0.646 
 woman in a saree                            0.000         0.000         0.000         0.765*        0.765*        0.765*

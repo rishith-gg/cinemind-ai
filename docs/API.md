@@ -127,6 +127,19 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
   (`false`), or take it back (`null`); stored with the query normalised (trimmed, lower case, single spaces).
 - Errors: an empty query 422, a shot from another project 404.
 
+## Implemented (Phase 10): ranking, selects, explainability
+- `POST /api/projects/{id}/search` also takes `weights` (any of `relevance`, `quality`, `selection`, `person`,
+  `scene`, `duplicate`, 0..5; missing ones keep the `[ranking]` value; unknown names 422) and the filters
+  `selects_only` and `include_rejected` (rejected shots are left out by default; also for "more like this" and
+  picture search). Results are in the ranked order and carry `final`, `breakdown` (per signal: `value`, `weight`,
+  `contribution`), `duplicate_of`, `notes`, `mark`, `stars`; the response says which `ranking_weights` were used.
+- `PUT /api/shots/{id}/mark` `{mark?: "select" | "reject" | "none", stars?: 0..5}`: returns `{shot_id, mark,
+  stars}`; a part left out is kept (so a star click never touches the mark); no mark and 0 stars removes the row;
+  an unchanged mark is not logged again. Unknown shot 404, other values 422.
+- `POST /api/projects/{id}/search/image` also takes `selects_only`, `include_rejected` and `weights` (JSON).
+  Responses carry `ranking_defaults` (the `[ranking]` weights) next to `ranking_weights`.
+- Scene shots (`GET /api/projects/{id}/scenes`) carry `mark` and `stars`.
+
 ## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc, transcribe, faces, embed_visual, embed_text, tags
 - validate: ffprobe (by content, not extension): rational fps, VFR flag (avg vs nominal rate differ > 0.5 %),
   codecs, display size (rotation applied), timecode, colour tags. Corrupt or non-media files fail with a plain message.

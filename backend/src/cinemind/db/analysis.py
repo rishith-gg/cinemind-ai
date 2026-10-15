@@ -4,7 +4,16 @@ others through `db.models`."""
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, ForeignKey, Index, LargeBinary, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    CheckConstraint,
+    ForeignKey,
+    Index,
+    LargeBinary,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from cinemind.db.base import Base, UTCDateTime, utcnow
@@ -215,3 +224,24 @@ class SearchJudgment(Base):
 def normal_query(text: str) -> str:
     """How a query is stored with its judgments: trimmed, case-folded, single spaces."""
     return " ".join(text.casefold().split())[:200]
+
+
+class ShotMark(Base):
+    """The user's verdict on a shot: `mark` select | reject | None, and 0..5 stars. Kept by shot
+    id without a foreign key (like tag reviews), so it outlives a re-detection that keeps the
+    shot's frames. Rejected shots are left out of search unless asked for."""
+
+    __tablename__ = "shot_marks"
+
+    shot_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    project_id: Mapped[str] = _project_fk()
+    media_id: Mapped[str] = _media_fk()
+    mark: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    stars: Mapped[int] = mapped_column(default=0, server_default="0")
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, onupdate=utcnow)
+
+    __table_args__ = (
+        Index("ix_shot_marks_project", "project_id"),
+        CheckConstraint("mark IN ('select', 'reject')", name="ck_shot_marks_mark"),
+        CheckConstraint("stars BETWEEN 0 AND 5", name="ck_shot_marks_stars"),
+    )

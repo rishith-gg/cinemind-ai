@@ -858,6 +858,38 @@ export type ListHit = {
 };
 
 /**
+ * MarkIn
+ */
+export type MarkIn = {
+    /**
+     * Mark
+     */
+    mark?: 'select' | 'reject' | 'none' | null;
+    /**
+     * Stars
+     */
+    stars?: number | null;
+};
+
+/**
+ * MarkOut
+ */
+export type MarkOut = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Mark
+     */
+    mark: 'select' | 'reject' | null;
+    /**
+     * Stars
+     */
+    stars: number;
+};
+
+/**
  * MediaFacesOut
  */
 export type MediaFacesOut = {
@@ -1395,6 +1427,14 @@ export type SceneShotOut = {
      * Edit
      */
     edit: 'split' | 'join' | null;
+    /**
+     * Mark
+     */
+    mark?: 'select' | 'reject' | null;
+    /**
+     * Stars
+     */
+    stars?: number;
 };
 
 /**
@@ -1454,6 +1494,14 @@ export type SearchFilters = {
      * Has Dialogue
      */
     has_dialogue?: boolean;
+    /**
+     * Selects Only
+     */
+    selects_only?: boolean;
+    /**
+     * Include Rejected
+     */
+    include_rejected?: boolean;
 };
 
 /**
@@ -1494,6 +1542,18 @@ export type SearchOut = {
     weights: {
         [key: string]: number;
     };
+    /**
+     * Ranking Weights
+     */
+    ranking_weights: {
+        [key: string]: number;
+    };
+    /**
+     * Ranking Defaults
+     */
+    ranking_defaults: {
+        [key: string]: number;
+    };
 };
 
 /**
@@ -1513,6 +1573,12 @@ export type SearchRequest = {
      * Use
      */
     use?: Array<'keyword' | 'labels' | 'text' | 'visual'> | null;
+    /**
+     * Weights
+     */
+    weights?: {
+        [key: string]: number;
+    } | null;
 };
 
 /**
@@ -1569,6 +1635,32 @@ export type SearchResult = {
     why: {
         [key: string]: ListHit;
     };
+    /**
+     * Final
+     */
+    final: number;
+    /**
+     * Breakdown
+     */
+    breakdown: {
+        [key: string]: SignalOut;
+    };
+    /**
+     * Duplicate Of
+     */
+    duplicate_of: string | null;
+    /**
+     * Notes
+     */
+    notes: Array<string>;
+    /**
+     * Mark
+     */
+    mark: 'select' | 'reject' | null;
+    /**
+     * Stars
+     */
+    stars: number;
     /**
      * Relevant
      */
@@ -1717,6 +1809,24 @@ export type ShotTagsOut = {
      * Tags
      */
     tags: Array<TagOut>;
+};
+
+/**
+ * SignalOut
+ */
+export type SignalOut = {
+    /**
+     * Value
+     */
+    value: number;
+    /**
+     * Weight
+     */
+    weight: number;
+    /**
+     * Contribution
+     */
+    contribution: number;
 };
 
 /**
@@ -4141,6 +4251,20 @@ export type SearchByImageData = {
          * Has Dialogue
          */
         has_dialogue?: boolean;
+        /**
+         * Selects Only
+         */
+        selects_only?: boolean;
+        /**
+         * Include Rejected
+         */
+        include_rejected?: boolean;
+        /**
+         * Weights
+         *
+         * Ranking weights as JSON, e.g. {"quality": 1}
+         */
+        weights?: string | null;
     };
     url: '/api/projects/{project_id}/search/image';
 };
@@ -4224,6 +4348,52 @@ export type JudgeSearchResultResponses = {
 };
 
 export type JudgeSearchResultResponse = JudgeSearchResultResponses[keyof JudgeSearchResultResponses];
+
+export type MarkShotData = {
+    body: MarkIn;
+    path: {
+        /**
+         * Shot Id
+         */
+        shot_id: string;
+    };
+    query?: never;
+    url: '/api/shots/{shot_id}/mark';
+};
+
+export type MarkShotErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type MarkShotError = MarkShotErrors[keyof MarkShotErrors];
+
+export type MarkShotResponses = {
+    /**
+     * Successful Response
+     */
+    200: MarkOut;
+};
+
+export type MarkShotResponse = MarkShotResponses[keyof MarkShotResponses];
 
 export type ListActorsData = {
     body?: never;

@@ -8,6 +8,8 @@ export interface FilterValues {
   scene_id?: string;
   min_quality?: number;
   has_dialogue: boolean;
+  selects_only: boolean;
+  include_rejected: boolean;
 }
 
 const SELECT = "rounded border border-neutral-700 bg-neutral-900 px-2 py-1";
@@ -68,6 +70,12 @@ export function SearchFilters({ projectId, value, onChange }: { projectId: strin
       </label>
       <label className="flex items-center gap-1">
         <input type="checkbox" checked={value.has_dialogue} onChange={(e) => set({ has_dialogue: e.target.checked })} /> With speech
+      </label>
+      <label className="flex items-center gap-1">
+        <input type="checkbox" checked={value.selects_only} onChange={(e) => set({ selects_only: e.target.checked })} /> Selects only
+      </label>
+      <label className="flex items-center gap-1">
+        <input type="checkbox" checked={value.include_rejected} onChange={(e) => set({ include_rejected: e.target.checked })} /> Show rejected
       </label>
     </fieldset>
   );

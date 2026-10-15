@@ -86,7 +86,7 @@ function Scenes({ projectId }: { projectId: string }) {
           </p>
           <ul className="grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-3">
             {data.ungrouped.map((s) => (
-              <ShotCard key={s.shot_id} shot={s} />
+              <ShotCard key={s.shot_id} projectId={projectId} shot={s} />
             ))}
           </ul>
         </div>

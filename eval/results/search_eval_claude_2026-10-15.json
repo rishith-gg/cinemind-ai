@@ -62,6 +62,27 @@
    "ndcg": 0.04159592162044115,
    "mrr": 0.07352941176470588,
    "unj": 0.0
+  },
+  "ranked": {
+   "p5": 0.5647058823529412,
+   "p10": 0.38235294117647056,
+   "ndcg": 0.8813193103160022,
+   "mrr": 0.9607843137254901,
+   "unj": 0.0
+  },
+  "ranked - quality": {
+   "p5": 0.5647058823529412,
+   "p10": 0.3764705882352941,
+   "ndcg": 0.8993009050045699,
+   "mrr": 0.9705882352941176,
+   "unj": 0.0
+  },
+  "ranked - duplicate": {
+   "p5": 0.5764705882352942,
+   "p10": 0.38235294117647056,
+   "ndcg": 0.8937764390949766,
+   "mrr": 0.9607843137254901,
+   "unj": 0.0
   }
  },
  "queries": [
@@ -148,7 +169,43 @@
     "6ab10730f53e40bedd4521b5e4475b59",
     "2adc04e6ebb162c5d081a8c4919abc8e"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "04c9bd7f650b26ff896f075d1814063e",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "2744e597a26c84068fd353545a25e06d",
+    "41f34751dd99a7ce800fb496605123cb",
+    "d92d497b9e8459c688182c4e9fb38dce",
+    "15521600893952bf6762eda6cf6face2",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "2adc04e6ebb162c5d081a8c4919abc8e",
+    "531ef6c8145eef1ed4f12900eb337882",
+    "6ab10730f53e40bedd4521b5e4475b59"
+   ],
+   "ranked - quality": [
+    "04c9bd7f650b26ff896f075d1814063e",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "2744e597a26c84068fd353545a25e06d",
+    "d92d497b9e8459c688182c4e9fb38dce",
+    "41f34751dd99a7ce800fb496605123cb",
+    "15521600893952bf6762eda6cf6face2",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "6ab10730f53e40bedd4521b5e4475b59",
+    "2adc04e6ebb162c5d081a8c4919abc8e",
+    "531ef6c8145eef1ed4f12900eb337882"
+   ],
+   "ranked - duplicate": [
+    "04c9bd7f650b26ff896f075d1814063e",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "2744e597a26c84068fd353545a25e06d",
+    "41f34751dd99a7ce800fb496605123cb",
+    "d92d497b9e8459c688182c4e9fb38dce",
+    "531ef6c8145eef1ed4f12900eb337882",
+    "15521600893952bf6762eda6cf6face2",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "2adc04e6ebb162c5d081a8c4919abc8e",
+    "6ab10730f53e40bedd4521b5e4475b59"
+   ]
   },
   "city street with traffic": {
    "keyword": [],
@@ -214,7 +271,43 @@
     "4b460587a008b0280e3eeaaca1667877",
     "1becad1368388afcc5d666f1a875a7d4"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "7bea72c895447e9505d98ce2403fa464",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "e11d234e38eb59a192bf3ae3b14e7ed7",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "e295dc1356a4ff4961df020784835f0b",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "4470a6c90067b10b7fdf580a1b633698",
+    "b81e79a1282139c563dfae3513264b7f",
+    "35f47a20e972a681e9db689c28ecd78e"
+   ],
+   "ranked - quality": [
+    "7bea72c895447e9505d98ce2403fa464",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "e11d234e38eb59a192bf3ae3b14e7ed7",
+    "e295dc1356a4ff4961df020784835f0b",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "4470a6c90067b10b7fdf580a1b633698",
+    "b81e79a1282139c563dfae3513264b7f",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "35f47a20e972a681e9db689c28ecd78e"
+   ],
+   "ranked - duplicate": [
+    "7bea72c895447e9505d98ce2403fa464",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "e11d234e38eb59a192bf3ae3b14e7ed7",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "e295dc1356a4ff4961df020784835f0b",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "b81e79a1282139c563dfae3513264b7f",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "4470a6c90067b10b7fdf580a1b633698",
+    "4b460587a008b0280e3eeaaca1667877"
+   ]
   },
   "flower decorations for a festival": {
    "keyword": [],
@@ -280,7 +373,43 @@
     "c20663a5e964c1ef32799d3568953826",
     "67c4601858d5a6678815bfce2d513fcb"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "1becad1368388afcc5d666f1a875a7d4",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "ebf76808b389617e6d1d144c1320f662",
+    "b0afea0b5df95e8ef9cbb7bc471b5d75",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "87a7272d986095621effceea1fdddd28",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "6e728c8f82c67b7a74c7d3385a920d3d",
+    "c20663a5e964c1ef32799d3568953826",
+    "aaf9e39cedfc5d1e5d5502473c784a5e"
+   ],
+   "ranked - quality": [
+    "1becad1368388afcc5d666f1a875a7d4",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "ebf76808b389617e6d1d144c1320f662",
+    "b0afea0b5df95e8ef9cbb7bc471b5d75",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "87a7272d986095621effceea1fdddd28",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "6e728c8f82c67b7a74c7d3385a920d3d",
+    "c20663a5e964c1ef32799d3568953826",
+    "aaf9e39cedfc5d1e5d5502473c784a5e"
+   ],
+   "ranked - duplicate": [
+    "1becad1368388afcc5d666f1a875a7d4",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "ebf76808b389617e6d1d144c1320f662",
+    "b0afea0b5df95e8ef9cbb7bc471b5d75",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "6e728c8f82c67b7a74c7d3385a920d3d",
+    "87a7272d986095621effceea1fdddd28",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "c20663a5e964c1ef32799d3568953826",
+    "67c4601858d5a6678815bfce2d513fcb"
+   ]
   },
   "forest": {
    "keyword": [],
@@ -354,6 +483,42 @@
     "76dec27fc22a82cd13673bfa887a7ba8",
     "b81e79a1282139c563dfae3513264b7f",
     "c689b644b9faa063c28bad1278ec02e8"
+   ],
+   "ranked": [
+    "c689b644b9faa063c28bad1278ec02e8",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "b81e79a1282139c563dfae3513264b7f",
+    "2744e597a26c84068fd353545a25e06d",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "178efdf35a7804df20717bad8c89039f",
+    "41f34751dd99a7ce800fb496605123cb",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "d70405e167bf348ef786433e7e680eb7",
+    "7b015ed6ce1a821c425ff42c4be5b02c"
+   ],
+   "ranked - quality": [
+    "c689b644b9faa063c28bad1278ec02e8",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "b81e79a1282139c563dfae3513264b7f",
+    "2744e597a26c84068fd353545a25e06d",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "178efdf35a7804df20717bad8c89039f",
+    "41f34751dd99a7ce800fb496605123cb",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "7b015ed6ce1a821c425ff42c4be5b02c",
+    "8112dbe8b6059ba83599c8a583a5e83b"
+   ],
+   "ranked - duplicate": [
+    "c689b644b9faa063c28bad1278ec02e8",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "b81e79a1282139c563dfae3513264b7f",
+    "2744e597a26c84068fd353545a25e06d",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "178efdf35a7804df20717bad8c89039f",
+    "41f34751dd99a7ce800fb496605123cb",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "d70405e167bf348ef786433e7e680eb7",
+    "7b015ed6ce1a821c425ff42c4be5b02c"
    ]
   },
   "jeep on a muddy road": {
@@ -420,7 +585,43 @@
     "378782b040b9fcaf5ba0e7c5bcc87e77",
     "178efdf35a7804df20717bad8c89039f"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "b81e79a1282139c563dfae3513264b7f",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "15521600893952bf6762eda6cf6face2",
+    "4470a6c90067b10b7fdf580a1b633698",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "4b460587a008b0280e3eeaaca1667877",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "378782b040b9fcaf5ba0e7c5bcc87e77",
+    "178efdf35a7804df20717bad8c89039f"
+   ],
+   "ranked - quality": [
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "b81e79a1282139c563dfae3513264b7f",
+    "4470a6c90067b10b7fdf580a1b633698",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "15521600893952bf6762eda6cf6face2",
+    "4b460587a008b0280e3eeaaca1667877",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "378782b040b9fcaf5ba0e7c5bcc87e77",
+    "178efdf35a7804df20717bad8c89039f"
+   ],
+   "ranked - duplicate": [
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "b81e79a1282139c563dfae3513264b7f",
+    "4b460587a008b0280e3eeaaca1667877",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "15521600893952bf6762eda6cf6face2",
+    "4470a6c90067b10b7fdf580a1b633698",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "378782b040b9fcaf5ba0e7c5bcc87e77",
+    "178efdf35a7804df20717bad8c89039f"
+   ]
   },
   "misty mountains": {
    "keyword": [],
@@ -486,7 +687,43 @@
     "76dec27fc22a82cd13673bfa887a7ba8",
     "4470a6c90067b10b7fdf580a1b633698"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "ca68ed8aef37c722cbec00efa0243718",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "178efdf35a7804df20717bad8c89039f",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "7b015ed6ce1a821c425ff42c4be5b02c",
+    "41f34751dd99a7ce800fb496605123cb",
+    "4f502d20a23db09b79de570727d35d6a",
+    "0a55d024b68e8f774674a950e061e74f",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "2744e597a26c84068fd353545a25e06d"
+   ],
+   "ranked - quality": [
+    "ca68ed8aef37c722cbec00efa0243718",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "178efdf35a7804df20717bad8c89039f",
+    "7b015ed6ce1a821c425ff42c4be5b02c",
+    "0a55d024b68e8f774674a950e061e74f",
+    "41f34751dd99a7ce800fb496605123cb",
+    "4f502d20a23db09b79de570727d35d6a",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "4470a6c90067b10b7fdf580a1b633698"
+   ],
+   "ranked - duplicate": [
+    "ca68ed8aef37c722cbec00efa0243718",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "178efdf35a7804df20717bad8c89039f",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "7b015ed6ce1a821c425ff42c4be5b02c",
+    "41f34751dd99a7ce800fb496605123cb",
+    "4f502d20a23db09b79de570727d35d6a",
+    "0a55d024b68e8f774674a950e061e74f",
+    "76dec27fc22a82cd13673bfa887a7ba8",
+    "2744e597a26c84068fd353545a25e06d"
+   ]
   },
   "night": {
    "keyword": [],
@@ -563,6 +800,42 @@
     "884112256e64ad5b6dd0cc44fe627be3",
     "b81e79a1282139c563dfae3513264b7f",
     "e11d234e38eb59a192bf3ae3b14e7ed7"
+   ],
+   "ranked": [
+    "e11d234e38eb59a192bf3ae3b14e7ed7",
+    "b81e79a1282139c563dfae3513264b7f",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "aaa7ca854aea2061798e2afd18a5a723",
+    "400087f176a930e7be57e40a67ef60b5",
+    "2744e597a26c84068fd353545a25e06d",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "178efdf35a7804df20717bad8c89039f",
+    "3a6f75fea55184cb2a4b3bd255afa78a"
+   ],
+   "ranked - quality": [
+    "e11d234e38eb59a192bf3ae3b14e7ed7",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "b81e79a1282139c563dfae3513264b7f",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "aaa7ca854aea2061798e2afd18a5a723",
+    "400087f176a930e7be57e40a67ef60b5",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "2744e597a26c84068fd353545a25e06d",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "3a6f75fea55184cb2a4b3bd255afa78a"
+   ],
+   "ranked - duplicate": [
+    "e11d234e38eb59a192bf3ae3b14e7ed7",
+    "b81e79a1282139c563dfae3513264b7f",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "aaa7ca854aea2061798e2afd18a5a723",
+    "400087f176a930e7be57e40a67ef60b5",
+    "2744e597a26c84068fd353545a25e06d",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "178efdf35a7804df20717bad8c89039f",
+    "3a6f75fea55184cb2a4b3bd255afa78a"
    ]
   },
   "old man and woman sitting": {
@@ -629,7 +902,43 @@
     "d70405e167bf348ef786433e7e680eb7",
     "0a55d024b68e8f774674a950e061e74f"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "fbc7259812ec04236d420b5f665952b9",
+    "3275dd361339cfac12f623101e90a97e",
+    "400087f176a930e7be57e40a67ef60b5",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "d4d2958321a1013d0857107720fe8436",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "d70405e167bf348ef786433e7e680eb7",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "0a55d024b68e8f774674a950e061e74f"
+   ],
+   "ranked - quality": [
+    "3275dd361339cfac12f623101e90a97e",
+    "fbc7259812ec04236d420b5f665952b9",
+    "400087f176a930e7be57e40a67ef60b5",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "d4d2958321a1013d0857107720fe8436",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "d70405e167bf348ef786433e7e680eb7",
+    "0a55d024b68e8f774674a950e061e74f"
+   ],
+   "ranked - duplicate": [
+    "fbc7259812ec04236d420b5f665952b9",
+    "3275dd361339cfac12f623101e90a97e",
+    "400087f176a930e7be57e40a67ef60b5",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "d4d2958321a1013d0857107720fe8436",
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "d70405e167bf348ef786433e7e680eb7",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "67c4601858d5a6678815bfce2d513fcb"
+   ]
   },
   "people in an office": {
    "keyword": [],
@@ -695,7 +1004,43 @@
     "9159d225c0e0862cd73d05edf470fe07",
     "d8e1c96457167c7e9470db83a6a36d87"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "c5eef625f21dfc568f8799fe6ced9ce4",
+    "400087f176a930e7be57e40a67ef60b5",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "0a55d024b68e8f774674a950e061e74f",
+    "3275dd361339cfac12f623101e90a97e",
+    "fbc7259812ec04236d420b5f665952b9",
+    "e295dc1356a4ff4961df020784835f0b",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "d8e1c96457167c7e9470db83a6a36d87"
+   ],
+   "ranked - quality": [
+    "c5eef625f21dfc568f8799fe6ced9ce4",
+    "400087f176a930e7be57e40a67ef60b5",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "0a55d024b68e8f774674a950e061e74f",
+    "3275dd361339cfac12f623101e90a97e",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "e295dc1356a4ff4961df020784835f0b",
+    "fbc7259812ec04236d420b5f665952b9",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "d8e1c96457167c7e9470db83a6a36d87"
+   ],
+   "ranked - duplicate": [
+    "c5eef625f21dfc568f8799fe6ced9ce4",
+    "400087f176a930e7be57e40a67ef60b5",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "0a55d024b68e8f774674a950e061e74f",
+    "3275dd361339cfac12f623101e90a97e",
+    "fbc7259812ec04236d420b5f665952b9",
+    "e295dc1356a4ff4961df020784835f0b",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "d8e1c96457167c7e9470db83a6a36d87"
+   ]
   },
   "person talking to the camera": {
    "keyword": [],
@@ -765,6 +1110,42 @@
    ],
    "hybrid - visual": [
     "2b11edf0bcb4c1eae2487024316e3d7c"
+   ],
+   "ranked": [
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "178efdf35a7804df20717bad8c89039f",
+    "e295dc1356a4ff4961df020784835f0b",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "400087f176a930e7be57e40a67ef60b5",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "027e1a9e0756103460750a31b1fb1192",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "378782b040b9fcaf5ba0e7c5bcc87e77"
+   ],
+   "ranked - quality": [
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "e295dc1356a4ff4961df020784835f0b",
+    "178efdf35a7804df20717bad8c89039f",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "400087f176a930e7be57e40a67ef60b5",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "027e1a9e0756103460750a31b1fb1192",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "13a7854ce6e4cd604d0e9bded11476c0"
+   ],
+   "ranked - duplicate": [
+    "2b11edf0bcb4c1eae2487024316e3d7c",
+    "178efdf35a7804df20717bad8c89039f",
+    "e295dc1356a4ff4961df020784835f0b",
+    "027e1a9e0756103460750a31b1fb1192",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "400087f176a930e7be57e40a67ef60b5",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "50b3a9237e6c48db4797335764ebbc50",
+    "378782b040b9fcaf5ba0e7c5bcc87e77"
    ]
   },
   "person walking": {
@@ -831,7 +1212,43 @@
     "e295dc1356a4ff4961df020784835f0b",
     "15521600893952bf6762eda6cf6face2"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "7bea72c895447e9505d98ce2403fa464",
+    "d70405e167bf348ef786433e7e680eb7",
+    "e960dff18b6d0ff815c22305353bbc31",
+    "0a55d024b68e8f774674a950e061e74f",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "178efdf35a7804df20717bad8c89039f",
+    "15521600893952bf6762eda6cf6face2",
+    "e295dc1356a4ff4961df020784835f0b",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28"
+   ],
+   "ranked - quality": [
+    "7bea72c895447e9505d98ce2403fa464",
+    "0a55d024b68e8f774674a950e061e74f",
+    "d70405e167bf348ef786433e7e680eb7",
+    "e960dff18b6d0ff815c22305353bbc31",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "178efdf35a7804df20717bad8c89039f",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "e295dc1356a4ff4961df020784835f0b",
+    "15521600893952bf6762eda6cf6face2"
+   ],
+   "ranked - duplicate": [
+    "7bea72c895447e9505d98ce2403fa464",
+    "d70405e167bf348ef786433e7e680eb7",
+    "e960dff18b6d0ff815c22305353bbc31",
+    "0a55d024b68e8f774674a950e061e74f",
+    "13a7854ce6e4cd604d0e9bded11476c0",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "178efdf35a7804df20717bad8c89039f",
+    "15521600893952bf6762eda6cf6face2",
+    "e295dc1356a4ff4961df020784835f0b",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28"
+   ]
   },
   "plates of food": {
    "keyword": [],
@@ -897,7 +1314,43 @@
     "1becad1368388afcc5d666f1a875a7d4",
     "884112256e64ad5b6dd0cc44fe627be3"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "c20663a5e964c1ef32799d3568953826",
+    "d06464bd0367abaaf3cb36bac0e69e04",
+    "52a21ab89e89ff39ef17e1cbee82d798",
+    "c69944aa72bac509c5a036ba0565624b",
+    "b0afea0b5df95e8ef9cbb7bc471b5d75",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "9ddb74715662948cc5a866f5c9f7f82b",
+    "ebf76808b389617e6d1d144c1320f662",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "400087f176a930e7be57e40a67ef60b5"
+   ],
+   "ranked - quality": [
+    "c20663a5e964c1ef32799d3568953826",
+    "d06464bd0367abaaf3cb36bac0e69e04",
+    "52a21ab89e89ff39ef17e1cbee82d798",
+    "c69944aa72bac509c5a036ba0565624b",
+    "b0afea0b5df95e8ef9cbb7bc471b5d75",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "9ddb74715662948cc5a866f5c9f7f82b",
+    "ebf76808b389617e6d1d144c1320f662",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "884112256e64ad5b6dd0cc44fe627be3"
+   ],
+   "ranked - duplicate": [
+    "c20663a5e964c1ef32799d3568953826",
+    "d06464bd0367abaaf3cb36bac0e69e04",
+    "52a21ab89e89ff39ef17e1cbee82d798",
+    "c69944aa72bac509c5a036ba0565624b",
+    "b0afea0b5df95e8ef9cbb7bc471b5d75",
+    "b8501812bee28bb2f12a5b5a62a1b72c",
+    "9ddb74715662948cc5a866f5c9f7f82b",
+    "ebf76808b389617e6d1d144c1320f662",
+    "1becad1368388afcc5d666f1a875a7d4",
+    "400087f176a930e7be57e40a67ef60b5"
+   ]
   },
   "selfie of friends": {
    "keyword": [],
@@ -963,7 +1416,43 @@
     "6ab10730f53e40bedd4521b5e4475b59",
     "a9b8d46010fcf85ce6691e4cac5d3a21"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "9159d225c0e0862cd73d05edf470fe07",
+    "08d394dbcdcb04ffb0558cf17255290a",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "178efdf35a7804df20717bad8c89039f",
+    "d70405e167bf348ef786433e7e680eb7",
+    "e295dc1356a4ff4961df020784835f0b",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "6ab10730f53e40bedd4521b5e4475b59"
+   ],
+   "ranked - quality": [
+    "08d394dbcdcb04ffb0558cf17255290a",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "178efdf35a7804df20717bad8c89039f",
+    "d70405e167bf348ef786433e7e680eb7",
+    "e295dc1356a4ff4961df020784835f0b",
+    "6ab10730f53e40bedd4521b5e4475b59",
+    "a9b8d46010fcf85ce6691e4cac5d3a21"
+   ],
+   "ranked - duplicate": [
+    "9159d225c0e0862cd73d05edf470fe07",
+    "08d394dbcdcb04ffb0558cf17255290a",
+    "35f47a20e972a681e9db689c28ecd78e",
+    "63f4b8decf42013a9ea9840c5856a0b1",
+    "c5a56430e3c5e6e0e34fdde9eb02bc28",
+    "178efdf35a7804df20717bad8c89039f",
+    "d70405e167bf348ef786433e7e680eb7",
+    "e295dc1356a4ff4961df020784835f0b",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "6ab10730f53e40bedd4521b5e4475b59"
+   ]
   },
   "swimming pool": {
    "keyword": [],
@@ -1029,7 +1518,43 @@
     "9159d225c0e0862cd73d05edf470fe07",
     "13a7854ce6e4cd604d0e9bded11476c0"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "0555bbc4adfedcd5a409c1f4758d16d9",
+    "28b71358e5b27430ab3b66129fc6f542",
+    "3a6f75fea55184cb2a4b3bd255afa78a",
+    "e11d234e38eb59a192bf3ae3b14e7ed7",
+    "4dba0bac675735125329d677086abd21",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "41f34751dd99a7ce800fb496605123cb",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "13a7854ce6e4cd604d0e9bded11476c0"
+   ],
+   "ranked - quality": [
+    "0555bbc4adfedcd5a409c1f4758d16d9",
+    "28b71358e5b27430ab3b66129fc6f542",
+    "3a6f75fea55184cb2a4b3bd255afa78a",
+    "4dba0bac675735125329d677086abd21",
+    "e11d234e38eb59a192bf3ae3b14e7ed7",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "41f34751dd99a7ce800fb496605123cb",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "13a7854ce6e4cd604d0e9bded11476c0"
+   ],
+   "ranked - duplicate": [
+    "0555bbc4adfedcd5a409c1f4758d16d9",
+    "28b71358e5b27430ab3b66129fc6f542",
+    "3a6f75fea55184cb2a4b3bd255afa78a",
+    "e11d234e38eb59a192bf3ae3b14e7ed7",
+    "4dba0bac675735125329d677086abd21",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "41f34751dd99a7ce800fb496605123cb",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "13a7854ce6e4cd604d0e9bded11476c0"
+   ]
   },
   "underwater": {
    "keyword": [],
@@ -1095,7 +1620,43 @@
     "803ce6be0f0d9bc12e92250dc1dc7cdb",
     "2a6892627bc30c046ff310c2914edfbd"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "0555bbc4adfedcd5a409c1f4758d16d9",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "41f34751dd99a7ce800fb496605123cb",
+    "3a6f75fea55184cb2a4b3bd255afa78a",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "28b71358e5b27430ab3b66129fc6f542",
+    "0a55d024b68e8f774674a950e061e74f",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "2a6892627bc30c046ff310c2914edfbd"
+   ],
+   "ranked - quality": [
+    "0555bbc4adfedcd5a409c1f4758d16d9",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "3a6f75fea55184cb2a4b3bd255afa78a",
+    "41f34751dd99a7ce800fb496605123cb",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "0a55d024b68e8f774674a950e061e74f",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "28b71358e5b27430ab3b66129fc6f542",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "2a6892627bc30c046ff310c2914edfbd"
+   ],
+   "ranked - duplicate": [
+    "0555bbc4adfedcd5a409c1f4758d16d9",
+    "3a6f75fea55184cb2a4b3bd255afa78a",
+    "85c7cf2333a28ccdb9cd58af3b764f13",
+    "41f34751dd99a7ce800fb496605123cb",
+    "9159d225c0e0862cd73d05edf470fe07",
+    "899146a66ad985e9ade0a4f73a7485a8",
+    "28b71358e5b27430ab3b66129fc6f542",
+    "0a55d024b68e8f774674a950e061e74f",
+    "803ce6be0f0d9bc12e92250dc1dc7cdb",
+    "2a6892627bc30c046ff310c2914edfbd"
+   ]
   },
   "waterfall": {
    "keyword": [],
@@ -1161,7 +1722,43 @@
     "04c9bd7f650b26ff896f075d1814063e",
     "63f4b8decf42013a9ea9840c5856a0b1"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "7b015ed6ce1a821c425ff42c4be5b02c",
+    "4f502d20a23db09b79de570727d35d6a",
+    "531ef6c8145eef1ed4f12900eb337882",
+    "41f34751dd99a7ce800fb496605123cb",
+    "2744e597a26c84068fd353545a25e06d",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "d856ccaa494469ac3cc364878cc3b1ba",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "d92d497b9e8459c688182c4e9fb38dce",
+    "63f4b8decf42013a9ea9840c5856a0b1"
+   ],
+   "ranked - quality": [
+    "7b015ed6ce1a821c425ff42c4be5b02c",
+    "4f502d20a23db09b79de570727d35d6a",
+    "531ef6c8145eef1ed4f12900eb337882",
+    "41f34751dd99a7ce800fb496605123cb",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "2744e597a26c84068fd353545a25e06d",
+    "d92d497b9e8459c688182c4e9fb38dce",
+    "d856ccaa494469ac3cc364878cc3b1ba",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "63f4b8decf42013a9ea9840c5856a0b1"
+   ],
+   "ranked - duplicate": [
+    "7b015ed6ce1a821c425ff42c4be5b02c",
+    "4f502d20a23db09b79de570727d35d6a",
+    "531ef6c8145eef1ed4f12900eb337882",
+    "41f34751dd99a7ce800fb496605123cb",
+    "d92d497b9e8459c688182c4e9fb38dce",
+    "2744e597a26c84068fd353545a25e06d",
+    "8112dbe8b6059ba83599c8a583a5e83b",
+    "d856ccaa494469ac3cc364878cc3b1ba",
+    "04c9bd7f650b26ff896f075d1814063e",
+    "63f4b8decf42013a9ea9840c5856a0b1"
+   ]
   },
   "women lighting a lamp": {
    "keyword": [],
@@ -1227,7 +1824,43 @@
     "55a897173e1b0fd4b10699451e0a92bc",
     "50b3a9237e6c48db4797335764ebbc50"
    ],
-   "hybrid - visual": []
+   "hybrid - visual": [],
+   "ranked": [
+    "aaf9e39cedfc5d1e5d5502473c784a5e",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "fbc7259812ec04236d420b5f665952b9",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "d70405e167bf348ef786433e7e680eb7",
+    "c5eef625f21dfc568f8799fe6ced9ce4",
+    "ef046f796821353195d286ece11ec9b5",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "50b3a9237e6c48db4797335764ebbc50"
+   ],
+   "ranked - quality": [
+    "aaf9e39cedfc5d1e5d5502473c784a5e",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "fbc7259812ec04236d420b5f665952b9",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "d70405e167bf348ef786433e7e680eb7",
+    "ef046f796821353195d286ece11ec9b5",
+    "c5eef625f21dfc568f8799fe6ced9ce4",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "50b3a9237e6c48db4797335764ebbc50"
+   ],
+   "ranked - duplicate": [
+    "aaf9e39cedfc5d1e5d5502473c784a5e",
+    "7dc51fa7912023ad0292724b8b86c91e",
+    "fbc7259812ec04236d420b5f665952b9",
+    "a9b8d46010fcf85ce6691e4cac5d3a21",
+    "d70405e167bf348ef786433e7e680eb7",
+    "c5eef625f21dfc568f8799fe6ced9ce4",
+    "ef046f796821353195d286ece11ec9b5",
+    "55a897173e1b0fd4b10699451e0a92bc",
+    "884112256e64ad5b6dd0cc44fe627be3",
+    "50b3a9237e6c48db4797335764ebbc50"
+   ]
   }
  },
  "judge": "claude",
@@ -1241,7 +1874,10 @@
    "hybrid - keyword": 0.961999147059583,
    "hybrid - labels": 0.961999147059583,
    "hybrid - text": 0.961999147059583,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.9709286432396581,
+   "ranked - quality": 0.9709286432396581,
+   "ranked - duplicate": 0.961999147059583
   },
   "city street with traffic": {
    "keyword": 0.0,
@@ -1252,7 +1888,10 @@
    "hybrid - keyword": 1.0,
    "hybrid - labels": 1.0,
    "hybrid - text": 1.0,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 1.0,
+   "ranked - quality": 1.0,
+   "ranked - duplicate": 1.0
   },
   "flower decorations for a festival": {
    "keyword": 0.0,
@@ -1263,7 +1902,10 @@
    "hybrid - keyword": 0.933745776545611,
    "hybrid - labels": 0.933745776545611,
    "hybrid - text": 0.933745776545611,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.933745776545611,
+   "ranked - quality": 0.933745776545611,
+   "ranked - duplicate": 0.933745776545611
   },
   "forest": {
    "keyword": 0.0,
@@ -1274,7 +1916,10 @@
    "hybrid - keyword": 0.8358912271816661,
    "hybrid - labels": 0.8223538668023913,
    "hybrid - text": 0.8358912271816661,
-   "hybrid - visual": 0.5390031312763821
+   "hybrid - visual": 0.5390031312763821,
+   "ranked": 0.9120345678990496,
+   "ranked - quality": 0.8358912271816661,
+   "ranked - duplicate": 0.9120345678990496
   },
   "jeep on a muddy road": {
    "keyword": 0.0,
@@ -1285,7 +1930,10 @@
    "hybrid - keyword": 1.0,
    "hybrid - labels": 1.0,
    "hybrid - text": 1.0,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.9178287402913374,
+   "ranked - quality": 0.9709286432396581,
+   "ranked - duplicate": 0.9709286432396581
   },
   "misty mountains": {
    "keyword": 0.0,
@@ -1296,7 +1944,10 @@
    "hybrid - keyword": 0.7246262544989281,
    "hybrid - labels": 0.7246262544989281,
    "hybrid - text": 0.7246262544989281,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.6816587806335841,
+   "ranked - quality": 0.7246262544989281,
+   "ranked - duplicate": 0.6816587806335841
   },
   "night": {
    "keyword": 0.0,
@@ -1307,7 +1958,10 @@
    "hybrid - keyword": 0.5413996682199069,
    "hybrid - labels": 0.44149241373678083,
    "hybrid - text": 0.5585075862632192,
-   "hybrid - visual": 0.16812753627111746
+   "hybrid - visual": 0.16812753627111746,
+   "ranked": 0.5413996682199069,
+   "ranked - quality": 0.5413996682199069,
+   "ranked - duplicate": 0.5413996682199069
   },
   "old man and woman sitting": {
    "keyword": 0.0,
@@ -1318,7 +1972,10 @@
    "hybrid - keyword": 0.9325210919548239,
    "hybrid - labels": 0.9325210919548239,
    "hybrid - text": 0.9325210919548239,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.9217868789962071,
+   "ranked - quality": 0.9325210919548239,
+   "ranked - duplicate": 0.9217868789962071
   },
   "people in an office": {
    "keyword": 0.0,
@@ -1329,7 +1986,10 @@
    "hybrid - keyword": 1.0,
    "hybrid - labels": 1.0,
    "hybrid - text": 1.0,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 1.0,
+   "ranked - quality": 1.0,
+   "ranked - duplicate": 1.0
   },
   "person talking to the camera": {
    "keyword": 0.0,
@@ -1340,7 +2000,10 @@
    "hybrid - keyword": 0.7100281367210132,
    "hybrid - labels": 0.7100281367210132,
    "hybrid - text": 0.9279611693743142,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.5749135036336186,
+   "ranked - quality": 0.6821597128635729,
+   "ranked - duplicate": 0.610960349354296
   },
   "person walking": {
    "keyword": 0.0,
@@ -1351,7 +2014,10 @@
    "hybrid - keyword": 1.0,
    "hybrid - labels": 1.0,
    "hybrid - text": 1.0,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.8772153153380493,
+   "ranked - quality": 1.0,
+   "ranked - duplicate": 0.8772153153380493
   },
   "plates of food": {
    "keyword": 0.0,
@@ -1362,7 +2028,10 @@
    "hybrid - keyword": 0.9818483242455301,
    "hybrid - labels": 0.9818483242455301,
    "hybrid - text": 0.9818483242455301,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.9818483242455301,
+   "ranked - quality": 0.9818483242455301,
+   "ranked - duplicate": 0.9818483242455301
   },
   "selfie of friends": {
    "keyword": 0.0,
@@ -1373,7 +2042,10 @@
    "hybrid - keyword": 0.9560290452802052,
    "hybrid - labels": 0.9560290452802052,
    "hybrid - text": 0.9560290452802052,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.9668342083190152,
+   "ranked - quality": 0.9560290452802052,
+   "ranked - duplicate": 0.9668342083190152
   },
   "swimming pool": {
    "keyword": 0.0,
@@ -1384,7 +2056,10 @@
    "hybrid - keyword": 1.0,
    "hybrid - labels": 1.0,
    "hybrid - text": 1.0,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.9828920819566879,
+   "ranked - quality": 1.0,
+   "ranked - duplicate": 0.9828920819566879
   },
   "underwater": {
    "keyword": 0.0,
@@ -1395,7 +2070,10 @@
    "hybrid - keyword": 1.0,
    "hybrid - labels": 1.0,
    "hybrid - text": 1.0,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.8772153153380493,
+   "ranked - quality": 0.9197207891481876,
+   "ranked - duplicate": 1.0
   },
   "waterfall": {
    "keyword": 0.0,
@@ -1406,7 +2084,10 @@
    "hybrid - keyword": 0.845519325279726,
    "hybrid - labels": 0.845519325279726,
    "hybrid - text": 0.845519325279726,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 0.842126470715732,
+   "ranked - quality": 0.8383162086599406,
+   "ranked - duplicate": 0.8508957228074243
   },
   "women lighting a lamp": {
    "keyword": 0.0,
@@ -1417,7 +2098,10 @@
    "hybrid - keyword": 1.0,
    "hybrid - labels": 1.0,
    "hybrid - text": 1.0,
-   "hybrid - visual": 0.0
+   "hybrid - visual": 0.0,
+   "ranked": 1.0,
+   "ranked - quality": 1.0,
+   "ranked - duplicate": 1.0
   }
  }
 }

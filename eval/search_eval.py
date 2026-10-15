@@ -44,7 +44,8 @@ from cinemind.core.search_config import RETRIEVERS  # noqa: E402
 from cinemind.db.analysis import SearchJudgment, normal_query  # noqa: E402
 from cinemind.db.base import make_engine, make_session_factory  # noqa: E402
 from cinemind.db.models import Keyframe, MediaAsset, Project, Shot  # noqa: E402
-from cinemind.search import hybrid  # noqa: E402
+from cinemind.pipeline import shot_marks  # noqa: E402
+from cinemind.search import hybrid, ranking  # noqa: E402
 from cinemind.search.metrics import ndcg_at, precision_at, reciprocal_rank  # noqa: E402
 
 K = 10
@@ -74,19 +75,73 @@ def _project(session: Session, wanted: str | None) -> str:
 
 
 def _ranked(
-    session: Session, settings: Settings, project: str, query: str, use: Sequence[str]
+    session: Session,
+    settings: Settings,
+    project: str,
+    query: str,
+    use: Sequence[str],
+    weights: dict[str, float] | None = None,
 ) -> tuple[list[str], dict[str, str]]:
-    out = hybrid.run(session, settings, project, hybrid.Query(text=query, use=use))
-    return [r.shot_id for r in out.results], out.unavailable
+    """Shot ids best first: the fused (RRF) order, or with `weights` the ranked order."""
+    # Judged shots must be rankable whatever the user marked: rejected shots stay in.
+    q = hybrid.Query(text=query, use=use, filters=hybrid.Filters(include_rejected=True))
+    if weights is None:
+        out = hybrid.run(session, settings, project, q)
+        return [r.shot_id for r in out.results], out.unavailable
+    out, placed = ranking.run_ranked(session, settings, project, q, weights)
+    return [r.fused.shot_id for r in placed], out.unavailable
 
 
-def configurations(lists: Sequence[str]) -> list[tuple[str, list[str]]]:
-    """Each list alone, all of them fused, and the fusion without each one."""
-    found = [(name, [name]) for name in lists]
-    found.append(("hybrid", list(lists)))
+Config = tuple[str, list[str], dict[str, float] | None]
+
+
+def configurations(lists: Sequence[str], settings: Settings) -> list[Config]:
+    """Each list alone, all of them fused, the fusion without each one, and the ranking (SPEC
+    section 10) with its default weights and without each signal that can change the order."""
+    found: list[Config] = [(name, [name], None) for name in lists]
+    found.append(("hybrid", list(lists), None))
     if len(lists) > 2:
-        found += [(f"hybrid - {name}", [n for n in lists if n != name]) for name in lists]
+        found += [(f"hybrid - {name}", [n for n in lists if n != name], None) for name in lists]
+    weights = dict(settings.ranking.weights)
+    found.append(("ranked", list(lists), weights))
+    for signal in ("quality", "selection", "duplicate"):
+        found.append((f"ranked - {signal}", list(lists), {**weights, signal: 0.0}))
     return found
+
+
+def _starred(session: Session, project: str) -> bool:
+    from cinemind.db.analysis import ShotMark
+
+    query = select(ShotMark.shot_id).where(ShotMark.project_id == project, ShotMark.stars > 0)
+    return session.scalar(query.limit(1)) is not None
+
+
+def picture_similarity(session: Session, settings: Settings, project: str) -> str:
+    """Spread of the cosine between the shots' mean picture vectors (what the duplicate
+    threshold is compared with)."""
+    import numpy as np
+
+    from cinemind.db.analysis import Embedding
+
+    key = embedder.choose_visual(settings).key
+    sums: dict[str, Any] = {}
+    rows = session.execute(
+        select(Embedding.shot_id, Embedding.vector)
+        .join(MediaAsset, MediaAsset.id == Embedding.media_id)
+        .where(MediaAsset.project_id == project, Embedding.kind == "keyframe",
+               Embedding.model == key)
+    )  # fmt: skip
+    for shot, blob in rows:
+        sums[str(shot)] = sums.get(str(shot), 0) + np.frombuffer(blob, dtype=np.float32)
+    if len(sums) < 2:
+        return "picture similarity between shots: fewer than two shots with vectors"
+    matrix = np.stack([v / np.linalg.norm(v) for v in sums.values()])
+    pairs = (matrix @ matrix.T)[np.triu_indices(len(sums), 1)]
+    cuts = ", ".join(f"p{p} {np.percentile(pairs, p):.3f}" for p in (10, 50, 90, 99))
+    return (
+        f"Picture similarity between shots ({len(pairs)} pairs): {cuts}, max {pairs.max():.3f}; "
+        f"duplicate threshold {settings.ranking.duplicate_threshold}."
+    )
 
 
 # --- run --------------------------------------------------------------------------------------
@@ -141,6 +196,10 @@ def run(args: argparse.Namespace) -> None:
             f"{platform.machine()}.",
             f"Settings: RRF k={cfg.rrf_k}, depth {cfg.depth}, weights {cfg.weights}, text floor "
             f"{cfg.text_min_similarity}, visual prompt {cfg.visual_prompt!r}.",
+            f"Ranking weights: {settings.ranking.weights}; selects in the project: "
+            f"{len(shot_marks.selected(session, project))}, rejects (left out): "
+            f"{len(shot_marks.rejected(session, project))} (kept in for the evaluation).",
+            picture_similarity(session, settings, project),
             "",
             f"{'configuration':<20} {'P@5':>6} {'P@10':>6} {'nDCG@10':>8} {'MRR':>6} "
             f"{'unjudged':>9}",
@@ -149,11 +208,16 @@ def run(args: argparse.Namespace) -> None:
         per_query: dict[str, dict[str, list[str]]] = {}
         ndcg_by_query: dict[str, dict[str, float]] = {}
         missing: dict[str, str] = {}
-        configs = configurations(lists)
-        for name, use in configs:
+        configs = configurations(lists, settings)
+        if not shot_marks.selected(session, project) and not _starred(session, project):
+            configs = [c for c in configs if c[0] != "ranked - selection"]
+            note_selection = True
+        else:
+            note_selection = False
+        for name, use, weights in configs:
             scores: dict[str, list[float]] = {"p5": [], "p10": [], "ndcg": [], "mrr": [], "unj": []}
             for q in queries:
-                ranked, unavailable = _ranked(session, settings, project, q, use)
+                ranked, unavailable = _ranked(session, settings, project, q, use, weights)
                 missing.update(unavailable)
                 relevant = {s for s, ok in judged[q].items() if ok}
                 scores["p5"].append(precision_at(ranked, relevant, 5))
@@ -169,7 +233,9 @@ def run(args: argparse.Namespace) -> None:
                 f"{name:<20} {mean['p5']:6.3f} {mean['p10']:6.3f} {mean['ndcg']:8.3f} "
                 f"{mean['mrr']:6.3f} {mean['unj']:9.1f}"
             )
-        names = [n for n, _ in configs if n in lists or n in ("hybrid", "hybrid - text")]
+        if note_selection:
+            lines.append("(ranked - selection left out: no selects or stars in the project)")
+        names = [n for n, _, _ in configs if n in lists or n in ("hybrid", "ranked")]
         lines += ["", "nDCG@10 per query (first result relevant: *)", f"{'query':<36} " + " ".join(
             f"{n[:13]:>13}" for n in names
         )]  # fmt: skip
@@ -240,7 +306,7 @@ def pool(args: argparse.Namespace) -> None:
         root = settings.project_dir(project)
         for n, q in enumerate(queries):
             pooled: list[str] = []
-            for _, use in configurations(list(RETRIEVERS))[: len(RETRIEVERS) + 1]:
+            for _, use, _ in configurations(list(RETRIEVERS), settings)[: len(RETRIEVERS) + 1]:
                 ranked, _ = _ranked(session, settings, project, q, use)
                 pooled += [s for s in ranked[:K] if s not in pooled]
             tiles = []

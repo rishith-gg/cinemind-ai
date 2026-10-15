@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 // The end-to-end data folder has no picture or text models, so only the lists that need none
 // (spoken words, labels) can answer; the page must still work and say nothing false. Also checks
 // moving to the next clip from the clip page.
-test("search finds shots by label, opens the moment, and the clip page moves to the next clip", async ({ page }) => {
+test("search finds shots by label, leaves rejected shots out, opens the moment, and the clip page moves to the next clip", async ({ page }) => {
   test.setTimeout(180_000);
   await page.goto("/projects");
   await page.getByLabel("Project name").fill(`Search ${Date.now()}`);
@@ -23,8 +23,23 @@ test("search finds shots by label, opens the moment, and the clip page moves to 
   await expect(page.getByRole("status")).toContainText("Labels");
   const first = results.getByRole("listitem").first();
   await expect(first).toContainText("three_shots.mp4");
+  await first.getByText(/Found by \d of the result lists/).click();
   await expect(first.getByRole("list", { name: "Why this result" })).toContainText("file: three_shots.mp4");
-  await first.getByRole("link").click();
+  await expect(first.getByRole("table", { name: "Score breakdown" })).toContainText("Relevance");
+
+  // A rejected shot is left out of the next search.
+  const cards = results.locator(":scope > li");
+  const before = await cards.count();
+  await first.getByRole("button", { name: /^Reject / }).click();
+  await expect(first).toContainText("Rejected: left out of search unless");
+  await page.getByLabel("Search shots").fill("three shots file");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(cards).toHaveCount(before - 1, { timeout: 30_000 });
+  await page.getByLabel("Show rejected").click();
+  await expect(page.getByLabel("Show rejected")).toBeChecked();
+  await expect(cards).toHaveCount(before, { timeout: 30_000 });
+
+  await results.getByRole("listitem").first().getByRole("link").click();
   await expect(page.getByRole("heading", { name: "three_shots.mp4" })).toBeVisible();
 
   // Previous / next without going back to the grid.

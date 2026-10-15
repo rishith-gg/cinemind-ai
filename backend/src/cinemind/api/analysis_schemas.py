@@ -30,6 +30,9 @@ class SceneShotOut(BaseModel):
     decision: str
     # The user's edit before this shot, if any.
     edit: Literal["split", "join"] | None
+    # The user's verdict on the shot: select / reject / none, and 0..5 stars.
+    mark: Literal["select", "reject"] | None = None
+    stars: int = 0
 
 
 class SceneOut(BaseModel):
