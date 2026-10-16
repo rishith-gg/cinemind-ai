@@ -299,7 +299,7 @@ def delete_media(media_id: str, session: SessionDep, settings: SettingsDep) -> N
     session.delete(asset)
     session.flush()
     session.commit()
-    project_refresh.refresh(session, settings, asset.project_id)  # actors, scenes, indexes
+    project_refresh.refresh(session, settings, asset.project_id)  # actors, scenes, takes, indexes
     importer.delete_asset_files(settings, asset)  # only once the rows are really gone
 
 

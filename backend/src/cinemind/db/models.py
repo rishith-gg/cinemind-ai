@@ -383,8 +383,9 @@ class TranscriptWord(Base):
     __table_args__ = (Index("ix_transcript_words_segment", "segment_id", "index"),)
 
 
-# Faces and actors, the Phase 8 analysis tables and the script tables live in their own modules;
-# importing them here registers their tables.
+# Faces and actors, the Phase 8 analysis tables, the script and the take tables live in their
+# own modules; importing them here registers their tables.
 from cinemind.db import analysis as analysis  # noqa: E402
 from cinemind.db import people as people  # noqa: E402
 from cinemind.db import script as script  # noqa: E402
+from cinemind.db import takes as takes  # noqa: E402

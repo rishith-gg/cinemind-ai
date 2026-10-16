@@ -3206,6 +3206,356 @@
         }
       }
     },
+    "/api/projects/{project_id}/takes": {
+      "get": {
+        "tags": [
+          "takes"
+        ],
+        "summary": "List Take Groups",
+        "operationId": "listTakeGroups",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TakeGroupsOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/takes/regroup": {
+      "post": {
+        "tags": [
+          "takes"
+        ],
+        "summary": "Regroup Takes",
+        "operationId": "regroupTakes",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TakeGroupsOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/takes/best": {
+      "put": {
+        "tags": [
+          "takes"
+        ],
+        "summary": "Set Best Take",
+        "description": "Make a take the best of its group, or (`best` false) let the signals choose again.",
+        "operationId": "setBestTake",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TakeBestIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TakeGroupsOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/takes/apart": {
+      "put": {
+        "tags": [
+          "takes"
+        ],
+        "summary": "Set Take Apart",
+        "description": "Take a shot out of its take group (it stays apart from those shots), or undo that.",
+        "operationId": "setTakeApart",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TakeApartIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TakeGroupsOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
     "/api/media/{media_id}/transcript": {
       "get": {
         "tags": [
@@ -4180,7 +4530,7 @@
           "search"
         ],
         "summary": "Mark Shot",
-        "description": "Select, reject or clear a shot, and set its stars. Rejected shots are left out of search\nunless asked for; selected and starred ones get the selection signal in the ranking.",
+        "description": "Select, reject or clear a shot, and set its stars. Rejected shots are left out of search\nunless asked for; selected and starred ones get the selection signal in the ranking. A\nrejected take is never the best of its take group, so a grouped shot's group is updated.",
         "operationId": "markShot",
         "parameters": [
           {
@@ -6619,6 +6969,17 @@
               }
             ],
             "title": "Scene Id"
+          },
+          "take_group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Take Group Id"
           },
           "keyframe_id": {
             "anyOf": [
@@ -10094,6 +10455,46 @@
         ],
         "title": "TagReviewIn"
       },
+      "TakeApartIn": {
+        "properties": {
+          "shot_id": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Shot Id"
+          },
+          "apart": {
+            "type": "boolean",
+            "title": "Apart",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "shot_id"
+        ],
+        "title": "TakeApartIn"
+      },
+      "TakeBestIn": {
+        "properties": {
+          "shot_id": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Shot Id"
+          },
+          "best": {
+            "type": "boolean",
+            "title": "Best",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "shot_id"
+        ],
+        "title": "TakeBestIn"
+      },
       "TakeChoice": {
         "properties": {
           "take_id": {
@@ -10116,6 +10517,256 @@
         },
         "type": "object",
         "title": "TakeChoice"
+      },
+      "TakeGroupOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "speech",
+              "picture"
+            ],
+            "title": "Kind"
+          },
+          "best_shot_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Shot Id"
+          },
+          "best_by": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "you",
+              "none"
+            ],
+            "title": "Best By"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/TakeMemberOut"
+            },
+            "type": "array",
+            "title": "Members"
+          },
+          "pairs": {
+            "items": {
+              "$ref": "#/components/schemas/TakePairOut"
+            },
+            "type": "array",
+            "title": "Pairs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "index",
+          "kind",
+          "best_shot_id",
+          "best_by",
+          "members",
+          "pairs"
+        ],
+        "title": "TakeGroupOut"
+      },
+      "TakeGroupsOut": {
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/TakeGroupOut"
+            },
+            "type": "array",
+            "title": "Groups"
+          },
+          "kept_apart": {
+            "items": {
+              "$ref": "#/components/schemas/TakeShotOut"
+            },
+            "type": "array",
+            "title": "Kept Apart"
+          },
+          "grouped_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grouped At"
+          },
+          "details": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Details"
+          },
+          "settings": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Settings"
+          },
+          "shots": {
+            "type": "integer",
+            "title": "Shots"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "groups",
+          "kept_apart",
+          "grouped_at",
+          "details",
+          "settings",
+          "shots"
+        ],
+        "title": "TakeGroupsOut"
+      },
+      "TakeMemberOut": {
+        "properties": {
+          "shot_id": {
+            "type": "string",
+            "title": "Shot Id"
+          },
+          "media_id": {
+            "type": "string",
+            "title": "Media Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "start_s": {
+            "type": "number",
+            "title": "Start S"
+          },
+          "end_s": {
+            "type": "number",
+            "title": "End S"
+          },
+          "keyframe_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keyframe Id"
+          },
+          "mark": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "select",
+                  "reject"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mark"
+          },
+          "stars": {
+            "type": "integer",
+            "title": "Stars",
+            "default": 0
+          },
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "best": {
+            "type": "boolean",
+            "title": "Best"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "signals": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Signals"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shot_id",
+          "media_id",
+          "filename",
+          "index",
+          "start_s",
+          "end_s",
+          "keyframe_id",
+          "rank",
+          "best",
+          "score",
+          "signals",
+          "notes",
+          "text"
+        ],
+        "title": "TakeMemberOut"
       },
       "TakeOut": {
         "properties": {
@@ -10181,6 +10832,139 @@
           "score"
         ],
         "title": "TakeOut"
+      },
+      "TakePairOut": {
+        "properties": {
+          "a": {
+            "type": "string",
+            "title": "A"
+          },
+          "b": {
+            "type": "string",
+            "title": "B"
+          },
+          "rule": {
+            "type": "string",
+            "title": "Rule"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "picture": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Picture"
+          },
+          "adjacent": {
+            "type": "number",
+            "title": "Adjacent"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "why": {
+            "type": "string",
+            "title": "Why"
+          }
+        },
+        "type": "object",
+        "required": [
+          "a",
+          "b",
+          "rule",
+          "text",
+          "picture",
+          "adjacent",
+          "score",
+          "why"
+        ],
+        "title": "TakePairOut",
+        "description": "Why two members were linked (or not): the signals, the rule and the pair score."
+      },
+      "TakeShotOut": {
+        "properties": {
+          "shot_id": {
+            "type": "string",
+            "title": "Shot Id"
+          },
+          "media_id": {
+            "type": "string",
+            "title": "Media Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "start_s": {
+            "type": "number",
+            "title": "Start S"
+          },
+          "end_s": {
+            "type": "number",
+            "title": "End S"
+          },
+          "keyframe_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keyframe Id"
+          },
+          "mark": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "select",
+                  "reject"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mark"
+          },
+          "stars": {
+            "type": "integer",
+            "title": "Stars",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "shot_id",
+          "media_id",
+          "filename",
+          "index",
+          "start_s",
+          "end_s",
+          "keyframe_id"
+        ],
+        "title": "TakeShotOut"
       },
       "TextPart": {
         "properties": {
@@ -10509,6 +11293,17 @@
               }
             ],
             "title": "Scene Id"
+          },
+          "take_group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Take Group Id"
           },
           "keyframe_id": {
             "anyOf": [

@@ -505,6 +505,55 @@ transcribed; 8 to 9 of 10 not-filmed lines rejected. Subtitles stand in for a sc
 - Each alignment embeds every window again (not cached); thousands of segments have not been timed. The test guard
   is 300 lines against 3000 segments, words only, under 30 s.
 
+## Take detection and best take (Phase 12B, SPEC P1-B)
+Existing: difflib's SequenceMatcher, the picture model's keyframe vectors (Phase 8), scikit-learn's average-linkage
+clustering, the quality and audio scores (Phase 5). Ours: the two pair rules, the pair score, the constraints, the
+best-take signals and weights (`pipeline/take_signals.py`, `pipeline/takes.py`, `rough_cut/take_pick.py`,
+`[takes]`, D-099 to D-102). Project-wide like scenes: runs after the last queued job, on "Look for takes again", after
+every correction, and when a grouped shot is selected / rejected; the groups are rewritten only when the result
+changed.
+
+1. **Per shot**: mean keyframe picture vector; the words of transcript lines not marked uncertain whose middle lies
+   in the shot (lower case, no punctuation); the number of uncertain lines in it; focus and exposure sub-scores of
+   the shot, the clip's audio score; whether the user rejected it; its place in project order (clips by file name,
+   then shots in source order, D-040).
+2. **Pair rules** (every pair of shots):
+   - both have speech (`min_words` 3 or more): words similarity (character ratio of the two word strings) must be at
+     least `text_min` 0.6, and the pictures at least `picture_min_with_text` 0.5 when both have vectors (a static
+     interview camera shows the same picture with different answers; a flashback says the same words elsewhere).
+     Pair score = 0.6 words + 0.25 picture + 0.15 neighbours.
+   - otherwise: picture cosine at least `picture_min` 0.9 and at most `max_apart` 3 places apart. Pair score =
+     0.8 picture + 0.2 neighbours. Neighbours = 1 for the next shot, falling by 1/3 per place.
+   A pair failing its rule scores 0 and says why ("different words (at most 0.31 < 0.6)"; "at most" because a
+   cheap upper bound already settles it). In effect, speech takes more than 3 shots apart need words of about 0.83
+   or more with identical pictures (0.875 at picture 0.9), since neighbours then add nothing; the note says so
+   ("same words (0.70) but pair score 0.62 < 0.75").
+3. **Groups**: pairs scoring `group_min` 0.75 or more connect shots; each connected part is grouped by average
+   linkage on 1 - pair score, joining while the mean is 0.75 or more, so one strong pair cannot chain two unrelated
+   shots. Pairs the user kept apart get a distance no group can bridge. Groups of one are not stored.
+4. **Best take**: weighted mean of the signals present (missing ones are left out of the mean):
+   speech groups 0.25 focus + 0.15 exposure + 0.15 audio + 0.25 complete + 0.2 clean; picture groups 0.5 focus +
+   0.3 exposure + 0.2 audio. Complete = share of the most typical take's words (highest mean word similarity to the
+   others) said in order. Clean = 1 - 0.25 per repeated word, filler ("um", "uh", ...) or uncertain line - 0.5 per
+   edge where speech starts or ends within 0.15 s of the shot's first or last frame (cut off). Each finding is a
+   note on the take. Rejected takes rank last and are never the best; the user's pick wins.
+5. **Rough cut**: at most one take per group. When the group's best take is among the candidates it takes the place
+   of the group's highest-ranked take, else that take is used; the others become swap suggestions, offered first in
+   the clip's swap list ("another take"). The reason says which.
+
+### Known limits (takes)
+- Every limit and weight above is a convention chosen before any evaluation. EVALUATION.md section 13 measures the
+  grouping on the user's footage with labels made by Claude from keyframes and transcripts, not by the user.
+- Repeats inside one continuous shot (an actor saying a line twice without cutting) are one shot and are not split
+  into takes; the Script page (12A) does find each repeat of a scripted line.
+- Words decide speech takes: ad-libbed takes with other words, takes in a "detect only" language (no text) and
+  takes Whisper did not write down fall back to the picture rule, which needs neighbouring shots.
+- Order is file-name order, not capture time; takes separated by more than three other shots without speech are not
+  found.
+- Audio is the clip's score, not the shot's; focus and exposure are medians over the shot; no performance judgement
+  (that stays with the editor). "Cut off" only means speech touches the shot's edge.
+- Every pair is compared (quadratic). Fine for hundreds of shots; thousands have not been timed.
+
 ### Known limits
 - Thresholds were set on web photos (Places365) and object crops in low light (CODaN), not on video frames; precision
   on a user's footage depends on how common each tag is there. Shot size is never shown (no labelled data).

@@ -4,6 +4,8 @@
 - Candidates: the hybrid search and ranking of Phases 9 and 10 with the subject of the brief as
   the query (rejected shots are already left out there; picture duplicates are pushed down by
   MMR). A brief without a subject takes every shot, ranked by the user's marks and quality.
+- Takes: at most one take of each take group (P1-B, `take_pick.py`), the best take when it is
+  among the candidates; the other takes become swap suggestions.
 - Filter: shots under `[rough_cut] min_quality` and shots too short to use, each listed with why.
 - Select and fit: in ranked order, each shot is trimmed (`trim.py`) and added while the cut
   stays within the target plus the tolerance; a clip without speech may be shortened to fill
@@ -32,6 +34,7 @@ from cinemind.pipeline import shot_marks
 from cinemind.rough_cut import BANNER
 from cinemind.rough_cut.assembly import check_rate, frame_size, natural_key
 from cinemind.rough_cut.brief import parse
+from cinemind.rough_cut.take_pick import one_take_per_group
 from cinemind.rough_cut.trim import Trim, trim_shot
 from cinemind.search import hybrid, ranking
 from cinemind.search.hybrid import Filters, Fused
@@ -65,6 +68,7 @@ class Candidate:
     asset: MediaAsset
     quality: float | None
     reason: dict[str, Any] = field(default_factory=lambda: {})
+    slot: int | None = None  # place in rank order when it replaced another take
 
 
 def _ranked(
@@ -173,7 +177,7 @@ def _order_key(order: Order, scenes: dict[str, int]) -> Any:
         c, trim = pair
         source = (natural_key(c.asset.filename), c.asset.id, trim.in_s)
         if order == "score":
-            return (c.rank,)
+            return (c.slot or c.rank, c.rank)
         if order == "scene":
             return (scenes.get(c.shot.scene_id or "", 1 << 30), *source)
         return source
@@ -205,20 +209,24 @@ def build_rough_cut(
             "Nothing in the footage matched the brief. Try other words, or remove the person "
             "or scene filter."
         )
-    lines = spoken_lines(session, {c.asset.id for c in candidates})
-
-    picks: list[tuple[Candidate, Trim]] = []
     left_out: list[dict[str, Any]] = []
-    spare: list[Candidate] = []
-    total = 0.0
-    most = target * (1 + cfg.tolerance)
+    usable: list[Candidate] = []
     for c in candidates:
         if c.quality is not None and c.quality < cfg.min_quality:
             left_out.append(_left(c, f"quality {c.quality:.2f} is below {cfg.min_quality:g}"))
-            continue
-        if c.shot.end_s - c.shot.start_s < cfg.min_clip_s:
+        elif c.shot.end_s - c.shot.start_s < cfg.min_clip_s:
             left_out.append(_left(c, f"shorter than {cfg.min_clip_s:g} s"))
-            continue
+        else:
+            usable.append(c)
+    # Takes are chosen among usable shots, so a poor best take cannot drop its whole group.
+    usable, other_takes = one_take_per_group(session, project_id, usable)
+    lines = spoken_lines(session, {c.asset.id for c in usable})
+
+    picks: list[tuple[Candidate, Trim]] = []
+    spare: list[Candidate] = list(other_takes)
+    total = 0.0
+    most = target * (1 + cfg.tolerance)
+    for c in usable:
         if total >= target * (1 - cfg.tolerance):
             spare.append(c)
             continue
@@ -268,7 +276,8 @@ def build_rough_cut(
             "search": search_info,
             "weights": settings.ranking.weights,
             "settings": cfg.model_dump(),
-            "candidates": len(candidates),
+            "candidates": len(candidates) + len(other_takes),
+            "other_takes": len(other_takes),
             "left_out": left_out,
             "alternatives": alternatives,
             "rate_chosen_by": "user" if req.fps else "most common rate among the chosen clips",

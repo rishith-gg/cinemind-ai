@@ -95,3 +95,15 @@ Models in `db/script.py` (imported by `db/models.py`).
 | `script_takes` | where a dialogue line was found, best first (`rank`), at most `[script] takes_kept`: `media_id` (cascade), `start_s`, `end_s` (first and last matched word), `text` (words heard), `lexical`, `semantic` (null without the text model), `score`, `segment_ids`. Rewritten by every alignment. |
 
 Script assemblies are ordinary timelines (`kind` `script_cut`); each item's `reason` holds the script lines it plays and the take's scores.
+
+## Phase 12B (migration 0016): take groups
+Models in `db/takes.py` (imported by `db/models.py`).
+
+| Table | Purpose |
+|---|---|
+| `take_groups` | shots found to be takes of the same material, rebuilt by every grouping (only when the result changed): `index`, `kind` (`speech` = linked by words, `picture`), `best_shot_id` (null when every take is rejected), `best_by` (`auto`, `you`, `none`), `details.pairs` (every pair of members with words, picture, neighbours, rule, pair score and why). Id = hash of project and first member shot. Cascades from `projects`. |
+| `take_group_members` | one row per take, best first (`rank`): `shot_id` (cascade), `score` (weighted mean of the signals, null when none was measured), `signals` (`focus`, `exposure`, `audio`, and for speech groups `complete`, `clean`; each 0..1 or null), `notes` (flubs, cut-off speech, rejected), `text` (words heard). |
+| `take_edits` | the user's corrections by shot id, re-applied by every grouping: `best` (this shot is the best take of its group), `apart` (`shot_id` and `other_id` are not takes of the same material). Unique per project, shot, kind and other. Every change is also a `feedback_events` row (`take_best`, `take_apart`). |
+| `take_runs` | per project: `digest` (hash of the last result and settings), `details` (picture model, settings, order, counts, number of edits), `grouped_at`. |
+
+Rough cut items in a take group carry `reason.take` (group number, number of takes, whether the best take was used, by whom it was chosen, and the result it replaced); other takes in the swap suggestions carry the take that was used instead.

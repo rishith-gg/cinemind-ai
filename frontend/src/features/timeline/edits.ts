@@ -46,9 +46,10 @@ export function withItems(t: TimelineDetail, items: TimelineItemOut[]): Timeline
   return { ...t, items: placed, item_count: placed.length, duration_frames: record, duration_s: record / rate };
 }
 
-/** Suggestions for one clip: those from its scene first, then by search rank. */
+/** Suggestions for one clip: other takes of it first, then those from its scene, then by search rank. */
 export function suggestionsFor(item: TimelineItemOut, alternatives: AlternativeOut[]): AlternativeOut[] {
   const scene = item.scene_id ?? null;
-  const near = (a: AlternativeOut) => (scene !== null && a.scene_id === scene ? 0 : 1);
+  const take = item.take_group_id ?? null;
+  const near = (a: AlternativeOut) => (take !== null && a.take_group_id === take ? 0 : scene !== null && a.scene_id === scene ? 1 : 2);
   return alternatives.slice().sort((a, b) => near(a) - near(b) || (a.rank ?? 1e9) - (b.rank ?? 1e9));
 }

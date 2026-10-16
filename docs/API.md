@@ -179,6 +179,20 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
   `reason` lists its script lines and scores. Edited and exported like any rough cut. No line with a take: 422.
 - `DELETE /api/projects/{id}/script` (timelines built from it stay).
 
+## Implemented (Phase 12B): take groups
+- `GET /api/projects/{id}/takes`: `groups` (each: `index`, `kind` `speech` | `picture`, `best_shot_id`, `best_by`
+  `auto` | `you` | `none`, `members` best first with shot, keyframe, marks, `rank`, `best`, `score`, `signals`,
+  `notes`, `text`, and `pairs` with words / picture / neighbours / rule / pair score / why), `kept_apart` (shots the
+  user took out), `grouped_at`, `details` (model, settings, counts), `settings` (`[takes]`), `shots`, `message`
+  (picture model missing, or never grouped yet).
+- `POST /api/projects/{id}/takes/regroup`: look for takes again (corrections are kept).
+- `PUT /api/projects/{id}/takes/best` `{shot_id, best}`: this take is the best of its group, or (`false`) the
+  signals choose again. 404 when the shot is in no group; 422 for a rejected take.
+- `PUT /api/projects/{id}/takes/apart` `{shot_id, apart}`: not a take of the others in its group (kept apart from
+  each of them from now on), or (`false`) forget every such answer about the shot.
+- `PUT /api/shots/{id}/mark` now also updates the shot's take group (a rejected take is never the best).
+- Timeline items and swap suggestions carry `take_group_id`; the editor offers other takes of a clip first.
+
 ## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc, transcribe, faces, embed_visual, embed_text, tags
 - validate: ffprobe (by content, not extension): rational fps, VFR flag (avg vs nominal rate differ > 0.5 %),
   codecs, display size (rotation applied), timecode, colour tags. Corrupt or non-media files fail with a plain message.

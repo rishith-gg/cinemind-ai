@@ -1,0 +1,30 @@
+Take grouping evaluation, 2026-10-16
+labels: eval/datasets/take_labels_claude_2026-10-16.json (judge: claude; judged by Claude from three keyframes and the certain transcript words per shot (eval/take_groups.py sheet), 25 clips of the user's footage folder without Tears of Steel; not by the user. Pieces of one continuous take split by a false shot cut (5582521 #1/#2) are not counted as repeats; consecutive montage shots of the same set-up are (1787323393287409 #16/#17). IMG_0867/0870/0872 (selfie clips, Kannada, no text) look like successive vlog pieces, not retakes; this cannot be confirmed from stills.)
+picture model: clip-vit-b32
+settings: {"min_words": 3, "text_min": 0.6, "picture_min_with_text": 0.5, "picture_min": 0.9, "max_apart": 3, "group_min": 0.75, "pair_weights": {"text": 0.6, "picture": 0.25, "adjacent": 0.15}, "pair_weights_picture": {"picture": 0.8, "adjacent": 0.2}, "best_weights": {"focus": 0.25, "exposure": 0.15, "audio": 0.15, "complete": 0.25, "clean": 0.2}, "best_weights_picture": {"focus": 0.5, "exposure": 0.3, "audio": 0.2}, "edge_s": 0.15, "fillers": ["um", "uh", "erm", "er", "hmm", "uhm", "umm"]}
+machine: macOS-26.5.2-arm64-arm-64bit-Mach-O, arm64
+shots: 76, with speech: 5
+groups: predicted 2, labelled 1
+pairs:  predicted 2, labelled 1, right 1
+pairwise  P 0.500  R 1.000  F1 0.667
+B-cubed   P 0.987  R 1.000  F1 0.993
+best take: suggestion = editor's pick in 0 of 0 groups with a pick
+wrong pairs (grouped, labelled apart):
+  5582521-uhd_3840_2160_24fps (1).mp4#1 + 5582521-uhd_3840_2160_24fps (1).mp4#2: same picture (0.94)
+missed pairs (labelled together, not grouped):
+sensitivity (same labels, NOT a tuning): group_min x picture_min -> pairwise P/R/F1
+  0.65 0.85  P 0.111  R 1.000  F1 0.200
+  0.65 0.90  P 0.500  R 1.000  F1 0.667
+  0.65 0.95  P 1.000  R 1.000  F1 1.000
+  0.70 0.85  P 0.111  R 1.000  F1 0.200
+  0.70 0.90  P 0.500  R 1.000  F1 0.667
+  0.70 0.95  P 1.000  R 1.000  F1 1.000
+  0.75 0.85  P 0.111  R 1.000  F1 0.200
+  0.75 0.90  P 0.500  R 1.000  F1 0.667
+  0.75 0.95  P 1.000  R 1.000  F1 1.000
+  0.80 0.85  P 0.111  R 1.000  F1 0.200
+  0.80 0.90  P 0.500  R 1.000  F1 0.667
+  0.80 0.95  P 1.000  R 1.000  F1 1.000
+  0.85 0.85  P 0.200  R 1.000  F1 0.333
+  0.85 0.90  P 0.500  R 1.000  F1 0.667
+  0.85 0.95  P 1.000  R 1.000  F1 1.000

@@ -53,7 +53,7 @@ def run_worker(
 
 def _after_ingest(factory: sessionmaker[Session], settings: Settings, job_id: str) -> None:
     """After an ingest job: once the project's queue is empty, group its faces into actors and
-    its shots into scenes, and bring its vector indexes up to date."""
+    its shots into scenes and takes, and bring its vector indexes up to date."""
     try:
         with factory() as session:
             job = session.get(Job, job_id)
@@ -61,7 +61,7 @@ def _after_ingest(factory: sessionmaker[Session], settings: Settings, job_id: st
                 return
             changed = project_refresh.refresh_if_idle(session, settings, job.project_id)
             for name in changed or ():
-                emit(session, job_id, name)  # tells open pages to reload people or scenes
+                emit(session, job_id, name)  # tells open pages to reload people, scenes or takes
             session.commit()
     except Exception:  # each step can be repeated from its page; never stop the worker
         log.exception("project steps failed after job %s", job_id)

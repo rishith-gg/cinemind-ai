@@ -18,6 +18,7 @@ const REFRESHED = new Set([
   "listSetAsideFaces",
   "getMediaFaces",
   "listScenes",
+  "listTakeGroups",
   "listMediaTags",
   "listProjectTags",
   "listVectorIndexes",
@@ -71,7 +72,7 @@ export function useJobEvents(onEvent?: (e: JobEvent) => void): { connected: bool
       scheduleMediaRefresh();
       handler.current?.(e);
     };
-    const types = ["queued", "started", "stage", "progress", "cancel_requested", "succeeded", "failed", "cancelled", "actors", "scenes"];
+    const types = ["queued", "started", "stage", "progress", "cancel_requested", "succeeded", "failed", "cancelled", "actors", "scenes", "takes"];
     types.forEach((t) => source.addEventListener(t, handle));
     return () => {
       source.close();

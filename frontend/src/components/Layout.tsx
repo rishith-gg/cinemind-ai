@@ -12,6 +12,7 @@ const NAV = [
   { to: "/actors", label: "Actors" },
   { to: "/transcripts", label: "Transcripts" },
   { to: "/search", label: "Search" },
+  { to: "/takes", label: "Takes" },
   { to: "/script", label: "Script" },
   { to: "/timeline", label: "Timeline" },
   { to: "/export", label: "Export" },

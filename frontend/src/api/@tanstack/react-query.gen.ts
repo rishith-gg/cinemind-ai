@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { alignScript, answerActorPair, browseFolder, cancelJob, chooseTake, createProject, createRoughCut, createScriptAssembly, createTimeline, deleteMedia, deleteProject, deleteScript, deleteTimeline, exportTimeline, getActor, getFaceCrop, getHealth, getJob, getKeyframe, getMedia, getMediaFaces, getMediaQuality, getMediaTranscript, getPoster, getProject, getScript, getSpeechLanguages, getStrip, getTimeline, getWaveform, importMedia, judgeSearchResult, listActorPairs, listActors, listJobs, listMedia, listMediaEmbeddings, listMediaShots, listMediaTags, listProjects, listProjectShots, listProjectTags, listProjectTranscripts, listScenes, listSetAsideFaces, listTimelines, listVectorIndexes, markShot, mergeActors, type Options, placeFaceTracks, processMedia, processProject, rebuildVectorIndexes, regroupActors, regroupScenes, relinkMedia, renameActor, renameScene, retryJob, reviewTag, searchByImage, searchShots, searchTranscripts, setClipSpeechLanguage, setSceneBoundary, setSpeechLanguages, splitActor, streamJobEvents, streamProxy, swapTimelineItem, updateProject, updateTimeline, uploadMedia, uploadScript } from '../sdk.gen';
-import type { AlignScriptData, AlignScriptError, AlignScriptResponse, AnswerActorPairData, AnswerActorPairError, AnswerActorPairResponse, BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, ChooseTakeData, ChooseTakeError, ChooseTakeResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateRoughCutData, CreateRoughCutError, CreateRoughCutResponse, CreateScriptAssemblyData, CreateScriptAssemblyError, CreateScriptAssemblyResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteScriptData, DeleteScriptError, DeleteScriptResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetActorData, GetActorError, GetActorResponse, GetFaceCropData, GetFaceCropError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaFacesData, GetMediaFacesError, GetMediaFacesResponse, GetMediaQualityData, GetMediaQualityError, GetMediaQualityResponse, GetMediaResponse, GetMediaTranscriptData, GetMediaTranscriptError, GetMediaTranscriptResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetScriptData, GetScriptError, GetScriptResponse, GetSpeechLanguagesData, GetSpeechLanguagesError, GetSpeechLanguagesResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, JudgeSearchResultData, JudgeSearchResultError, JudgeSearchResultResponse, ListActorPairsData, ListActorPairsError, ListActorPairsResponse, ListActorsData, ListActorsError, ListActorsResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaEmbeddingsData, ListMediaEmbeddingsError, ListMediaEmbeddingsResponse, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListMediaTagsData, ListMediaTagsError, ListMediaTagsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListProjectTagsData, ListProjectTagsError, ListProjectTagsResponse, ListProjectTranscriptsData, ListProjectTranscriptsError, ListProjectTranscriptsResponse, ListScenesData, ListScenesError, ListScenesResponse, ListSetAsideFacesData, ListSetAsideFacesError, ListSetAsideFacesResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ListVectorIndexesData, ListVectorIndexesError, ListVectorIndexesResponse, MarkShotData, MarkShotError, MarkShotResponse, MergeActorsData, MergeActorsError, MergeActorsResponse, PlaceFaceTracksData, PlaceFaceTracksError, PlaceFaceTracksResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RebuildVectorIndexesData, RebuildVectorIndexesError, RebuildVectorIndexesResponse, RegroupActorsData, RegroupActorsError, RegroupActorsResponse, RegroupScenesData, RegroupScenesError, RegroupScenesResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RenameActorData, RenameActorError, RenameActorResponse, RenameSceneData, RenameSceneError, RenameSceneResponse, RetryJobData, RetryJobError, RetryJobResponse, ReviewTagData, ReviewTagError, ReviewTagResponse, SearchByImageData, SearchByImageError, SearchByImageResponse, SearchShotsData, SearchShotsError, SearchShotsResponse, SearchTranscriptsData, SearchTranscriptsError, SearchTranscriptsResponse, SetClipSpeechLanguageData, SetClipSpeechLanguageError, SetClipSpeechLanguageResponse, SetSceneBoundaryData, SetSceneBoundaryError, SetSceneBoundaryResponse, SetSpeechLanguagesData, SetSpeechLanguagesError, SetSpeechLanguagesResponse, SplitActorData, SplitActorError, SplitActorResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, SwapTimelineItemData, SwapTimelineItemError, SwapTimelineItemResponse, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UpdateTimelineData, UpdateTimelineError, UpdateTimelineResponse, UploadMediaData, UploadMediaError, UploadMediaResponse, UploadScriptData, UploadScriptError, UploadScriptResponse } from '../types.gen';
+import { alignScript, answerActorPair, browseFolder, cancelJob, chooseTake, createProject, createRoughCut, createScriptAssembly, createTimeline, deleteMedia, deleteProject, deleteScript, deleteTimeline, exportTimeline, getActor, getFaceCrop, getHealth, getJob, getKeyframe, getMedia, getMediaFaces, getMediaQuality, getMediaTranscript, getPoster, getProject, getScript, getSpeechLanguages, getStrip, getTimeline, getWaveform, importMedia, judgeSearchResult, listActorPairs, listActors, listJobs, listMedia, listMediaEmbeddings, listMediaShots, listMediaTags, listProjects, listProjectShots, listProjectTags, listProjectTranscripts, listScenes, listSetAsideFaces, listTakeGroups, listTimelines, listVectorIndexes, markShot, mergeActors, type Options, placeFaceTracks, processMedia, processProject, rebuildVectorIndexes, regroupActors, regroupScenes, regroupTakes, relinkMedia, renameActor, renameScene, retryJob, reviewTag, searchByImage, searchShots, searchTranscripts, setBestTake, setClipSpeechLanguage, setSceneBoundary, setSpeechLanguages, setTakeApart, splitActor, streamJobEvents, streamProxy, swapTimelineItem, updateProject, updateTimeline, uploadMedia, uploadScript } from '../sdk.gen';
+import type { AlignScriptData, AlignScriptError, AlignScriptResponse, AnswerActorPairData, AnswerActorPairError, AnswerActorPairResponse, BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, ChooseTakeData, ChooseTakeError, ChooseTakeResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateRoughCutData, CreateRoughCutError, CreateRoughCutResponse, CreateScriptAssemblyData, CreateScriptAssemblyError, CreateScriptAssemblyResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteScriptData, DeleteScriptError, DeleteScriptResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetActorData, GetActorError, GetActorResponse, GetFaceCropData, GetFaceCropError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaFacesData, GetMediaFacesError, GetMediaFacesResponse, GetMediaQualityData, GetMediaQualityError, GetMediaQualityResponse, GetMediaResponse, GetMediaTranscriptData, GetMediaTranscriptError, GetMediaTranscriptResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetScriptData, GetScriptError, GetScriptResponse, GetSpeechLanguagesData, GetSpeechLanguagesError, GetSpeechLanguagesResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, JudgeSearchResultData, JudgeSearchResultError, JudgeSearchResultResponse, ListActorPairsData, ListActorPairsError, ListActorPairsResponse, ListActorsData, ListActorsError, ListActorsResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaEmbeddingsData, ListMediaEmbeddingsError, ListMediaEmbeddingsResponse, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListMediaTagsData, ListMediaTagsError, ListMediaTagsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListProjectTagsData, ListProjectTagsError, ListProjectTagsResponse, ListProjectTranscriptsData, ListProjectTranscriptsError, ListProjectTranscriptsResponse, ListScenesData, ListScenesError, ListScenesResponse, ListSetAsideFacesData, ListSetAsideFacesError, ListSetAsideFacesResponse, ListTakeGroupsData, ListTakeGroupsError, ListTakeGroupsResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ListVectorIndexesData, ListVectorIndexesError, ListVectorIndexesResponse, MarkShotData, MarkShotError, MarkShotResponse, MergeActorsData, MergeActorsError, MergeActorsResponse, PlaceFaceTracksData, PlaceFaceTracksError, PlaceFaceTracksResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RebuildVectorIndexesData, RebuildVectorIndexesError, RebuildVectorIndexesResponse, RegroupActorsData, RegroupActorsError, RegroupActorsResponse, RegroupScenesData, RegroupScenesError, RegroupScenesResponse, RegroupTakesData, RegroupTakesError, RegroupTakesResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RenameActorData, RenameActorError, RenameActorResponse, RenameSceneData, RenameSceneError, RenameSceneResponse, RetryJobData, RetryJobError, RetryJobResponse, ReviewTagData, ReviewTagError, ReviewTagResponse, SearchByImageData, SearchByImageError, SearchByImageResponse, SearchShotsData, SearchShotsError, SearchShotsResponse, SearchTranscriptsData, SearchTranscriptsError, SearchTranscriptsResponse, SetBestTakeData, SetBestTakeError, SetBestTakeResponse, SetClipSpeechLanguageData, SetClipSpeechLanguageError, SetClipSpeechLanguageResponse, SetSceneBoundaryData, SetSceneBoundaryError, SetSceneBoundaryResponse, SetSpeechLanguagesData, SetSpeechLanguagesError, SetSpeechLanguagesResponse, SetTakeApartData, SetTakeApartError, SetTakeApartResponse, SplitActorData, SplitActorError, SplitActorResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, SwapTimelineItemData, SwapTimelineItemError, SwapTimelineItemResponse, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UpdateTimelineData, UpdateTimelineError, UpdateTimelineResponse, UploadMediaData, UploadMediaError, UploadMediaResponse, UploadScriptData, UploadScriptError, UploadScriptResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -797,6 +797,79 @@ export const createScriptAssemblyMutation = (options?: Partial<Options<CreateScr
     return mutationOptions;
 };
 
+export const listTakeGroupsQueryKey = (options: Options<ListTakeGroupsData>) => createQueryKey('listTakeGroups', options);
+
+/**
+ * List Take Groups
+ */
+export const listTakeGroupsOptions = (options: Options<ListTakeGroupsData>) => queryOptions<ListTakeGroupsResponse, ListTakeGroupsError, ListTakeGroupsResponse, ReturnType<typeof listTakeGroupsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listTakeGroups({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listTakeGroupsQueryKey(options)
+});
+
+/**
+ * Regroup Takes
+ */
+export const regroupTakesMutation = (options?: Partial<Options<RegroupTakesData>>): UseMutationOptions<RegroupTakesResponse, RegroupTakesError, Options<RegroupTakesData>> => {
+    const mutationOptions: UseMutationOptions<RegroupTakesResponse, RegroupTakesError, Options<RegroupTakesData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await regroupTakes({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Set Best Take
+ *
+ * Make a take the best of its group, or (`best` false) let the signals choose again.
+ */
+export const setBestTakeMutation = (options?: Partial<Options<SetBestTakeData>>): UseMutationOptions<SetBestTakeResponse, SetBestTakeError, Options<SetBestTakeData>> => {
+    const mutationOptions: UseMutationOptions<SetBestTakeResponse, SetBestTakeError, Options<SetBestTakeData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await setBestTake({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Set Take Apart
+ *
+ * Take a shot out of its take group (it stays apart from those shots), or undo that.
+ */
+export const setTakeApartMutation = (options?: Partial<Options<SetTakeApartData>>): UseMutationOptions<SetTakeApartResponse, SetTakeApartError, Options<SetTakeApartData>> => {
+    const mutationOptions: UseMutationOptions<SetTakeApartResponse, SetTakeApartError, Options<SetTakeApartData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await setTakeApart({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const getMediaTranscriptQueryKey = (options: Options<GetMediaTranscriptData>) => createQueryKey('getMediaTranscript', options);
 
 /**
@@ -983,7 +1056,8 @@ export const judgeSearchResultMutation = (options?: Partial<Options<JudgeSearchR
  * Mark Shot
  *
  * Select, reject or clear a shot, and set its stars. Rejected shots are left out of search
- * unless asked for; selected and starred ones get the selection signal in the ranking.
+ * unless asked for; selected and starred ones get the selection signal in the ranking. A
+ * rejected take is never the best of its take group, so a grouped shot's group is updated.
  */
 export const markShotMutation = (options?: Partial<Options<MarkShotData>>): UseMutationOptions<MarkShotResponse, MarkShotError, Options<MarkShotData>> => {
     const mutationOptions: UseMutationOptions<MarkShotResponse, MarkShotError, Options<MarkShotData>> = {

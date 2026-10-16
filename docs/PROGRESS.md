@@ -22,11 +22,21 @@ _Last updated: 2026-10-16_
 - [x] Phase 9: Hybrid search (ablation measured on the user's footage with judgments by Claude; the user's own judgments pending)
 - [x] Phase 10: Ranking, selects, explainability (learned re-weighting P1-D deferred to Phase 12)
 - [ ] Phase 11: Rough cut engine + timeline UI (built and tested; **waiting for the user's DaVinci Resolve import of a rough cut**, the last acceptance item)
-- [ ] Phase 12: P1 differentiators (**A script-to-footage alignment done and evaluated**; B take detection / best take and C word-level speech-aware trimming next; at least three needed)
+- [x] Phase 12: P1 differentiators: A script-to-footage alignment, B take detection / best take, D explainable ranking with what-if sliders (Phase 10), E search by reference image (Phase 9). C speech-aware word-level trimming not built (whole transcript lines are kept).
 - [ ] Phase 13: Evaluation
 - [ ] Phase 14: Polish, packaging, demo
 
 ## Current state
+Phase 12B (take detection and best take) is done. Shots are grouped into takes by words (both with speech: words
+agree at least 0.6, pictures at least 0.5) or by picture (at least 0.9 and at most 3 shots apart), average linkage
+at a mean pair score of 0.75; the best take is the weighted mean of focus, exposure, audio, line completeness and
+cleanliness (flubs, fillers, cut-off speech), every number shown on the Takes page. The editor picks another best
+take or takes a shot out of a group; answers survive regrouping. The rough cut keeps one take per group. Measured
+on the user's footage with Claude's labels (EVALUATION.md section 13): one real repeat found, one false pair (a
+continuous shot split by a false cut); the footage has almost no retakes, so this is a sanity check only. Code review
+fixes: clearing a reject re-ranks, score order keeps the replaced place, filters run before take choice, honest
+"at most" word scores, pair notes when the score misses the limit.
+
 Phase 12A (script-to-footage alignment) is done. The Script page reads a screenplay (Fountain or plain text), finds
 every dialogue line in the transcripts (windows of up to 3 segments, lines marked uncertain never used), lists up to 5
 takes per line with word and meaning scores, lets the editor pick a take or mark "not filmed" (kept through
@@ -102,7 +112,7 @@ Fixes after Phase 8, from the user's feedback (2026-10-15):
   5 Kannada clips marked as speech without text (EVALUATION.md section 5).
 - Deleted `data/phase4-verify/` (the Resolve test it served is confirmed).
 
-Next step: Phase 12B (take detection and best-take suggestion). Still open from Phase 11: the user's Resolve import of a rough cut (TESTING.md, "rough cut import checklist"). The earlier reviews (✓ / ✕ on search results, selects / rejects) are still welcome: they also steer the rough cut.
+Next step: Phase 13/14 (evaluation summary, packaging, demo) and the course report. Still open from Phase 11: the user's Resolve import of a rough cut (TESTING.md, "rough cut import checklist"). The earlier reviews (✓ / ✕ on search results, selects / rejects) are still welcome: they also steer the rough cut.
 
 Export path for the rest of the project (decided in Phase 4): FCP7 XML into DaVinci Resolve.
 

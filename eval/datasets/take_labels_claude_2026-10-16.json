@@ -1,0 +1,6 @@
+{
+  "judge": "claude",
+  "made": "2026-10-16",
+  "how": "judged by Claude from three keyframes and the certain transcript words per shot (eval/take_groups.py sheet), 25 clips of the user's footage folder without Tears of Steel; not by the user. Pieces of one continuous take split by a false shot cut (5582521 #1/#2) are not counted as repeats; consecutive montage shots of the same set-up are (1787323393287409 #16/#17). IMG_0867/0870/0872 (selfie clips, Kannada, no text) look like successive vlog pieces, not retakes; this cannot be confirmed from stills.",
+  "groups": [["1787323393287409.MP4#16", "1787323393287409.MP4#17"]]
+}

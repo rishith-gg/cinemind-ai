@@ -24,8 +24,10 @@ from cinemind.api.timeline_schemas import (
 from cinemind.core.config import Settings
 from cinemind.core.errors import InvalidInputError, NotFoundError
 from cinemind.db.models import Keyframe, MediaAsset, Shot, Timeline
+from cinemind.db.takes import TakeGroup
 from cinemind.export import service
 from cinemind.export.sequence import Sequence
+from cinemind.pipeline import takes
 from cinemind.rough_cut import editing, engine
 from cinemind.rough_cut.assembly import build_all_shots
 
@@ -81,7 +83,7 @@ def _keyframes(session: Session, shot_ids: set[str]) -> dict[str, str]:
 
 
 def _alternatives(
-    session: Session, timeline: Timeline, keyframes: dict[str, str]
+    session: Session, timeline: Timeline, keyframes: dict[str, str], groups: dict[str, TakeGroup]
 ) -> list[AlternativeOut]:
     entries: list[dict[str, Any]] = timeline.params.get("alternatives", [])
     used = {i.shot_id for i in timeline.items}
@@ -104,6 +106,7 @@ def _alternatives(
                 start_s=shot.start_s,
                 end_s=shot.end_s,
                 scene_id=shot.scene_id,
+                take_group_id=groups[shot.id].id if shot.id in groups else None,
                 keyframe_id=keyframes.get(shot.id),
                 summary=str(reason.get("summary", "")),
                 rank=reason.get("rank"),
@@ -126,6 +129,7 @@ def detail(session: Session, settings: Settings, timeline: Timeline) -> Timeline
         ).all()
     )
     keyframes = _keyframes(session, shot_ids)
+    groups = takes.groups_by_shot(session, timeline.project_id)
     items: list[TimelineItemOut] = []
     for position, cut in enumerate(seq.cuts):
         item = items_by_id.get(cut.item_id or "")
@@ -148,6 +152,7 @@ def detail(session: Session, settings: Settings, timeline: Timeline) -> Timeline
                 shot_start_s=shot.start_s if shot else None,
                 shot_end_s=shot.end_s if shot else None,
                 scene_id=shot.scene_id if shot else None,
+                take_group_id=groups[shot.id].id if shot and shot.id in groups else None,
                 keyframe_id=keyframes.get(cut.shot_id or ""),
                 reason=item.reason if item else None,
             )
@@ -155,7 +160,7 @@ def detail(session: Session, settings: Settings, timeline: Timeline) -> Timeline
     return TimelineDetail(
         **_summary(settings, timeline, seq).model_dump(),
         items=items,
-        alternatives=_alternatives(session, timeline, keyframes),
+        alternatives=_alternatives(session, timeline, keyframes, groups),
     )
 
 

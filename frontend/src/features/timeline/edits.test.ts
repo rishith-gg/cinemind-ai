@@ -49,4 +49,10 @@ it("offers suggestions from the clip's own scene first, then by rank", () => {
   });
   const found = suggestionsFor(item("a", 0, 1, { scene_id: "x" }), [alt("1", "y", 1), alt("2", "x", 5), alt("3", null, 2)]);
   expect(found.map((a) => a.shot_id)).toEqual(["2", "1", "3"]);
+  // another take of the same material comes before the same scene
+  const takes = suggestionsFor(item("a", 0, 1, { scene_id: "x", take_group_id: "t" }), [
+    alt("2", "x", 5),
+    { ...alt("4", "z", 9), take_group_id: "t" },
+  ]);
+  expect(takes.map((a) => a.shot_id)).toEqual(["4", "2"]);
 });

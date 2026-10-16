@@ -76,6 +76,8 @@ class TimelineItemOut(BaseModel):
     shot_start_s: float | None = None
     shot_end_s: float | None = None
     scene_id: str | None = None
+    # The take group the shot is in now (other takes of it are offered first as swaps).
+    take_group_id: str | None = None
     keyframe_id: str | None = None
     # Rough cuts: search rank, score breakdown, how it was trimmed, and a one-line summary.
     reason: dict[str, Any] | None = None
@@ -88,6 +90,7 @@ class AlternativeOut(BaseModel):
     start_s: float
     end_s: float
     scene_id: str | None
+    take_group_id: str | None = None
     keyframe_id: str | None
     summary: str
     rank: int | None

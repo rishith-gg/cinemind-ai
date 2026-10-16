@@ -289,6 +289,10 @@ export type AlternativeOut = {
      */
     scene_id: string | null;
     /**
+     * Take Group Id
+     */
+    take_group_id?: string | null;
+    /**
      * Keyframe Id
      */
     keyframe_id: string | null;
@@ -2216,6 +2220,34 @@ export type TagReviewIn = {
 };
 
 /**
+ * TakeApartIn
+ */
+export type TakeApartIn = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Apart
+     */
+    apart?: boolean;
+};
+
+/**
+ * TakeBestIn
+ */
+export type TakeBestIn = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Best
+     */
+    best?: boolean;
+};
+
+/**
  * TakeChoice
  */
 export type TakeChoice = {
@@ -2227,6 +2259,146 @@ export type TakeChoice = {
      * Not Filmed
      */
     not_filmed?: boolean;
+};
+
+/**
+ * TakeGroupOut
+ */
+export type TakeGroupOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Kind
+     */
+    kind: 'speech' | 'picture';
+    /**
+     * Best Shot Id
+     */
+    best_shot_id: string | null;
+    /**
+     * Best By
+     */
+    best_by: 'auto' | 'you' | 'none';
+    /**
+     * Members
+     */
+    members: Array<TakeMemberOut>;
+    /**
+     * Pairs
+     */
+    pairs: Array<TakePairOut>;
+};
+
+/**
+ * TakeGroupsOut
+ */
+export type TakeGroupsOut = {
+    /**
+     * Groups
+     */
+    groups: Array<TakeGroupOut>;
+    /**
+     * Kept Apart
+     */
+    kept_apart: Array<TakeShotOut>;
+    /**
+     * Grouped At
+     */
+    grouped_at: string | null;
+    /**
+     * Details
+     */
+    details: {
+        [key: string]: unknown;
+    };
+    /**
+     * Settings
+     */
+    settings: {
+        [key: string]: unknown;
+    };
+    /**
+     * Shots
+     */
+    shots: number;
+    /**
+     * Message
+     */
+    message?: string | null;
+};
+
+/**
+ * TakeMemberOut
+ */
+export type TakeMemberOut = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Keyframe Id
+     */
+    keyframe_id: string | null;
+    /**
+     * Mark
+     */
+    mark?: 'select' | 'reject' | null;
+    /**
+     * Stars
+     */
+    stars?: number;
+    /**
+     * Rank
+     */
+    rank: number;
+    /**
+     * Best
+     */
+    best: boolean;
+    /**
+     * Score
+     */
+    score: number | null;
+    /**
+     * Signals
+     */
+    signals: {
+        [key: string]: number | null;
+    };
+    /**
+     * Notes
+     */
+    notes: Array<string>;
+    /**
+     * Text
+     */
+    text: string;
 };
 
 /**
@@ -2273,6 +2445,88 @@ export type TakeOut = {
      * Score
      */
     score: number;
+};
+
+/**
+ * TakePairOut
+ *
+ * Why two members were linked (or not): the signals, the rule and the pair score.
+ */
+export type TakePairOut = {
+    /**
+     * A
+     */
+    a: string;
+    /**
+     * B
+     */
+    b: string;
+    /**
+     * Rule
+     */
+    rule: string;
+    /**
+     * Text
+     */
+    text: number | null;
+    /**
+     * Picture
+     */
+    picture: number | null;
+    /**
+     * Adjacent
+     */
+    adjacent: number;
+    /**
+     * Score
+     */
+    score: number;
+    /**
+     * Why
+     */
+    why: string;
+};
+
+/**
+ * TakeShotOut
+ */
+export type TakeShotOut = {
+    /**
+     * Shot Id
+     */
+    shot_id: string;
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Keyframe Id
+     */
+    keyframe_id: string | null;
+    /**
+     * Mark
+     */
+    mark?: 'select' | 'reject' | null;
+    /**
+     * Stars
+     */
+    stars?: number;
 };
 
 /**
@@ -2494,6 +2748,10 @@ export type TimelineItemOut = {
      * Scene Id
      */
     scene_id?: string | null;
+    /**
+     * Take Group Id
+     */
+    take_group_id?: string | null;
     /**
      * Keyframe Id
      */
@@ -4677,6 +4935,190 @@ export type CreateScriptAssemblyResponses = {
 };
 
 export type CreateScriptAssemblyResponse = CreateScriptAssemblyResponses[keyof CreateScriptAssemblyResponses];
+
+export type ListTakeGroupsData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/takes';
+};
+
+export type ListTakeGroupsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ListTakeGroupsError = ListTakeGroupsErrors[keyof ListTakeGroupsErrors];
+
+export type ListTakeGroupsResponses = {
+    /**
+     * Successful Response
+     */
+    200: TakeGroupsOut;
+};
+
+export type ListTakeGroupsResponse = ListTakeGroupsResponses[keyof ListTakeGroupsResponses];
+
+export type RegroupTakesData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/takes/regroup';
+};
+
+export type RegroupTakesErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type RegroupTakesError = RegroupTakesErrors[keyof RegroupTakesErrors];
+
+export type RegroupTakesResponses = {
+    /**
+     * Successful Response
+     */
+    200: TakeGroupsOut;
+};
+
+export type RegroupTakesResponse = RegroupTakesResponses[keyof RegroupTakesResponses];
+
+export type SetBestTakeData = {
+    body: TakeBestIn;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/takes/best';
+};
+
+export type SetBestTakeErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type SetBestTakeError = SetBestTakeErrors[keyof SetBestTakeErrors];
+
+export type SetBestTakeResponses = {
+    /**
+     * Successful Response
+     */
+    200: TakeGroupsOut;
+};
+
+export type SetBestTakeResponse = SetBestTakeResponses[keyof SetBestTakeResponses];
+
+export type SetTakeApartData = {
+    body: TakeApartIn;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/takes/apart';
+};
+
+export type SetTakeApartErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type SetTakeApartError = SetTakeApartErrors[keyof SetTakeApartErrors];
+
+export type SetTakeApartResponses = {
+    /**
+     * Successful Response
+     */
+    200: TakeGroupsOut;
+};
+
+export type SetTakeApartResponse = SetTakeApartResponses[keyof SetTakeApartResponses];
 
 export type GetMediaTranscriptData = {
     body?: never;

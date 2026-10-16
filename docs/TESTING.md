@@ -88,6 +88,17 @@ Test footage is synthetic and generated on demand with ffmpeg (never committed).
   markers in the export), and errors. Tests of `eval/script_align.py` check that neighbouring subtitles never count
   as a right place, whole-word matching, the take-middle rule and the Wilson interval. The E2E test reads a
   screenplay in the E2E data folder (no speech model: every line "not found", no empty assembly) and replaces it.
+- Takes: unit tests check the pair rules (same words far apart, different words in one picture, same words in
+  another picture, picture-only takes needing neighbours, no vectors), neighbour scores, words assigned to shots by
+  their middle, average linkage not chaining, "apart" answers splitting a group, the best-take signals (filler,
+  repeat, cut-off start and end, completeness, focus), the user's pick, rejected takes, missing signals and the
+  settings checks. API tests (`a_h264.mp4` and `cuts.mp4` with the same spoken line) check that the worker groups
+  the two takes with every number, that best / apart answers survive regrouping and are logged, that a reject
+  updates the group, errors, and that the rough cut uses one take per group with the other as a swap suggestion.
+  The shared search fixture sets `[takes] picture_min` 0.999 because the stand-in picture vectors make every
+  synthetic shot about 0.99 alike. Tests of `eval/take_groups.py` check the pairwise and B-cubed figures and shot
+  labels. The Takes page is unit-tested (groups, signals, notes, pairs, best / apart / undo / regroup requests,
+  empty and not-yet-grouped states) and swap suggestions put other takes first.
 
 ## Manual: DaVinci Resolve import checklist (Phase 4)
 Claude cannot run Resolve. This is done by hand; write the outcome in the results table and in `docs/PROGRESS.md`.

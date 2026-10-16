@@ -175,7 +175,11 @@ export function ClipCard({
                 <option key={s.shot_id} value={s.shot_id}>
                   {s.rank ? `#${s.rank} ` : ""}
                   {s.filename} {formatTime(s.start_s)}
-                  {s.scene_id && s.scene_id === item.scene_id ? " (same scene)" : ""}
+                  {s.take_group_id && s.take_group_id === item.take_group_id
+                    ? " (another take)"
+                    : s.scene_id && s.scene_id === item.scene_id
+                      ? " (same scene)"
+                      : ""}
                 </option>
               ))}
             </select>

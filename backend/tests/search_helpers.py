@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from cinemind.ai import transcriber
 from cinemind.core.config import Settings
 from cinemind.core.search_config import SearchConfig
+from cinemind.core.takes_config import TakesConfig
 from cinemind.core.transcribe_config import MODEL_FILES
 from embed_helpers import use_fake_embedder, write_thresholds
 from helpers import drain, import_one
@@ -62,6 +63,9 @@ def processed_cuts(
     api_settings.media_roots.append(cut_footage)
     # The stand-in text vectors are hashes: unrelated to each other, so no floor here.
     api_settings.search = SearchConfig(text_min_similarity=-1.0)
+    # The stand-in picture vectors are mostly a constant: every synthetic shot scores about 0.99
+    # against every other, so only an identical picture may count as another take.
+    api_settings.takes = TakesConfig(picture_min=0.999)
     media: Any = import_one(client, pid, cut_footage / "cuts.mp4")["media"]
     drain(api_settings)
     shots = client.get(f"/api/media/{media['id']}/shots").json()

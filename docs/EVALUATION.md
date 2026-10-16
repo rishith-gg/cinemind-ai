@@ -395,3 +395,28 @@ What this says, and what it cannot:
   pair "previous + this" always contains the line) and reported 0.71; those numbers were replaced, not kept.
 - Not measured: a real screenplay against raw takes (none exists for the user's footage, whose speech is mostly
   Kannada without text, D-084), choice of the best of several takes, or how often an editor keeps the suggested take.
+
+## 13. Take grouping on the user's footage (Phase 12B)
+Script: `uv run python eval/take_groups.py run data/phase12b-verify --labels eval/datasets/take_labels_claude_2026-10-16.json --out --sweep`
+(output in `eval/results/take_groups_claude_2026-10-16.txt/.json`). Machine: Apple M1, 8 GB, macOS; picture model
+clip-vit-b32 (lite tier); default `[takes]` settings (conventions, not tuned).
+
+Data: the 25 clips of the user's footage folder except Tears of Steel, processed in a separate data folder; 76 shots,
+5 with speech (English: 4; Kannada clips are "detect only" and have no text). **Labels by Claude** from three
+keyframes and the transcript words per shot, not by the user (file records how).
+
+| Figure | Value |
+|---|---|
+| Groups predicted / labelled | 2 / 1 |
+| Pairs predicted / labelled / right | 2 / 1 / 1 |
+| Pairwise precision / recall / F1 | 0.500 / 1.000 / 0.667 |
+| B-cubed precision / recall / F1 | 0.987 / 1.000 / 0.993 |
+| Best take = editor's pick | no picks yet (0 of 0) |
+
+What it means: this footage has almost no repeated takes (single phone clips and two edited montages), so one
+labelled pair is a sanity check, not an accuracy figure. The wrong pair is two pieces of one continuous night shot
+split by a false shot cut (`5582521 #1/#2`, picture 0.94): the picture rule cannot tell a split take from a retake.
+The B-cubed figure is high mostly because nearly every shot is correctly left alone. The sensitivity table (same
+labels, not used to change the defaults) shows `picture_min` matters most: 0.85 groups many unrelated neighbours
+(P 0.11), 0.95 removes the false pair. No speech takes exist here; speech grouping is covered by tests only. A
+real figure needs footage shot with retakes and the user's own labels or corrections on the Takes page.

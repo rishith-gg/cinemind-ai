@@ -134,6 +134,7 @@ Library: `GET /api/projects/{id}/media|shots|scenes|actors|transcripts|tags`, `P
 Search: `POST /api/projects/{id}/search` (text or image, filters, weights override)
 Rough cut: `POST /api/projects/{id}/rough-cut`, `GET/PATCH /api/timelines/{id}`, `POST /api/timelines/{id}/export?format=`
 Script (P1-A): `POST/GET/DELETE /api/projects/{id}/script`, `POST .../script/align`, `POST .../script/assembly`, `PUT /api/script-lines/{id}/take` (D-098)
+Takes (P1-B): `GET /api/projects/{id}/takes`, `POST .../takes/regroup`, `PUT .../takes/best`, `PUT .../takes/apart` (D-102)
 System: `GET /api/system/health` (ffmpeg, models, hardware tier), `GET /api/system/config`
 
 ## 14. UI

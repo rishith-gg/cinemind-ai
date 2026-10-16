@@ -13,6 +13,7 @@ import { ShotsPage } from "../features/shots/ShotsPage";
 import { SettingsPage } from "../features/system/SettingsPage";
 import { ScriptPage } from "../features/script/ScriptPage";
 import { SearchPage } from "../features/search/SearchPage";
+import { TakesPage } from "../features/takes/TakesPage";
 import { TimelineEditorPage } from "../features/timeline/TimelineEditor";
 import { TimelinePage } from "../features/timeline/TimelinePage";
 import { TranscriptsPage } from "../features/transcripts/TranscriptsPage";
@@ -31,6 +32,7 @@ export function App() {
         <Route path="transcripts" element={<TranscriptsPage />} />
         <Route path="actors" element={<ActorsPage />} />
         <Route path="actors/:actorId" element={<ActorPage />} />
+        <Route path="takes" element={<TakesPage />} />
         <Route path="script" element={<ScriptPage />} />
         <Route path="timeline" element={<TimelinePage />} />
         <Route path="timeline/:timelineId" element={<TimelineEditorPage />} />

@@ -31,6 +31,7 @@ from cinemind.api import (
     search,
     shots,
     speech,
+    takes,
     timelines,
     transcripts,
 )
@@ -113,6 +114,7 @@ def create_app(
     app.include_router(quality.router)
     app.include_router(timelines.router)
     app.include_router(script.router)
+    app.include_router(takes.router)
     app.include_router(transcripts.router)
     app.include_router(speech.router)
     app.include_router(search.router)

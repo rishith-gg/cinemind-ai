@@ -27,3 +27,10 @@ lexical_weight = 0.0        # weight of word similarity in the match score
 semantic_weight = 1.0       # weight of meaning similarity (text model); words still set in/out points
 min_score = 0.3             # a line's best take must reach this to be used
 words_only_min_score = 0.45 # the limit when the text model is not downloaded
+
+[takes]
+# Take groups (Takes page). Conventions, not tuned: see EVALUATION.md section 13 and eval/take_groups.py
+text_min = 0.6              # two shots with speech are takes when their words agree at least this much
+picture_min = 0.9           # shots without speech need pictures this alike ...
+max_apart = 3               # ... and at most this many shots apart in file-name order
+group_min = 0.75            # mean pair score needed to join a group
