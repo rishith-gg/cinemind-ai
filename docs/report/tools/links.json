@@ -1,5 +1,7 @@
-{"school": "School of Computer Science and Engineering (SCOPE)",
+{
+ "school": "School of Computer Science and Engineering (SCOPE)",
  "faculty": "",
  "ppt": "[paste the PPT link here]",
  "video": "[paste the demonstration video link here]",
- "repo": "[paste the GitHub repository link here]"}
+ "repo": "https://github.com/rishith-gg/cinemind-ai"
+}

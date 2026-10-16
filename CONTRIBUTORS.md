@@ -21,3 +21,12 @@ describes their own part below and committed it from their own account.
 - Embeddings and tags: OpenCLIP/SigLIP picture vectors, MiniLM text vectors, zero-shot tag calibration on Places365
   and CODaN, scene grouping, and take detection with best-take signals.
 - Report: dataset description, result analysis and figures, summary of gaps.
+
+## Krish Singh (24BDS0235) · [@singhkrish2006](https://github.com/singhkrish2006)
+- Frontend: React + TypeScript + Tailwind interface (library, clip player, shots/scenes, actors, transcripts, search,
+  takes, script, timeline editor with drag-and-drop, export), generated API client, Vitest and Playwright tests.
+- Search and ranking: four retrieval lists, Reciprocal Rank Fusion, explainable weighted ranking with MMR duplicate
+  penalty and what-if sliders; search evaluation (P@K, nDCG@10, MRR, ablations).
+- Rough-cut engine: brief parsing, candidate selection, speech-aware trimming, length fitting, ordering, swap
+  suggestions and SRT/marker export; timing evaluation.
+- Report: comparative analysis, user manual with screenshots, presentation and demonstration video.
