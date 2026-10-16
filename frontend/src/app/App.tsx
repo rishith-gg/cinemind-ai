@@ -11,6 +11,7 @@ import { ProjectPage } from "../features/projects/ProjectPage";
 import { ProjectsPage } from "../features/projects/ProjectsPage";
 import { ShotsPage } from "../features/shots/ShotsPage";
 import { SettingsPage } from "../features/system/SettingsPage";
+import { ScriptPage } from "../features/script/ScriptPage";
 import { SearchPage } from "../features/search/SearchPage";
 import { TimelineEditorPage } from "../features/timeline/TimelineEditor";
 import { TimelinePage } from "../features/timeline/TimelinePage";
@@ -30,6 +31,7 @@ export function App() {
         <Route path="transcripts" element={<TranscriptsPage />} />
         <Route path="actors" element={<ActorsPage />} />
         <Route path="actors/:actorId" element={<ActorPage />} />
+        <Route path="script" element={<ScriptPage />} />
         <Route path="timeline" element={<TimelinePage />} />
         <Route path="timeline/:timelineId" element={<TimelineEditorPage />} />
         <Route path="export" element={<ExportPage />} />

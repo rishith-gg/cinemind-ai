@@ -162,6 +162,23 @@ OpenAPI is the contract (`T gen-api` regenerates the TypeScript client). Errors 
   00:00:00,000); 422 when no line falls inside the cuts. FCP7 XML, EDL and OTIO of a rough cut carry a marker /
   comment per clip and the banner.
 
+## Implemented (Phase 12A): script-to-footage alignment
+- `POST /api/projects/{id}/script` `{name?, text}` (Fountain or plain text, at most a million characters and 5000
+  lines) → 201 script: replaces the project's script (choices kept for lines with the same character and words) and
+  finds every dialogue line in the transcripts. No dialogue found: 422 saying which formats are read.
+- `GET /api/projects/{id}/script`: `name`, `format`, `alignment` (when, `text_model` or null, `semantic`, weights,
+  `limit`, transcript lines searched, lines found), `min_score` (the limit in force), counts, and `lines` in script
+  order: `kind` (scene, action, dialogue), `character`, `scene`, `text`, and for dialogue `choice` (auto, take,
+  not_filmed), `chosen_take_id`, `why` (in words) and `takes` (best first: clip, `start_s`, `end_s`, words heard,
+  `lexical`, `semantic`, `score`). 404 when the project has no script.
+- `POST /api/projects/{id}/script/align`: find the lines again (after more footage was processed); choices stay.
+- `PUT /api/script-lines/{id}/take` `{take_id?, not_filmed?}`: use that take, mark not filmed, or neither = back to
+  the best match. A take of another line or a scene / action line 404; both at once or an empty id 422.
+- `POST /api/projects/{id}/script/assembly` `{name?, fps?}` → 201 timeline (`kind: "script_cut"`): each line's take
+  in script order, cut to its words plus `[rough_cut] speech_pad_s`, lines from one running take joined; every item's
+  `reason` lists its script lines and scores. Edited and exported like any rough cut. No line with a take: 422.
+- `DELETE /api/projects/{id}/script` (timelines built from it stay).
+
 ## Ingest chain (`ingest`): validate, proxy, thumbnails, waveform, shots, keyframes, quality, audio_qc, transcribe, faces, embed_visual, embed_text, tags
 - validate: ffprobe (by content, not extension): rational fps, VFR flag (avg vs nominal rate differ > 0.5 %),
   codecs, display size (rotation applied), timecode, colour tags. Corrupt or non-media files fail with a plain message.

@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { answerActorPair, browseFolder, cancelJob, createProject, createRoughCut, createTimeline, deleteMedia, deleteProject, deleteTimeline, exportTimeline, getActor, getFaceCrop, getHealth, getJob, getKeyframe, getMedia, getMediaFaces, getMediaQuality, getMediaTranscript, getPoster, getProject, getSpeechLanguages, getStrip, getTimeline, getWaveform, importMedia, judgeSearchResult, listActorPairs, listActors, listJobs, listMedia, listMediaEmbeddings, listMediaShots, listMediaTags, listProjects, listProjectShots, listProjectTags, listProjectTranscripts, listScenes, listSetAsideFaces, listTimelines, listVectorIndexes, markShot, mergeActors, type Options, placeFaceTracks, processMedia, processProject, rebuildVectorIndexes, regroupActors, regroupScenes, relinkMedia, renameActor, renameScene, retryJob, reviewTag, searchByImage, searchShots, searchTranscripts, setClipSpeechLanguage, setSceneBoundary, setSpeechLanguages, splitActor, streamJobEvents, streamProxy, swapTimelineItem, updateProject, updateTimeline, uploadMedia } from '../sdk.gen';
-import type { AnswerActorPairData, AnswerActorPairError, AnswerActorPairResponse, BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateRoughCutData, CreateRoughCutError, CreateRoughCutResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetActorData, GetActorError, GetActorResponse, GetFaceCropData, GetFaceCropError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaFacesData, GetMediaFacesError, GetMediaFacesResponse, GetMediaQualityData, GetMediaQualityError, GetMediaQualityResponse, GetMediaResponse, GetMediaTranscriptData, GetMediaTranscriptError, GetMediaTranscriptResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetSpeechLanguagesData, GetSpeechLanguagesError, GetSpeechLanguagesResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, JudgeSearchResultData, JudgeSearchResultError, JudgeSearchResultResponse, ListActorPairsData, ListActorPairsError, ListActorPairsResponse, ListActorsData, ListActorsError, ListActorsResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaEmbeddingsData, ListMediaEmbeddingsError, ListMediaEmbeddingsResponse, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListMediaTagsData, ListMediaTagsError, ListMediaTagsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListProjectTagsData, ListProjectTagsError, ListProjectTagsResponse, ListProjectTranscriptsData, ListProjectTranscriptsError, ListProjectTranscriptsResponse, ListScenesData, ListScenesError, ListScenesResponse, ListSetAsideFacesData, ListSetAsideFacesError, ListSetAsideFacesResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ListVectorIndexesData, ListVectorIndexesError, ListVectorIndexesResponse, MarkShotData, MarkShotError, MarkShotResponse, MergeActorsData, MergeActorsError, MergeActorsResponse, PlaceFaceTracksData, PlaceFaceTracksError, PlaceFaceTracksResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RebuildVectorIndexesData, RebuildVectorIndexesError, RebuildVectorIndexesResponse, RegroupActorsData, RegroupActorsError, RegroupActorsResponse, RegroupScenesData, RegroupScenesError, RegroupScenesResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RenameActorData, RenameActorError, RenameActorResponse, RenameSceneData, RenameSceneError, RenameSceneResponse, RetryJobData, RetryJobError, RetryJobResponse, ReviewTagData, ReviewTagError, ReviewTagResponse, SearchByImageData, SearchByImageError, SearchByImageResponse, SearchShotsData, SearchShotsError, SearchShotsResponse, SearchTranscriptsData, SearchTranscriptsError, SearchTranscriptsResponse, SetClipSpeechLanguageData, SetClipSpeechLanguageError, SetClipSpeechLanguageResponse, SetSceneBoundaryData, SetSceneBoundaryError, SetSceneBoundaryResponse, SetSpeechLanguagesData, SetSpeechLanguagesError, SetSpeechLanguagesResponse, SplitActorData, SplitActorError, SplitActorResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, SwapTimelineItemData, SwapTimelineItemError, SwapTimelineItemResponse, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UpdateTimelineData, UpdateTimelineError, UpdateTimelineResponse, UploadMediaData, UploadMediaError, UploadMediaResponse } from '../types.gen';
+import { alignScript, answerActorPair, browseFolder, cancelJob, chooseTake, createProject, createRoughCut, createScriptAssembly, createTimeline, deleteMedia, deleteProject, deleteScript, deleteTimeline, exportTimeline, getActor, getFaceCrop, getHealth, getJob, getKeyframe, getMedia, getMediaFaces, getMediaQuality, getMediaTranscript, getPoster, getProject, getScript, getSpeechLanguages, getStrip, getTimeline, getWaveform, importMedia, judgeSearchResult, listActorPairs, listActors, listJobs, listMedia, listMediaEmbeddings, listMediaShots, listMediaTags, listProjects, listProjectShots, listProjectTags, listProjectTranscripts, listScenes, listSetAsideFaces, listTimelines, listVectorIndexes, markShot, mergeActors, type Options, placeFaceTracks, processMedia, processProject, rebuildVectorIndexes, regroupActors, regroupScenes, relinkMedia, renameActor, renameScene, retryJob, reviewTag, searchByImage, searchShots, searchTranscripts, setClipSpeechLanguage, setSceneBoundary, setSpeechLanguages, splitActor, streamJobEvents, streamProxy, swapTimelineItem, updateProject, updateTimeline, uploadMedia, uploadScript } from '../sdk.gen';
+import type { AlignScriptData, AlignScriptError, AlignScriptResponse, AnswerActorPairData, AnswerActorPairError, AnswerActorPairResponse, BrowseFolderData, BrowseFolderError, BrowseFolderResponse, CancelJobData, CancelJobError, CancelJobResponse, ChooseTakeData, ChooseTakeError, ChooseTakeResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateRoughCutData, CreateRoughCutError, CreateRoughCutResponse, CreateScriptAssemblyData, CreateScriptAssemblyError, CreateScriptAssemblyResponse, CreateTimelineData, CreateTimelineError, CreateTimelineResponse, DeleteMediaData, DeleteMediaError, DeleteMediaResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteScriptData, DeleteScriptError, DeleteScriptResponse, DeleteTimelineData, DeleteTimelineError, DeleteTimelineResponse, ExportTimelineData, ExportTimelineError, GetActorData, GetActorError, GetActorResponse, GetFaceCropData, GetFaceCropError, GetHealthData, GetHealthResponse, GetJobData, GetJobError, GetJobResponse, GetKeyframeData, GetKeyframeError, GetMediaData, GetMediaError, GetMediaFacesData, GetMediaFacesError, GetMediaFacesResponse, GetMediaQualityData, GetMediaQualityError, GetMediaQualityResponse, GetMediaResponse, GetMediaTranscriptData, GetMediaTranscriptError, GetMediaTranscriptResponse, GetPosterData, GetPosterError, GetProjectData, GetProjectError, GetProjectResponse, GetScriptData, GetScriptError, GetScriptResponse, GetSpeechLanguagesData, GetSpeechLanguagesError, GetSpeechLanguagesResponse, GetStripData, GetStripError, GetTimelineData, GetTimelineError, GetTimelineResponse, GetWaveformData, GetWaveformError, ImportMediaData, ImportMediaError, ImportMediaResponse, JudgeSearchResultData, JudgeSearchResultError, JudgeSearchResultResponse, ListActorPairsData, ListActorPairsError, ListActorPairsResponse, ListActorsData, ListActorsError, ListActorsResponse, ListJobsData, ListJobsError, ListJobsResponse, ListMediaData, ListMediaEmbeddingsData, ListMediaEmbeddingsError, ListMediaEmbeddingsResponse, ListMediaError, ListMediaResponse, ListMediaShotsData, ListMediaShotsError, ListMediaShotsResponse, ListMediaTagsData, ListMediaTagsError, ListMediaTagsResponse, ListProjectsData, ListProjectShotsData, ListProjectShotsError, ListProjectShotsResponse, ListProjectsResponse, ListProjectTagsData, ListProjectTagsError, ListProjectTagsResponse, ListProjectTranscriptsData, ListProjectTranscriptsError, ListProjectTranscriptsResponse, ListScenesData, ListScenesError, ListScenesResponse, ListSetAsideFacesData, ListSetAsideFacesError, ListSetAsideFacesResponse, ListTimelinesData, ListTimelinesError, ListTimelinesResponse, ListVectorIndexesData, ListVectorIndexesError, ListVectorIndexesResponse, MarkShotData, MarkShotError, MarkShotResponse, MergeActorsData, MergeActorsError, MergeActorsResponse, PlaceFaceTracksData, PlaceFaceTracksError, PlaceFaceTracksResponse, ProcessMediaData, ProcessMediaError, ProcessMediaResponse, ProcessProjectData, ProcessProjectError, ProcessProjectResponse, RebuildVectorIndexesData, RebuildVectorIndexesError, RebuildVectorIndexesResponse, RegroupActorsData, RegroupActorsError, RegroupActorsResponse, RegroupScenesData, RegroupScenesError, RegroupScenesResponse, RelinkMediaData, RelinkMediaError, RelinkMediaResponse, RenameActorData, RenameActorError, RenameActorResponse, RenameSceneData, RenameSceneError, RenameSceneResponse, RetryJobData, RetryJobError, RetryJobResponse, ReviewTagData, ReviewTagError, ReviewTagResponse, SearchByImageData, SearchByImageError, SearchByImageResponse, SearchShotsData, SearchShotsError, SearchShotsResponse, SearchTranscriptsData, SearchTranscriptsError, SearchTranscriptsResponse, SetClipSpeechLanguageData, SetClipSpeechLanguageError, SetClipSpeechLanguageResponse, SetSceneBoundaryData, SetSceneBoundaryError, SetSceneBoundaryResponse, SetSpeechLanguagesData, SetSpeechLanguagesError, SetSpeechLanguagesResponse, SplitActorData, SplitActorError, SplitActorResponse, StreamJobEventsData, StreamJobEventsError, StreamProxyData, StreamProxyError, SwapTimelineItemData, SwapTimelineItemError, SwapTimelineItemResponse, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UpdateTimelineData, UpdateTimelineError, UpdateTimelineResponse, UploadMediaData, UploadMediaError, UploadMediaResponse, UploadScriptData, UploadScriptError, UploadScriptResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -684,6 +684,118 @@ export const exportTimelineOptions = (options: Options<ExportTimelineData>) => q
     },
     queryKey: exportTimelineQueryKey(options)
 });
+
+/**
+ * Delete Script
+ */
+export const deleteScriptMutation = (options?: Partial<Options<DeleteScriptData>>): UseMutationOptions<DeleteScriptResponse, DeleteScriptError, Options<DeleteScriptData>> => {
+    const mutationOptions: UseMutationOptions<DeleteScriptResponse, DeleteScriptError, Options<DeleteScriptData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteScript({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getScriptQueryKey = (options: Options<GetScriptData>) => createQueryKey('getScript', options);
+
+/**
+ * Get Script
+ */
+export const getScriptOptions = (options: Options<GetScriptData>) => queryOptions<GetScriptResponse, GetScriptError, GetScriptResponse, ReturnType<typeof getScriptQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getScript({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getScriptQueryKey(options)
+});
+
+/**
+ * Upload Script
+ *
+ * Store the screenplay (replacing the project's previous one) and find each dialogue line
+ * in the transcripts.
+ */
+export const uploadScriptMutation = (options?: Partial<Options<UploadScriptData>>): UseMutationOptions<UploadScriptResponse, UploadScriptError, Options<UploadScriptData>> => {
+    const mutationOptions: UseMutationOptions<UploadScriptResponse, UploadScriptError, Options<UploadScriptData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await uploadScript({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Align Script
+ *
+ * Find the lines again, e.g. after more footage was processed. Your choices stay.
+ */
+export const alignScriptMutation = (options?: Partial<Options<AlignScriptData>>): UseMutationOptions<AlignScriptResponse, AlignScriptError, Options<AlignScriptData>> => {
+    const mutationOptions: UseMutationOptions<AlignScriptResponse, AlignScriptError, Options<AlignScriptData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await alignScript({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Choose Take
+ *
+ * Use this take for the line, mark the line as not filmed, or go back to the best match.
+ */
+export const chooseTakeMutation = (options?: Partial<Options<ChooseTakeData>>): UseMutationOptions<ChooseTakeResponse, ChooseTakeError, Options<ChooseTakeData>> => {
+    const mutationOptions: UseMutationOptions<ChooseTakeResponse, ChooseTakeError, Options<ChooseTakeData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await chooseTake({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Create Script Assembly
+ *
+ * Every dialogue line's take in script order, as a timeline (AI-assisted rough cut).
+ */
+export const createScriptAssemblyMutation = (options?: Partial<Options<CreateScriptAssemblyData>>): UseMutationOptions<CreateScriptAssemblyResponse, CreateScriptAssemblyError, Options<CreateScriptAssemblyData>> => {
+    const mutationOptions: UseMutationOptions<CreateScriptAssemblyResponse, CreateScriptAssemblyError, Options<CreateScriptAssemblyData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createScriptAssembly({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export const getMediaTranscriptQueryKey = (options: Options<GetMediaTranscriptData>) => createQueryKey('getMediaTranscript', options);
 

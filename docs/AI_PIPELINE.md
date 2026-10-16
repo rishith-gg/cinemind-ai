@@ -467,6 +467,44 @@ length only: whether the clips suit the brief has not been judged.
 - The player's cut from clip to clip is checked by its clock about 60 times a second, so a cut can run up to a
   frame or two late in the preview (the exported timeline is frame-exact).
 
+## Script-to-footage alignment (Phase 12A, SPEC P1-A)
+Existing: difflib's SequenceMatcher (Ratcliff/Obershelp) and the MiniLM sentence model. Ours: the screenplay reader,
+the windows, the trimming and scoring, the defaults (`rough_cut/script_parse.py`, `script_align.py`,
+`script_store.py`, `script_cut.py`, `[script]`, D-096 to D-098).
+
+1. **Screenplay**: Fountain (scene headings, also without a blank line after them and with `#12A#` numbers; character
+   cues with "(V.O.)" / "^" dropped; dialogue without parentheticals; title page, notes, boneyard, sections,
+   transitions skipped) or plain text ("NAME: words", one line per row, scene headings kept). Fountain is used when
+   it finds dialogue and at least as many speakers' lines as "NAME:" rows would give.
+2. **Windows**: 1 to 3 neighbouring transcript segments of one clip with pauses up to 2 s; only segments not marked
+   uncertain (D-084). Clips in a "detect only" language have no text and cannot be matched.
+3. **Candidates per line**: the 50 windows sharing the line's rarest words (summed inverse frequency) and the 20
+   closest in meaning.
+4. **Scores**: lexical = the line's words matched in order, the stretch from first to last match widened by up to 6
+   words for contractions ("you're" / "you are"), character similarity of line and stretch; semantic = cosine of the
+   line's and the window's MiniLM vectors. Score = weighted mean (defaults: meaning only, limit 0.3; words only,
+   limit 0.45, without the text model). The take is the matched stretch (its first and last word give in and out),
+   or the whole window when fewer than two real words match.
+5. **Takes**: overlapping takes in one clip keep the best; up to 5 per line, plus the user's pick if it fell out.
+   The best take at or above the limit is used unless the user picked another or marked the line not filmed; every
+   line says why.
+6. **Assembly**: script order, each take cut to its words plus 0.25 s, consecutive lines from one running take joined
+   into one clip, linked to the shot the take starts in; the result is a `script_cut` timeline with the banner.
+
+Measured on Tears of Steel (EVALUATION.md section 12): of the lines the speech model wrote down, about 4 in 5 are
+found at a right place (19 to 20 of 24 on the test half); overall 20 to 21 of 38 film lines, because 14 were never
+transcribed; 8 to 9 of 10 not-filmed lines rejected. Subtitles stand in for a screenplay (an upper bound).
+
+### Known limits (script alignment)
+- Only as good as the transcript: lines Whisper did not write down (short shouts, speech under music, Kannada here)
+  cannot be found. One language per clip.
+- Meaning only can give a short unrelated line a moderate score ("Hey!" 0.36 against "See you tomorrow morning" on
+  the user's footage, as a second take); the limit and the word check keep it from being used but it is listed.
+- Numbers are compared as written ("20" is not "twenty"). Takes are not compared with each other (best take by
+  quality, flubs, completeness is SPEC P1-B).
+- Each alignment embeds every window again (not cached); thousands of segments have not been timed. The test guard
+  is 300 lines against 3000 segments, words only, under 30 s.
+
 ### Known limits
 - Thresholds were set on web photos (Places365) and object crops in low light (CODaN), not on video frames; precision
   on a user's footage depends on how common each tag is there. Shot size is never shown (no labelled data).

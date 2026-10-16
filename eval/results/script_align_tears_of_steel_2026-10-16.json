@@ -1,0 +1,285 @@
+{
+  "meta": {
+    "date": "2026-10-16",
+    "data": "Tears of Steel 720p, (CC) Blender Foundation | mango.blender.org, CC BY 3.0",
+    "script": "official English subtitles (76 lines) + 20 distractor lines written by Claude",
+    "speech_model": "small",
+    "text_model": "minilm-l6",
+    "segments_kept": 52,
+    "segments_total": 52,
+    "machine": "macOS-26.5.2-arm64-arm-64bit-Mach-O, arm",
+    "tolerance_s": 0.5,
+    "right_take": "the take's middle within tolerance of one of the line's places",
+    "split": "dev = even subtitles + distractors 1-10, test = odd subtitles + 11-20",
+    "commit": "19788c2",
+    "script_settings": {
+      "lexical_weight": 0.0,
+      "semantic_weight": 1.0,
+      "min_score": 0.3,
+      "words_only_min_score": 0.45,
+      "max_window": 3,
+      "max_gap_s": 2.0,
+      "takes_kept": 5
+    },
+    "transcribe_settings": {
+      "model": "auto",
+      "language": "auto",
+      "device": "auto",
+      "compute_type": "auto",
+      "beam_size": 5,
+      "vad_threshold": 0.5,
+      "vad_min_silence_ms": 2000
+    }
+  },
+  "report": {
+    "words only": {
+      "lexical_weight": 1.0,
+      "semantic_weight": 0.0,
+      "min_score": 0.45,
+      "dev": {
+        "accuracy": {
+          "k": 32,
+          "n": 48,
+          "rate": 0.6667,
+          "ci95": [
+            0.525,
+            0.783
+          ]
+        },
+        "film_lines_found": {
+          "k": 22,
+          "n": 38,
+          "rate": 0.5789,
+          "ci95": [
+            0.422,
+            0.721
+          ]
+        },
+        "transcribed_lines_found": {
+          "k": 21,
+          "n": 22,
+          "rate": 0.9545,
+          "ci95": [
+            0.782,
+            0.992
+          ]
+        },
+        "not_filmed_rejected": {
+          "k": 10,
+          "n": 10,
+          "rate": 1.0,
+          "ci95": [
+            0.722,
+            1.0
+          ]
+        },
+        "median_in_point_error_s": 0.3
+      },
+      "test": {
+        "accuracy": {
+          "k": 29,
+          "n": 48,
+          "rate": 0.6042,
+          "ci95": [
+            0.463,
+            0.73
+          ]
+        },
+        "film_lines_found": {
+          "k": 21,
+          "n": 38,
+          "rate": 0.5526,
+          "ci95": [
+            0.397,
+            0.699
+          ]
+        },
+        "transcribed_lines_found": {
+          "k": 20,
+          "n": 24,
+          "rate": 0.8333,
+          "ci95": [
+            0.641,
+            0.933
+          ]
+        },
+        "not_filmed_rejected": {
+          "k": 8,
+          "n": 10,
+          "rate": 0.8,
+          "ci95": [
+            0.49,
+            0.943
+          ]
+        },
+        "median_in_point_error_s": 0.37
+      }
+    },
+    "meaning only": {
+      "lexical_weight": 0.0,
+      "semantic_weight": 1.0,
+      "min_score": 0.3,
+      "dev": {
+        "accuracy": {
+          "k": 34,
+          "n": 48,
+          "rate": 0.7083,
+          "ci95": [
+            0.568,
+            0.818
+          ]
+        },
+        "film_lines_found": {
+          "k": 24,
+          "n": 38,
+          "rate": 0.6316,
+          "ci95": [
+            0.473,
+            0.766
+          ]
+        },
+        "transcribed_lines_found": {
+          "k": 21,
+          "n": 22,
+          "rate": 0.9545,
+          "ci95": [
+            0.782,
+            0.992
+          ]
+        },
+        "not_filmed_rejected": {
+          "k": 10,
+          "n": 10,
+          "rate": 1.0,
+          "ci95": [
+            0.722,
+            1.0
+          ]
+        },
+        "median_in_point_error_s": 0.19
+      },
+      "test": {
+        "accuracy": {
+          "k": 29,
+          "n": 48,
+          "rate": 0.6042,
+          "ci95": [
+            0.463,
+            0.73
+          ]
+        },
+        "film_lines_found": {
+          "k": 20,
+          "n": 38,
+          "rate": 0.5263,
+          "ci95": [
+            0.373,
+            0.675
+          ]
+        },
+        "transcribed_lines_found": {
+          "k": 19,
+          "n": 24,
+          "rate": 0.7917,
+          "ci95": [
+            0.595,
+            0.908
+          ]
+        },
+        "not_filmed_rejected": {
+          "k": 9,
+          "n": 10,
+          "rate": 0.9,
+          "ci95": [
+            0.596,
+            0.982
+          ]
+        },
+        "median_in_point_error_s": 0.37
+      }
+    },
+    "both": {
+      "lexical_weight": 0.3,
+      "semantic_weight": 0.7,
+      "min_score": 0.3,
+      "dev": {
+        "accuracy": {
+          "k": 32,
+          "n": 48,
+          "rate": 0.6667,
+          "ci95": [
+            0.525,
+            0.783
+          ]
+        },
+        "film_lines_found": {
+          "k": 22,
+          "n": 38,
+          "rate": 0.5789,
+          "ci95": [
+            0.422,
+            0.721
+          ]
+        },
+        "transcribed_lines_found": {
+          "k": 21,
+          "n": 22,
+          "rate": 0.9545,
+          "ci95": [
+            0.782,
+            0.992
+          ]
+        },
+        "not_filmed_rejected": {
+          "k": 10,
+          "n": 10,
+          "rate": 1.0,
+          "ci95": [
+            0.722,
+            1.0
+          ]
+        },
+        "median_in_point_error_s": 0.23
+      },
+      "test": {
+        "accuracy": {
+          "k": 30,
+          "n": 48,
+          "rate": 0.625,
+          "ci95": [
+            0.484,
+            0.748
+          ]
+        },
+        "film_lines_found": {
+          "k": 21,
+          "n": 38,
+          "rate": 0.5526,
+          "ci95": [
+            0.397,
+            0.699
+          ]
+        },
+        "transcribed_lines_found": {
+          "k": 20,
+          "n": 24,
+          "rate": 0.8333,
+          "ci95": [
+            0.641,
+            0.933
+          ]
+        },
+        "not_filmed_rejected": {
+          "k": 9,
+          "n": 10,
+          "rate": 0.9,
+          "ci95": [
+            0.596,
+            0.982
+          ]
+        },
+        "median_in_point_error_s": 0.37
+      }
+    }
+  }
+}

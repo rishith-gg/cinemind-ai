@@ -22,11 +22,25 @@ _Last updated: 2026-10-16_
 - [x] Phase 9: Hybrid search (ablation measured on the user's footage with judgments by Claude; the user's own judgments pending)
 - [x] Phase 10: Ranking, selects, explainability (learned re-weighting P1-D deferred to Phase 12)
 - [ ] Phase 11: Rough cut engine + timeline UI (built and tested; **waiting for the user's DaVinci Resolve import of a rough cut**, the last acceptance item)
-- [ ] Phase 12: P1 differentiators
+- [ ] Phase 12: P1 differentiators (**A script-to-footage alignment done and evaluated**; B take detection / best take and C word-level speech-aware trimming next; at least three needed)
 - [ ] Phase 13: Evaluation
 - [ ] Phase 14: Polish, packaging, demo
 
 ## Current state
+Phase 12A (script-to-footage alignment) is done. The Script page reads a screenplay (Fountain or plain text), finds
+every dialogue line in the transcripts (windows of up to 3 segments, lines marked uncertain never used), lists up to 5
+takes per line with word and meaning scores, lets the editor pick a take or mark "not filmed" (kept through
+re-alignment and through a replaced script for unchanged lines), and builds a script-ordered assembly that opens in
+the timeline editor and exports like any rough cut. Measured on the Blender film Tears of Steel with its subtitles as
+the script (EVALUATION.md section 12, test half): 29 to 30 of 48 lines right for all three variants (intervals
+overlap); of the lines Whisper wrote down 19 to 20 of 24 found; 14 of 38 film lines were never transcribed; 8 to 9 of
+10 invented lines rejected. Defaults chosen on the development half: meaning only, limit 0.3 (words only 0.45
+without the text model); a weak preference. Code review found that the first evaluation counted the neighbouring
+subtitle as right (0.71 reported, replaced), that uploading held the write lock during alignment, and several parser
+and take-choice issues; all fixed with tests. Checked in the real app on the user's footage with a four-line test
+script made from their English transcripts (both takes of the two repeated lines found, the invented line rejected,
+assembly built), then deleted.
+
 Phase 11 is built; its last acceptance item, the user's Resolve import of a rough cut, is open. The Timeline page
 takes a one-sentence brief (plus optional length, order, person, scene) and builds an AI-assisted rough cut: rules read
 the length and order (no language model), hybrid search + ranking give 50 candidates (rejected shots out), shots under
@@ -88,7 +102,7 @@ Fixes after Phase 8, from the user's feedback (2026-10-15):
   5 Kannada clips marked as speech without text (EVALUATION.md section 5).
 - Deleted `data/phase4-verify/` (the Resolve test it served is confirmed).
 
-Next step: the user imports a rough cut into DaVinci Resolve (TESTING.md, "rough cut import checklist"), then Phase 12 (P1 differentiators). The earlier reviews (✓ / ✕ on search results, selects / rejects) are still welcome: they also steer the rough cut.
+Next step: Phase 12B (take detection and best-take suggestion). Still open from Phase 11: the user's Resolve import of a rough cut (TESTING.md, "rough cut import checklist"). The earlier reviews (✓ / ✕ on search results, selects / rejects) are still welcome: they also steer the rough cut.
 
 Export path for the rest of the project (decided in Phase 4): FCP7 XML into DaVinci Resolve.
 
@@ -110,6 +124,13 @@ file was re-read with OTIO: same cuts, gapless.
 None.
 
 ## Open issues / notes
+- Phase 12A, needs the user: if any of their footage was shot from a script, paste it on the Script page (English
+  lines only can be matched; Kannada has no text, D-084) and say whether the suggested takes are right; that would be
+  the first measurement on real takes instead of subtitles.
+- Phase 12A limitations: only as good as the transcript (short shouts and speech under music are missed); meaning-only
+  scoring lists short unrelated lines as weak takes; numbers compared as written; window vectors are re-embedded on
+  every alignment (fine for tens of segments, untimed for thousands); the evaluation's script is subtitles (an upper
+  bound) and its invented negatives are easy; no best-take judgement between takes (that is 12B).
 - Phase 11, needs the user: (1) build a rough cut on the Timeline page, export the FCP7 XML and the SRT, import both
   into Resolve 21.1 and fill in TESTING.md "Results (Phase 11)" (are the markers there? where does the SRT land?);
   (2) say whether the chosen clips suit the briefs, so the selection can be judged instead of only timed.

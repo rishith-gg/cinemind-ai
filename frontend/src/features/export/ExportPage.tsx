@@ -52,9 +52,9 @@ function TimelineCard({ timeline, onDelete }: { timeline: TimelineOut; onDelete:
           <p className="text-sm text-neutral-400">
             {timeline.item_count} cuts · {formatDuration(timeline.duration_s)} · {rateLabel(timeline.fps_num, timeline.fps_den)}{" "}
             fps · {timeline.width}×{timeline.height} ·{" "}
-            {timeline.kind === "rough_cut" ? (
+            {timeline.kind === "rough_cut" || timeline.kind === "script_cut" ? (
               <Link className="underline" to={`/timeline/${timeline.id}`}>
-                AI-assisted rough cut (open in the editor)
+                {timeline.kind === "script_cut" ? "script assembly" : "AI-assisted rough cut"} (open in the editor)
               </Link>
             ) : (
               "every shot, in file-name order"

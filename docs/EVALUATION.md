@@ -353,3 +353,45 @@ What this says, and what it cannot:
   them; binary relevance cannot credit variety, so these figures cannot say whether an editor is better served.
 - Nothing was tuned on the test set; the weights can be changed per search on the Search page, and the order
   changes deterministically with them (tested).
+
+## 12. Script-to-footage alignment on Tears of Steel (Phase 12A)
+Script: `eval/script_align.py` (`fetch`, then `run --out`); results:
+`eval/results/script_align_tears_of_steel_2026-10-16.{txt,json}` (commit 19788c2 plus the uncommitted Phase 12A
+code, M1 8 GB, Whisper `small`, MiniLM `minilm-l6`).
+
+Data: the Blender open movie *Tears of Steel* (720p, 12 min; (CC) Blender Foundation | mango.blender.org, CC BY
+3.0), checked by SHA-256, never committed. The "script" is the film's official English subtitles, one line per
+subtitle (76), plus 20 lines that are not in the film, written by Claude for this test (everyday sentences, so they
+are easy to reject). Subtitles are much closer to what was said than a screenplay is: these figures are an upper
+bound for a real script.
+
+Method: the film is transcribed once with the app's speech model (English forced; 52 segments, none marked
+uncertain) and the app's own alignment code runs on the result. A film line is right when its best take reaches
+the limit and the middle of the take lies, within 0.5 s, at a place where the line is said: its own subtitle, or
+another subtitle (or two neighbouring subtitles) holding the same words as whole words; the subtitles just before
+and after a line never count. The film replays its break-up scene, so some lines are said twice; either place is a
+right take for a script assembly. A not-filmed line is right when no take reaches the limit. Weights and limit are
+chosen on the development half (even subtitles and distractors 1 to 10; ties keep the first, i.e. the lower weight
+and limit) and reported on the test half (odd subtitles, distractors 11 to 20). Neighbouring subtitles fall on both
+halves; only two numbers are tuned. Rates with counts and 95 % Wilson intervals.
+
+| Variant (chosen on dev) | Test accuracy | Film lines found | Lines the speech model wrote down, found | Not-filmed lines rejected |
+|---|---|---|---|---|
+| words only, limit 0.45 | 29/48 = 0.60 [0.46, 0.73] | 21/38 = 0.55 [0.40, 0.70] | 20/24 = 0.83 [0.64, 0.93] | 8/10 [0.49, 0.94] |
+| meaning only, limit 0.30 | 29/48 = 0.60 [0.46, 0.73] | 20/38 = 0.53 [0.37, 0.68] | 19/24 = 0.79 [0.59, 0.91] | 9/10 [0.60, 0.98] |
+| both (words 0.3, meaning 0.7), limit 0.30 | 30/48 = 0.63 [0.48, 0.75] | 21/38 = 0.55 [0.40, 0.70] | 20/24 = 0.83 [0.64, 0.93] | 9/10 [0.60, 0.98] |
+
+Median in-point error of lines found at their own subtitle: 0.37 s for all three (against subtitle timing, which is
+itself approximate).
+
+What this says, and what it cannot:
+- The speech model is the limit: 14 of the 38 test lines are not in the transcript at all (short shouts such as
+  "Abort!", "Cut!", "Whoaaa!", or lines under music), and no alignment can find them. Of the lines that were written
+  down, about 4 in 5 are found at a right place.
+- The three variants are within one line of each other on the test half and all intervals overlap: the data cannot
+  tell them apart. Meaning only scored best on the development half (34/48 against 32/48), so it is the default
+  (`[script]`, D-097); words only is used, with limit 0.45, when the text model is not downloaded.
+- An earlier version of this script counted the subtitle before a line as a right place (a bug found in review: the
+  pair "previous + this" always contains the line) and reported 0.71; those numbers were replaced, not kept.
+- Not measured: a real screenplay against raw takes (none exists for the user's footage, whose speech is mostly
+  Kannada without text, D-084), choice of the best of several takes, or how often an editor keeps the suggested take.

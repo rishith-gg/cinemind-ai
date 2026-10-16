@@ -177,7 +177,7 @@ function RoughCuts({ projectId }: { projectId: string }) {
               >
                 <span className="font-medium">{t.name}</span>{" "}
                 <span className="text-sm text-neutral-400">
-                  · {t.kind === "rough_cut" ? "AI-assisted rough cut" : "every shot"} · {t.item_count} clips · {formatDuration(t.duration_s)}
+                  · {t.kind === "rough_cut" ? "AI-assisted rough cut" : t.kind === "script_cut" ? "script assembly" : "every shot"} · {t.item_count} clips · {formatDuration(t.duration_s)}
                 </span>
               </Link>
             </li>

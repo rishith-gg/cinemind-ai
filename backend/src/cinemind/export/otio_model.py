@@ -16,6 +16,8 @@ NOTES = {
     "all_shots": "Every detected shot in file order; nothing selected or ranked.",
     "rough_cut": f"{BANNER} Clips were chosen from a brief by search and ranking; each clip's "
     "marker says why.",
+    "script_cut": f"{BANNER} Each script line's take in script order, found by matching the "
+    "script with the transcripts; each clip's marker says which line.",
 }
 
 

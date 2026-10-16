@@ -61,7 +61,7 @@ def _summary(settings: Settings, timeline: Timeline, seq: Sequence) -> TimelineO
     )
 
 
-def _rate(fps: tuple[int, int] | None) -> Fraction | None:
+def rate_of(fps: tuple[int, int] | None) -> Fraction | None:
     if fps is None:
         return None
     if fps[0] <= 0 or fps[1] <= 0:
@@ -112,7 +112,7 @@ def _alternatives(
     return found
 
 
-def _detail(session: Session, settings: Settings, timeline: Timeline) -> TimelineDetail:
+def detail(session: Session, settings: Settings, timeline: Timeline) -> TimelineDetail:
     seq = service.load_sequence(session, timeline)
     items_by_id = {i.id: i for i in timeline.items}
     alt_ids = {a["shot_id"] for a in timeline.params.get("alternatives", [])}
@@ -171,9 +171,9 @@ def create_timeline(
 ) -> TimelineDetail:
     """Build the chronological "all shots" timeline: every detected shot, nothing selected."""
     get_project(session, project_id)
-    fps = _rate(body.fps)
+    fps = rate_of(body.fps)
     timeline = build_all_shots(session, project_id, body.name.strip(), fps, body.mixed_rates)
-    return _detail(session, settings, timeline)
+    return detail(session, settings, timeline)
 
 
 @router.post(
@@ -196,10 +196,10 @@ def create_rough_cut(
         actor_id=body.actor_id,
         scene_id=body.scene_id,
         name=body.name,
-        fps=_rate(body.fps),
+        fps=rate_of(body.fps),
     )
     timeline = engine.build_rough_cut(session, settings, project_id, request)
-    return _detail(session, settings, timeline)
+    return detail(session, settings, timeline)
 
 
 @router.get(
@@ -229,7 +229,7 @@ def list_timelines(
     operation_id="getTimeline",
 )
 def get_timeline(timeline_id: str, session: SessionDep, settings: SettingsDep) -> TimelineDetail:
-    return _detail(session, settings, _timeline(session, timeline_id))
+    return detail(session, settings, _timeline(session, timeline_id))
 
 
 @router.patch(
@@ -251,7 +251,7 @@ def update_timeline(
     )
     editing.edit(session, timeline, body.name, items)
     session.commit()
-    return _detail(session, settings, timeline)
+    return detail(session, settings, timeline)
 
 
 @router.post(
@@ -268,7 +268,7 @@ def swap_timeline_item(
     timeline = _timeline(session, timeline_id)
     editing.swap(session, settings, timeline, item_id, body.shot_id)
     session.commit()
-    return _detail(session, settings, timeline)
+    return detail(session, settings, timeline)
 
 
 @router.delete(

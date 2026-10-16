@@ -84,3 +84,14 @@ index file are mapped back to rows by a `.ids.json` file written next to it.
 | Table | Purpose |
 |---|---|
 | `timeline_items.reason` | JSON, null for "all shots" timelines: why a rough cut chose this clip (search rank, list ranks, score breakdown, matched line or labels, trim rule, summary). `timelines.kind` is `rough_cut` for these; `timelines.params` holds the brief, how it was read, settings, left-out shots and swap suggestions. |
+
+## Phase 12A (migration 0015): script alignment
+Models in `db/script.py` (imported by `db/models.py`).
+
+| Table | Purpose |
+|---|---|
+| `script_docs` | one screenplay per project (unique `project_id`; uploading another replaces it): `name`, `format` (`fountain`, `plain`), `text` (as uploaded), `alignment` (last alignment: when, text model or none, settings, limit used, transcript lines searched, lines found), `created_at`. |
+| `script_lines` | in script order (`index`): `kind` (`scene`, `action`, `dialogue`), `character`, `scene` (heading in force), `text`; for dialogue the user's `choice` (`auto` = best take at or above the limit, `take`, `not_filmed`) and, for `take`, the picked take by place (`picked_media_id`, `picked_start_s`, `picked_end_s`) so it survives aligning again. |
+| `script_takes` | where a dialogue line was found, best first (`rank`), at most `[script] takes_kept`: `media_id` (cascade), `start_s`, `end_s` (first and last matched word), `text` (words heard), `lexical`, `semantic` (null without the text model), `score`, `segment_ids`. Rewritten by every alignment. |
+
+Script assemblies are ordinary timelines (`kind` `script_cut`); each item's `reason` holds the script lines it plays and the take's scores.

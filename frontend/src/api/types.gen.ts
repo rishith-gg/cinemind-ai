@@ -217,6 +217,50 @@ export type ActorsOut = {
 };
 
 /**
+ * AlignmentOut
+ *
+ * How the last alignment ran (rule 6).
+ */
+export type AlignmentOut = {
+    /**
+     * At
+     */
+    at?: string | null;
+    /**
+     * Text Model
+     */
+    text_model?: string | null;
+    /**
+     * Semantic
+     */
+    semantic?: boolean;
+    /**
+     * Lexical Weight
+     */
+    lexical_weight?: number;
+    /**
+     * Semantic Weight
+     */
+    semantic_weight?: number;
+    /**
+     * Limit
+     */
+    limit?: number;
+    /**
+     * Segments
+     */
+    segments?: number;
+    /**
+     * Dialogue Lines
+     */
+    dialogue_lines?: number;
+    /**
+     * Found
+     */
+    found?: number;
+};
+
+/**
  * AlternativeOut
  */
 export type AlternativeOut = {
@@ -1550,6 +1594,126 @@ export type ScenesOut = {
 };
 
 /**
+ * ScriptCutCreate
+ */
+export type ScriptCutCreate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Fps
+     */
+    fps?: [
+        number,
+        number
+    ] | null;
+};
+
+/**
+ * ScriptIn
+ */
+export type ScriptIn = {
+    /**
+     * Name
+     */
+    name?: string;
+    /**
+     * Text
+     */
+    text: string;
+};
+
+/**
+ * ScriptLineOut
+ */
+export type ScriptLineOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Kind
+     */
+    kind: string;
+    /**
+     * Character
+     */
+    character: string | null;
+    /**
+     * Scene
+     */
+    scene: string | null;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Choice
+     */
+    choice: string;
+    /**
+     * Chosen Take Id
+     */
+    chosen_take_id: string | null;
+    /**
+     * Why
+     */
+    why: string;
+    /**
+     * Takes
+     */
+    takes: Array<TakeOut>;
+};
+
+/**
+ * ScriptOut
+ */
+export type ScriptOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Project Id
+     */
+    project_id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Format
+     */
+    format: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    alignment: AlignmentOut;
+    /**
+     * Min Score
+     */
+    min_score: number;
+    /**
+     * Dialogue Lines
+     */
+    dialogue_lines: number;
+    /**
+     * With Take
+     */
+    with_take: number;
+    /**
+     * Lines
+     */
+    lines: Array<ScriptLineOut>;
+};
+
+/**
  * SearchFilters
  */
 export type SearchFilters = {
@@ -2049,6 +2213,66 @@ export type TagReviewIn = {
      * Decision
      */
     decision: 'approved' | 'rejected' | 'none';
+};
+
+/**
+ * TakeChoice
+ */
+export type TakeChoice = {
+    /**
+     * Take Id
+     */
+    take_id?: string | null;
+    /**
+     * Not Filmed
+     */
+    not_filmed?: boolean;
+};
+
+/**
+ * TakeOut
+ */
+export type TakeOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Media Id
+     */
+    media_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Rank
+     */
+    rank: number;
+    /**
+     * Start S
+     */
+    start_s: number;
+    /**
+     * End S
+     */
+    end_s: number;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Lexical
+     */
+    lexical: number;
+    /**
+     * Semantic
+     */
+    semantic: number | null;
+    /**
+     * Score
+     */
+    score: number;
 };
 
 /**
@@ -4177,6 +4401,282 @@ export type ExportTimelineResponses = {
      */
     200: unknown;
 };
+
+export type DeleteScriptData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/script';
+};
+
+export type DeleteScriptErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type DeleteScriptError = DeleteScriptErrors[keyof DeleteScriptErrors];
+
+export type DeleteScriptResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteScriptResponse = DeleteScriptResponses[keyof DeleteScriptResponses];
+
+export type GetScriptData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/script';
+};
+
+export type GetScriptErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type GetScriptError = GetScriptErrors[keyof GetScriptErrors];
+
+export type GetScriptResponses = {
+    /**
+     * Successful Response
+     */
+    200: ScriptOut;
+};
+
+export type GetScriptResponse = GetScriptResponses[keyof GetScriptResponses];
+
+export type UploadScriptData = {
+    body: ScriptIn;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/script';
+};
+
+export type UploadScriptErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type UploadScriptError = UploadScriptErrors[keyof UploadScriptErrors];
+
+export type UploadScriptResponses = {
+    /**
+     * Successful Response
+     */
+    201: ScriptOut;
+};
+
+export type UploadScriptResponse = UploadScriptResponses[keyof UploadScriptResponses];
+
+export type AlignScriptData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/script/align';
+};
+
+export type AlignScriptErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type AlignScriptError = AlignScriptErrors[keyof AlignScriptErrors];
+
+export type AlignScriptResponses = {
+    /**
+     * Successful Response
+     */
+    200: ScriptOut;
+};
+
+export type AlignScriptResponse = AlignScriptResponses[keyof AlignScriptResponses];
+
+export type ChooseTakeData = {
+    body: TakeChoice;
+    path: {
+        /**
+         * Line Id
+         */
+        line_id: string;
+    };
+    query?: never;
+    url: '/api/script-lines/{line_id}/take';
+};
+
+export type ChooseTakeErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type ChooseTakeError = ChooseTakeErrors[keyof ChooseTakeErrors];
+
+export type ChooseTakeResponses = {
+    /**
+     * Successful Response
+     */
+    200: ScriptOut;
+};
+
+export type ChooseTakeResponse = ChooseTakeResponses[keyof ChooseTakeResponses];
+
+export type CreateScriptAssemblyData = {
+    body: ScriptCutCreate;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/script/assembly';
+};
+
+export type CreateScriptAssemblyErrors = {
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+};
+
+export type CreateScriptAssemblyError = CreateScriptAssemblyErrors[keyof CreateScriptAssemblyErrors];
+
+export type CreateScriptAssemblyResponses = {
+    /**
+     * Successful Response
+     */
+    201: TimelineDetail;
+};
+
+export type CreateScriptAssemblyResponse = CreateScriptAssemblyResponses[keyof CreateScriptAssemblyResponses];
 
 export type GetMediaTranscriptData = {
     body?: never;

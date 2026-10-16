@@ -77,6 +77,18 @@ Test footage is synthetic and generated on demand with ffmpeg (never committed).
   Play at the end starts over, only the shown clip reports errors). The E2E test builds a cut from "10 seconds, best first",
   trims with the keyboard (kept after reload), plays it, removes a clip and checks the exported XML.
 
+- Script alignment: unit tests check the Fountain reader (title page, notes, boneyard, extensions, "^", two-line
+  parentheticals, headings without a blank line, `EXT/INT`, scene numbers, transitions), plain text (NAME: rows, a
+  scene heading among them, title page, "Scene 1:" not a name, CRLF), size limits, and the matching (exact and
+  paraphrased takes, a line over two segments, the pause limit, a line not in any transcript, meaning with a stand-in
+  model and the words-only fallback, overlapping takes, the whole window when only a stopword is shared, a pick kept
+  when better takes appear, a speed guard). API tests on `cuts.mp4` check finding the spoken line with its times,
+  the uncertain line never used, choices (take, not filmed, back to auto) surviving re-alignment and a replaced
+  script, the words-only limit when meaning has weight 0, the assembly (padding, joining two lines from one take,
+  markers in the export), and errors. Tests of `eval/script_align.py` check that neighbouring subtitles never count
+  as a right place, whole-word matching, the take-middle rule and the Wilson interval. The E2E test reads a
+  screenplay in the E2E data folder (no speech model: every line "not found", no empty assembly) and replaces it.
+
 ## Manual: DaVinci Resolve import checklist (Phase 4)
 Claude cannot run Resolve. This is done by hand; write the outcome in the results table and in `docs/PROGRESS.md`.
 Tested so far: DaVinci Resolve 21.1 (free edition), macOS, FCP7 XML, on 2026-10-09 (results below).

@@ -20,3 +20,10 @@ min_quality = 0.5           # shots below this Technical Quality Score are left 
 max_clip_s = 6.0            # longest clip without speech
 min_clip_s = 1.5            # shorter shots are not used
 order = "chronological"     # chronological | scene | score (when the brief names none)
+
+[script]
+# Script alignment (Script page). Chosen on the Tears of Steel development half: eval/script_align.py
+lexical_weight = 0.0        # weight of word similarity in the match score
+semantic_weight = 1.0       # weight of meaning similarity (text model); words still set in/out points
+min_score = 0.3             # a line's best take must reach this to be used
+words_only_min_score = 0.45 # the limit when the text model is not downloaded

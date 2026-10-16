@@ -17,6 +17,7 @@ from cinemind.core.face_config import FaceConfig
 from cinemind.core.quality_config import QualityConfig
 from cinemind.core.ranking_config import RankingConfig
 from cinemind.core.rough_cut_config import RoughCutConfig
+from cinemind.core.script_config import ScriptConfig
 from cinemind.core.search_config import SearchConfig
 from cinemind.core.transcribe_config import TranscribeConfig
 
@@ -57,6 +58,7 @@ class Settings(BaseSettings):
     search: SearchConfig = SearchConfig()
     ranking: RankingConfig = RankingConfig()
     rough_cut: RoughCutConfig = RoughCutConfig()
+    script: ScriptConfig = ScriptConfig()
     worker_poll_seconds: float = 0.5
     # Importable modules that register extra stage chains (used by tests and plugins).
     extra_stage_modules: list[str] = []

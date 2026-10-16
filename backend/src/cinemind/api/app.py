@@ -27,6 +27,7 @@ from cinemind.api import (
     media,
     projects,
     quality,
+    script,
     search,
     shots,
     speech,
@@ -111,6 +112,7 @@ def create_app(
     app.include_router(shots.router)
     app.include_router(quality.router)
     app.include_router(timelines.router)
+    app.include_router(script.router)
     app.include_router(transcripts.router)
     app.include_router(speech.router)
     app.include_router(search.router)
