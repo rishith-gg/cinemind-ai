@@ -12,3 +12,12 @@ describes their own part below and committed it from their own account.
 - Speech: faster-whisper transcription with word timings, uncertainty marking, per-project languages;
   script-to-footage alignment and the script assembly.
 - Report: introduction, methodology, proposed approach, tools and technologies.
+
+## Hrishikesh Acharya (24BDS0231) · [@Hrishikesh-Acharya](https://github.com/Hrishikesh-Acharya)
+- Computer vision: technical quality metrics (focus, exposure, contrast) and audio QC, with threshold calibration on
+  synthetically degraded frames.
+- Faces and actors: YuNet/SFace detection, tracking, constrained agglomerative clustering and the "same person?"
+  review loop; evaluation on LFW (purity, ARI, NMI, B-cubed).
+- Embeddings and tags: OpenCLIP/SigLIP picture vectors, MiniLM text vectors, zero-shot tag calibration on Places365
+  and CODaN, scene grouping, and take detection with best-take signals.
+- Report: dataset description, result analysis and figures, summary of gaps.
