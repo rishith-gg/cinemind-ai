@@ -53,7 +53,7 @@ bullets(s, [
   "Non-destructive: source footage is never modified",
   "Explainable and honest: every tag, rank and cut stores its inputs; every reported number comes from an evaluation script",
 ], { w: 7.3 });
-img(s, path.join(SCREENS, "03_library.png"), 8.1, 1.4, 4.9, 3.1);
+img(s, path.join(SCREENS, "01_dashboard.png"), 8.1, 1.4, 4.9, 3.4);
 
 // 4 Architecture
 s = frame("System architecture", 4);

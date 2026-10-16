@@ -337,3 +337,41 @@ class TranscriptSearchOut(BaseModel):
     # How the query was read: every term must occur, each matching the start of a word.
     terms: list[str]
     hits: list[TranscriptHit]
+
+
+class ProjectStatsOut(BaseModel):
+    """Footage statistics of a project (Dashboard): counts from the database, nothing estimated."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    clips: int
+    duration_s: float
+    size_bytes: int
+    # Clips by the state of their latest job (queued, running, succeeded, failed, cancelled,
+    # "not processed").
+    states: dict[str, int]
+    codecs: dict[str, int]
+    portrait: int
+    landscape: int
+    variable_rate: int
+    no_audio: int
+    frame_rates: list[str]
+    shots: int
+    scenes: int
+    # Shots per Technical Quality Score band: 0-0.2, 0.2-0.4, 0.4-0.6, 0.6-0.8, 0.8-1.
+    quality_bands: list[int]
+    quality_measured: int
+    low_quality: int
+    low_quality_below: float
+    qc_flags: dict[str, int]
+    transcripts: dict[str, int]
+    languages: dict[str, int]
+    speech_s: float
+    segments: int
+    actors: int
+    actors_named: int
+    take_groups: int
+    shots_in_takes: int
+    selected: int
+    rejected: int
+    timelines: dict[str, int]

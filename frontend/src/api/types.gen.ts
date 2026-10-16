@@ -1307,6 +1307,138 @@ export type ProjectShotOut = {
 };
 
 /**
+ * ProjectStatsOut
+ *
+ * Footage statistics of a project (Dashboard): counts from the database, nothing estimated.
+ */
+export type ProjectStatsOut = {
+    /**
+     * Clips
+     */
+    clips: number;
+    /**
+     * Duration S
+     */
+    duration_s: number;
+    /**
+     * Size Bytes
+     */
+    size_bytes: number;
+    /**
+     * States
+     */
+    states: {
+        [key: string]: number;
+    };
+    /**
+     * Codecs
+     */
+    codecs: {
+        [key: string]: number;
+    };
+    /**
+     * Portrait
+     */
+    portrait: number;
+    /**
+     * Landscape
+     */
+    landscape: number;
+    /**
+     * Variable Rate
+     */
+    variable_rate: number;
+    /**
+     * No Audio
+     */
+    no_audio: number;
+    /**
+     * Frame Rates
+     */
+    frame_rates: Array<string>;
+    /**
+     * Shots
+     */
+    shots: number;
+    /**
+     * Scenes
+     */
+    scenes: number;
+    /**
+     * Quality Bands
+     */
+    quality_bands: Array<number>;
+    /**
+     * Quality Measured
+     */
+    quality_measured: number;
+    /**
+     * Low Quality
+     */
+    low_quality: number;
+    /**
+     * Low Quality Below
+     */
+    low_quality_below: number;
+    /**
+     * Qc Flags
+     */
+    qc_flags: {
+        [key: string]: number;
+    };
+    /**
+     * Transcripts
+     */
+    transcripts: {
+        [key: string]: number;
+    };
+    /**
+     * Languages
+     */
+    languages: {
+        [key: string]: number;
+    };
+    /**
+     * Speech S
+     */
+    speech_s: number;
+    /**
+     * Segments
+     */
+    segments: number;
+    /**
+     * Actors
+     */
+    actors: number;
+    /**
+     * Actors Named
+     */
+    actors_named: number;
+    /**
+     * Take Groups
+     */
+    take_groups: number;
+    /**
+     * Shots In Takes
+     */
+    shots_in_takes: number;
+    /**
+     * Selected
+     */
+    selected: number;
+    /**
+     * Rejected
+     */
+    rejected: number;
+    /**
+     * Timelines
+     */
+    timelines: {
+        [key: string]: number;
+    };
+};
+
+/**
  * ProjectUpdate
  */
 export type ProjectUpdate = {
@@ -3316,6 +3448,40 @@ export type UpdateProjectResponses = {
 };
 
 export type UpdateProjectResponse = UpdateProjectResponses[keyof UpdateProjectResponses];
+
+export type GetProjectStatsData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: string;
+    };
+    query?: never;
+    url: '/api/projects/{project_id}/stats';
+};
+
+export type GetProjectStatsErrors = {
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetProjectStatsError = GetProjectStatsErrors[keyof GetProjectStatsErrors];
+
+export type GetProjectStatsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ProjectStatsOut;
+};
+
+export type GetProjectStatsResponse = GetProjectStatsResponses[keyof GetProjectStatsResponses];
 
 export type StreamJobEventsData = {
     body?: never;

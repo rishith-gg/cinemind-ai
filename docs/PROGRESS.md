@@ -27,6 +27,9 @@ _Last updated: 2026-10-16_
 - [~] Phase 14: Polish, packaging, demo (README with run steps, USER_GUIDE, DEMO script, UI screenshots, course report and deck in docs/report/; not done: first-run wizard, seed sample project, performance profiling, desktop packaging)
 
 ## Current state
+The Dashboard now shows the current project's footage statistics (`GET /api/projects/{id}/stats`) instead of the
+Phase 2 placeholder. `docs/DEMO.md` is a three-presenter Google Meet script.
+
 Phase 12B (take detection and best take) is done. Shots are grouped into takes by words (both with speech: words
 agree at least 0.6, pictures at least 0.5) or by picture (at least 0.9 and at most 3 shots apart), average linkage
 at a mean pair score of 0.75; the best take is the weighted mean of focus, exposure, audio, line completeness and

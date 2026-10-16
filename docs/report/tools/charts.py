@@ -32,16 +32,16 @@ ax.set_title("Technical quality flags (synthetic degradations of 55 real frames)
 ax.legend(loc="lower right", fontsize=8)
 save(fig, "fig2_quality")
 
-# Fig 3: WER
-fig, ax1 = plt.subplots(figsize=(6.5, 3.0))
+# Fig 3: WER and speed as two panels (one axis each)
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(6.8, 2.9))
 m = ["Whisper base", "Whisper small"]
-wer = [6.60, 4.70]; rtf = [0.104, 0.290]
-b = ax1.bar([0, 1], wer, 0.4, color=[GREY, BLUE])
-for bb, v in zip(b, wer): ax1.text(bb.get_x() + 0.2, v + 0.1, f"{v:.2f} %", ha="center", fontsize=9)
-ax1.set_xticks([0, 1], m); ax1.set_ylabel("Word error rate (%)"); ax1.set_ylim(0, 8)
-ax2 = ax1.twinx(); ax2.plot([0, 1], rtf, "o--", color=ORANGE); ax2.set_ylabel("Seconds per second of audio", color=ORANGE)
-ax2.set_ylim(0, 0.35); ax2.spines["top"].set_visible(False)
-ax1.set_title("Transcription on Mini LibriSpeech (1682 words), Apple M1 CPU")
+for ax, vals, fmt, ttl, col in ((a1, [6.60, 4.70], "{:.2f} %", "Word error rate (%)", BLUE),
+                                (a2, [0.104, 0.290], "{:.3f} s", "Seconds per second of audio", ORANGE)):
+    bars = ax.bar(m, vals, 0.5, color=col)
+    for b, v in zip(bars, vals):
+        ax.text(b.get_x() + b.get_width() / 2, v * 1.02, fmt.format(v), ha="center", va="bottom", fontsize=8)
+    ax.set_title(ttl, fontsize=9); ax.set_ylim(0, max(vals) * 1.25)
+fig.suptitle("Transcription on Mini LibriSpeech (1682 words), Apple M1 CPU", fontsize=10)
 save(fig, "fig3_wer")
 
 # Fig 4: face grouping

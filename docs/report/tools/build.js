@@ -177,7 +177,7 @@ body.push(table([3600, 1400, 1400, 1300, 1326], ["Flag / rule", "Precision", "Re
 ]));
 body.push(caption("Table 7. Quality flag calibration (5-fold grouped by clip)"));
 fig("fig3_wer.png", "Fig. 3. Word error rate and speed of the two Whisper sizes on Mini LibriSpeech",
-  "Whisper small lowers WER from 6.60 % to 4.70 % at almost three times the processing time (0.29 s per second of audio, still about 3.4× faster than real time on CPU), so small is the default for the lite tier. On the team's noisy field audio, the uncertainty rule hid the hallucinated lines, but some fluent text that passes the model's own limits remains.");
+  "Whisper small lowers WER from 6.60 % to 4.70 % (left) at almost three times the processing time (right) (0.29 s per second of audio, still about 3.4× faster than real time on CPU), so small is the default for the lite tier. On the team's noisy field audio, the uncertainty rule hid the hallucinated lines, but some fluent text that passes the model's own limits remains.");
 fig("fig4_faces.png", "Fig. 4. Actor grouping quality on LFW (held-out half)",
   "Average-linkage agglomerative clustering at distance 0.60 (chosen on the tuning half) gives 410 groups for 409 people, with B-cubed F1 0.993, ahead of HDBSCAN (0.955), which splits more people. LFW photos are frontal and well lit, so footage is harder. On our clips, setting aside faces seen in only one frame reduced 27 'actors' to 14.");
 fig("fig5_tags.png", "Fig. 5. Held-out precision of the zero-shot tags",
@@ -227,6 +227,7 @@ body.push(p("Inference: CineMind does not beat specialised GPU models on their o
 body.push(h1("13. User Manual"));
 body.push(p("Start the application with `uv run cinemind serve` and open http://127.0.0.1:8000. The screenshots below were taken from the running application on the team's footage."));
 const shots = [
+  ["01_dashboard.png", "Dashboard", "Footage statistics of the current project: clips, shots, scenes, actors, speech, low-quality shots, take groups, your marks and timelines; processing state, the distribution of technical quality scores with the quality flags, footage formats, speech per language, and suggested next steps."],
   ["03_library.png", "Library", "Import a footage folder (referenced in place, never modified) and follow processing live. Filter and sort clips by technical quality."],
   ["04_clip.png", "Clip page", "Proxy player with the shot strip, the QC lane of quality flags, the waveform, the transcript with word timings, tags and faces."],
   ["05_shots_scenes.png", "Shots / Scenes", "Shots grouped into scenes, with the similarity behind each boundary. Split, join and rename scenes, and select or reject shots."],

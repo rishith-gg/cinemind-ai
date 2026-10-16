@@ -235,3 +235,10 @@ queued or running, so a large import is grouped once at its end.
 
 ## Static frontend
 `cinemind serve` serves `frontend/dist`. Unknown extensionless non-`/api` paths return `index.html` (client-side routing deep links and reloads); missing files with an extension and unknown `/api` paths are real 404s.
+
+## Dashboard
+- `GET /api/projects/{id}/stats`: footage statistics read from the database: clips, total length and size, clips
+  by the state of their latest job, codecs, portrait / landscape, frame rates, variable-rate and silent clips,
+  shots, scenes, shots per quality band (0.2 wide) and below the low-quality limit, quality flags by kind,
+  transcripts by status and language, seconds of speech, transcript lines, actors (named), take groups, selects /
+  rejects, timelines by kind. 404 for an unknown project.

@@ -224,6 +224,59 @@
         }
       }
     },
+    "/api/projects/{project_id}/stats": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Get Project Stats",
+        "description": "Footage statistics for the Dashboard.",
+        "operationId": "getProjectStats",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectStatsOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/jobs/events": {
       "get": {
         "tags": [
@@ -8860,6 +8913,179 @@
           "filename"
         ],
         "title": "ProjectShotOut"
+      },
+      "ProjectStatsOut": {
+        "properties": {
+          "clips": {
+            "type": "integer",
+            "title": "Clips"
+          },
+          "duration_s": {
+            "type": "number",
+            "title": "Duration S"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "title": "Size Bytes"
+          },
+          "states": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "States"
+          },
+          "codecs": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Codecs"
+          },
+          "portrait": {
+            "type": "integer",
+            "title": "Portrait"
+          },
+          "landscape": {
+            "type": "integer",
+            "title": "Landscape"
+          },
+          "variable_rate": {
+            "type": "integer",
+            "title": "Variable Rate"
+          },
+          "no_audio": {
+            "type": "integer",
+            "title": "No Audio"
+          },
+          "frame_rates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Frame Rates"
+          },
+          "shots": {
+            "type": "integer",
+            "title": "Shots"
+          },
+          "scenes": {
+            "type": "integer",
+            "title": "Scenes"
+          },
+          "quality_bands": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Quality Bands"
+          },
+          "quality_measured": {
+            "type": "integer",
+            "title": "Quality Measured"
+          },
+          "low_quality": {
+            "type": "integer",
+            "title": "Low Quality"
+          },
+          "low_quality_below": {
+            "type": "number",
+            "title": "Low Quality Below"
+          },
+          "qc_flags": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Qc Flags"
+          },
+          "transcripts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Transcripts"
+          },
+          "languages": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Languages"
+          },
+          "speech_s": {
+            "type": "number",
+            "title": "Speech S"
+          },
+          "segments": {
+            "type": "integer",
+            "title": "Segments"
+          },
+          "actors": {
+            "type": "integer",
+            "title": "Actors"
+          },
+          "actors_named": {
+            "type": "integer",
+            "title": "Actors Named"
+          },
+          "take_groups": {
+            "type": "integer",
+            "title": "Take Groups"
+          },
+          "shots_in_takes": {
+            "type": "integer",
+            "title": "Shots In Takes"
+          },
+          "selected": {
+            "type": "integer",
+            "title": "Selected"
+          },
+          "rejected": {
+            "type": "integer",
+            "title": "Rejected"
+          },
+          "timelines": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Timelines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "clips",
+          "duration_s",
+          "size_bytes",
+          "states",
+          "codecs",
+          "portrait",
+          "landscape",
+          "variable_rate",
+          "no_audio",
+          "frame_rates",
+          "shots",
+          "scenes",
+          "quality_bands",
+          "quality_measured",
+          "low_quality",
+          "low_quality_below",
+          "qc_flags",
+          "transcripts",
+          "languages",
+          "speech_s",
+          "segments",
+          "actors",
+          "actors_named",
+          "take_groups",
+          "shots_in_takes",
+          "selected",
+          "rejected",
+          "timelines"
+        ],
+        "title": "ProjectStatsOut",
+        "description": "Footage statistics of a project (Dashboard): counts from the database, nothing estimated."
       },
       "ProjectUpdate": {
         "properties": {

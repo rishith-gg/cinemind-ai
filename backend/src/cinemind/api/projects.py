@@ -8,10 +8,17 @@ from fastapi import APIRouter
 from sqlalchemy import delete, select
 
 from cinemind.api.deps import SessionDep, SettingsDep
-from cinemind.api.schemas import ErrorResponse, ProjectCreate, ProjectOut, ProjectUpdate
+from cinemind.api.schemas import (
+    ErrorResponse,
+    ProjectCreate,
+    ProjectOut,
+    ProjectStatsOut,
+    ProjectUpdate,
+)
 from cinemind.core.errors import JobStateError, NotFoundError
 from cinemind.core.paths import validate_project_id
 from cinemind.db.models import Job, JobEvent, Project
+from cinemind.pipeline.project_stats import project_stats
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/projects", tags=["projects"])
@@ -75,3 +82,17 @@ def delete_project(project_id: str, session: SessionDep, settings: SettingsDep) 
         pass
     except OSError:
         log.exception("could not remove derived data for project %s", project_id)
+
+
+@router.get(
+    "/{project_id}/stats",
+    response_model=ProjectStatsOut,
+    responses=_404,
+    operation_id="getProjectStats",
+)
+def get_project_stats(
+    project_id: str, session: SessionDep, settings: SettingsDep
+) -> ProjectStatsOut:
+    """Footage statistics for the Dashboard."""
+    _get(session, project_id)
+    return ProjectStatsOut.model_validate(project_stats(session, settings, project_id))
