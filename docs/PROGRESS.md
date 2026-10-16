@@ -23,8 +23,8 @@ _Last updated: 2026-10-16_
 - [x] Phase 10: Ranking, selects, explainability (learned re-weighting P1-D deferred to Phase 12)
 - [ ] Phase 11: Rough cut engine + timeline UI (built and tested; **waiting for the user's DaVinci Resolve import of a rough cut**, the last acceptance item)
 - [x] Phase 12: P1 differentiators: A script-to-footage alignment, B take detection / best take, D explainable ranking with what-if sliders (Phase 10), E search by reference image (Phase 9). C speech-aware word-level trimming not built (whole transcript lines are kept).
-- [ ] Phase 13: Evaluation
-- [ ] Phase 14: Polish, packaging, demo
+- [~] Phase 13: Evaluation (every figure is in EVALUATION.md with its script; still missing: user study, the user's own search / take judgements, shot detection on footage with hand-marked cuts, ACADEMIC_NOTES.md)
+- [~] Phase 14: Polish, packaging, demo (README with run steps, USER_GUIDE, DEMO script, UI screenshots, course report and deck in docs/report/; not done: first-run wizard, seed sample project, performance profiling, desktop packaging)
 
 ## Current state
 Phase 12B (take detection and best take) is done. Shots are grouped into takes by words (both with speech: words
@@ -112,7 +112,7 @@ Fixes after Phase 8, from the user's feedback (2026-10-15):
   5 Kannada clips marked as speech without text (EVALUATION.md section 5).
 - Deleted `data/phase4-verify/` (the Resolve test it served is confirmed).
 
-Next step: Phase 13/14 (evaluation summary, packaging, demo) and the course report. Still open from Phase 11: the user's Resolve import of a rough cut (TESTING.md, "rough cut import checklist"). The earlier reviews (✓ / ✕ on search results, selects / rejects) are still welcome: they also steer the rough cut.
+Next step: the user records the demo video (docs/DEMO.md), uploads the deck and fills the three Appendix links in docs/report/tools/links.json; the Phase 11 Resolve import of a rough cut is still open. Still open from Phase 11: the user's Resolve import of a rough cut (TESTING.md, "rough cut import checklist"). The earlier reviews (✓ / ✕ on search results, selects / rejects) are still welcome: they also steer the rough cut.
 
 Export path for the rest of the project (decided in Phase 4): FCP7 XML into DaVinci Resolve.
 
