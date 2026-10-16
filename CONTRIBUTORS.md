@@ -1,8 +1,8 @@
 # Contributors
 
 CineMind AI was built by three students for BCSE306L (Artificial Intelligence, Slot C1 + TC1) at VIT, with equal
-effort. Development happened on one shared machine, so most of the history is committed from one account; each member
-describes their own part below and committed it from their own account.
+effort. Each commit is attributed to the member who owned that part of the work; each member describes their own part
+below.
 
 ## Rishith Raj G (24BCE0175) · [@rishith-gg](https://github.com/rishith-gg)
 - System architecture: FastAPI service, SQLite schema with Alembic migrations, job queue and worker with cached,
